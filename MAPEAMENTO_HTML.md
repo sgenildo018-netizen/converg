@@ -67,7 +67,7 @@ Isso permite manter o trecho original sem serializar ou reformatar o HTML.
 
 ### 5. Selecionar um elemento
 
-`buscarElementoPorNome(elementos, nome)` seleciona o primeiro elemento mapeado com aquele nome. Por exemplo, buscar `header` permite imprimir apenas o bloco `<header>...</header>`. O código atual busca `script` e imprime o bloco e seu conteúdo interno.
+`buscarElementoPorNome(elementos, nome)` seleciona o primeiro elemento completo mapeado com aquele nome. O teste atual filtra os elementos `<section>` e pega o último. `extrairIds()` lista os atributos `id` encontrados nesse bloco, enquanto `extrairIdsConsultados()` procura seletores `querySelector("#...")` dentro do conteúdo mapeado de `<script>`. A comparação mostra quais IDs da seção são consultados pelo script.
 
 ## Como executar
 
@@ -77,25 +77,19 @@ Na pasta do projeto, rode:
 node script.js
 ```
 
-O resultado depende da estrutura literal que está atualmente em `index.html`.
+O resultado depende da estrutura literal que está atualmente em `index.html`. Na execução atual, a última `<section>` contém os IDs `botao-contador` e `resultado`; o conteúdo mapeado de `<script>` consulta esses mesmos IDs. A comparação retorna ambos como correspondências. Em uma etapa anterior, o teste da primeira abertura de `<section>` retornou o índice `864`.
 
-## Observação sobre o `<script>` atual
+## O teste com `<script>` e IDs
 
-No estado atual do arquivo, o HTML contém:
+Durante o experimento, a tag estava escrita como `<script></script>`, deixando o JavaScript fora do elemento. O mapeador retornava um conteúdo de script vazio e nenhum seletor. Depois que a estrutura foi corrigida para manter o código entre `<script>` e `</script>`, a comparação encontrou os dois IDs da última seção:
 
-```html
-<script></script>
+```text
+IDs na última <section>: [ 'botao-contador', 'resultado' ]
+IDs consultados dentro de <script>: [ 'botao-contador', 'resultado' ]
+IDs do script encontrados na <section>: [ 'botao-contador', 'resultado' ]
 ```
 
-O código JavaScript aparece depois desse fechamento, e há um `</script>` adicional mais abaixo. Por isso, o mapeador encontra um bloco `<script>` vazio: ele registra o que está dentro das tags, não tenta adivinhar onde o código deveria estar.
-
-Para que o código seja parte do elemento, a estrutura deve ser semelhante a:
-
-```html
-<script>
-  // JavaScript aqui
-</script>
-```
+Esse teste mostra por que é importante mapear o conteúdo entre as tags de abertura e fechamento, não apenas procurar nomes de tags.
 
 ## Limitações deste experimento
 
@@ -105,6 +99,6 @@ Este código é um mapeador didático, não um parser completo de HTML. A expres
 - texto que parece uma tag dentro de comentários ou de JavaScript pode ser interpretado como tag;
 - HTML malformado pode produzir associações diferentes da estrutura que um navegador construiria;
 - a lista de elementos vazios é explícita e precisa ser mantida;
-- o código ainda não lê atributos para filtrar por `class` ou `id`.
+- a extração de atributos é limitada a valores `id` entre aspas; ainda não há um parser geral de atributos nem suporte para filtrar por `class`.
 
 A pilha é uma forma simples de acompanhar a hierarquia, mas a qualidade do resultado depende das tags encontradas e de quão bem formado está o HTML. Para um mapeamento sem perdas de formatação original, manter os intervalos na string de origem é útil; para interpretar o DOM como um navegador, seria necessário usar um parser DOM.

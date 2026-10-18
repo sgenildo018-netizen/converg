@@ -107,6 +107,28 @@ function buscarElementoPorNome(elementos, nome) {
   return elementos.find((elemento) => elemento.nome === nome.toLowerCase());
 }
 
+/**
+ * Extrai atributos `id` entre aspas de um trecho HTML.
+ * @param {string} html - Trecho HTML onde procurar os IDs.
+ * @returns {string[]} Os valores dos atributos `id` encontrados.
+ */
+function extrairIds(html) {
+  return [...html.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)].map(
+    ([, id]) => id,
+  );
+}
+
+/**
+ * Extrai IDs usados em chamadas simples de `querySelector("#id")`.
+ * @param {string} script - Código JavaScript a analisar.
+ * @returns {string[]} Os IDs consultados.
+ */
+function extrairIdsConsultados(script) {
+  return [
+    ...script.matchAll(/\bquerySelector\(\s*["']#([^"']+)["']\s*\)/g),
+  ].map(([, id]) => id);
+}
+
 // ---
 
 /**
@@ -177,8 +199,8 @@ function mapearElementos(tags, html) {
 // ---
 
 /**
- * Lê o `index.html`, extrai as tags via regex, monta os elementos e exibe o
- * bloco `<script>` encontrado (texto e conteúdo interno).
+ * Lê o `index.html`, mapeia os elementos da última `<section>` e compara os
+ * IDs dela com seletores `querySelector` encontrados no conteúdo mapeado de `<script>`.
  * @async
  * @returns {Promise<Tag[]>} A lista de tags extraídas do HTML.
  */
@@ -201,17 +223,27 @@ async function mapearTags() {
   });
 
   const elementos = mapearElementos(tags, html);
+  const sections = elementos.filter((elemento) => elemento.nome === "section");
+  const ultimaSection = sections[sections.length - 1];
   const script = buscarElementoPorNome(elementos, "script");
 
-  if (!script) {
-    console.log("Bloco <script> não encontrado.");
+  if (!ultimaSection) {
+    console.log("Nenhum elemento <section> completo foi encontrado.");
     return tags;
   }
 
-  console.log("Bloco <script>:");
-  console.log(script.texto);
-  console.log("Conteúdo interno do <script>:");
-  console.log(script.conteudo);
+  const idsSection = extrairIds(ultimaSection.texto);
+  const idsConsultados = extrairIdsConsultados(script?.conteudo ?? "");
+  const idsEncontrados = idsConsultados.filter((id) => idsSection.includes(id));
+
+  console.log("Última <section>:", ultimaSection.texto);
+  console.log("IDs na última <section>:", idsSection);
+  console.log("IDs consultados dentro de <script>:", idsConsultados);
+  console.log("IDs do script encontrados na <section>:", idsEncontrados);
+  console.log(
+    "Conteúdo mapeado de <script>:",
+    script?.conteudo ?? "não encontrado",
+  );
 
   return tags;
 }
