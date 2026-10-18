@@ -1,10 +1,12 @@
 # Experimento: mapear HTML sem dependências
 
-Este documento descreve a arquitetura e os experimentos implementados em `script.js`: ler um arquivo HTML como texto, localizar tags com precisão posicional, calcular seus intervalos `[inicio, fim)`, validar a integridade estrutural, interpretar atributos e associar dinâmicas de JavaScript (como `addEventListener` e seletores DOM) aos elementos correspondentes, sem utilizar qualquer biblioteca externa ou parser pesado.
+Este documento descreve a arquitetura e os experimentos implementados em `script.js`: ler um arquivo HTML como texto, localizar tags com precisão posicional, calcular seus intervalos `[inicio, fim)`, validar a integridade estrutural, interpretar atributos, **mapear detalhadamente os eventos** (tipo de evento, manipulador, parâmetros, código-fonte e opções) e **exportar o resultado estruturado em arquivos JSON na pasta `output/`**, sem utilizar qualquer biblioteca externa ou parser pesado.
 
 ## Objetivo
 
 Extrair trechos do HTML original — como blocos `<header>`, `<main>`, botões e `<script>` — preservando estritamente os caracteres, espaçamentos, indentação e quebras de linha do arquivo de origem. Ao operar diretamente com offsets (`String.prototype.slice`), o código dispensa ferramentas de serialização que reformatam a árvore sintática, mantendo a fidelidade total do texto.
+
+Além da extração textual, o objetivo é correlacionar o DOM estático com as rotinas interativas em JavaScript, mapeando tanto manipuladores inline (`onclick`, etc.) quanto ouvintes registrados dinamicamente (`addEventListener`, propriedades `on...`), persistindo a análise completa em arquivos JSON estruturados.
 
 ---
 
@@ -30,12 +32,18 @@ Extrair trechos do HTML original — como blocos `<header>`, `<main>`, botões e
                             ▼
  4. Análise Estática de JS (analisarScripts)
     - Captura variáveis e seletores (querySelector, getElementById, etc.)
-    - Identifica listeners (addEventListener, propriedades on...)
+    - Analisa chamadas addEventListener e extrai argumentos
+    - Detalha manipuladores (código, parâmetros, tipo de função)
                             │
                             ▼
- 5. Vínculo de Interatividade (associarEventos)
+ 5. Mapeamento e Vínculo de Eventos (associarEventos)
     - Conecta ouvintes JS e eventos inline aos elementos HTML mapeados
+    - Mapeia o código-fonte integral de cada handler
     - Audita seletores não encontrados no documento
+                            │
+                            ▼
+ 6. Exportação em JSON (salvarResultadoJson / processarHtml)
+    - Gera arquivos estruturados na pasta output/ (code.json, index.json, resultado.json)
 ```
 
 ---
@@ -67,7 +75,7 @@ Cada tag de abertura é analisada para estruturar:
 
 * `id`: valor normalizado do identificador único (se houver);
 * `classes`: array de classes CSS divididas por espaço em branco;
-* `eventosInline`: lista de handlers inline iniciados com `on` (como `onclick`, `onchange`), separando o nome do evento e o código JS literal;
+* `eventosInline`: lista de handlers inline iniciados com `on` (como `onclick`, `onchange`), separando o nome do evento, parâmetros implícitos (`["event"]`) e o código JS literal;
 * `todos`: dicionário com todos os atributos encontrados (com suporte a atributos booleanos como `disabled` ou `required`).
 
 ---
@@ -105,6 +113,7 @@ O validador retorna um relatório com `valido: boolean`, `totalErros`, `totalAvi
   classes: ["fixed", "top-0", ...],
   eventosInline: [],
   eventosJS: [],
+  eventos: [],
   vazio: false
 }
 ```
@@ -114,34 +123,104 @@ O validador retorna um relatório com `valido: boolean`, `totalErros`, `totalAvi
 
 ---
 
-### 6. Análise Estática de JavaScript e Associação de Eventos
+### 6. Mapeamento Detalhado de Eventos (`analisarScripts` e `associarEventos`)
 
-A análise estática vincula o comportamento declarado nos scripts aos elementos HTML do template:
+Em vez de registrar apenas o nome do evento (como `"click"`), o analisador disseca a chamada e mapeia o manipulador completo:
 
-1. **Detecção de Seletores DOM (`analisarScripts`)**:
-   Localiza variáveis e chamadas diretas como:
-   * `document.querySelector("#botao-contador")` / `document.querySelectorAll(".card")`
-   * `document.getElementById("btn-run-test")`
-   * `document.getElementsByClassName(...)` / `document.getElementsByTagName(...)`
-2. **Detecção de Ouvintes de Evento**:
-   * Padrão com variável: `botao.addEventListener("click", ...)` ou `botao.onclick = ...`
-   * Padrão direto: `document.getElementById("x").addEventListener("click", ...)`
-3. **Associação Bidirecional (`associarEventos`)**:
-   Encontra os elementos correspondentes por `id`, `class` ou `tag` e anexa os ouvintes ao array `elemento.eventosJS`.
-4. **Auditoria de Interatividade (`gerarRelatorioInteratividade`)**:
-   * Identifica elementos com eventos (inline ou via script);
-   * Identifica elementos interativos (`<button>`, `<a>`, `<input>`) que não possuem nenhum manipulador configurado;
-   * Identifica seletores no script que não encontram nenhum elemento correspondente no HTML (seletores órfãos ou código morto).
+1. **Parser de Argumentos de Chamada (`extrairArgumentosChamada`)**:
+   Rastreia balanceamento de parênteses `()`, chaves `{}`, colchetes `[]`, comentários e template literals complexos para isolar cada argumento de `.addEventListener(tipo, handler, opcoes)`.
+2. **Detalhamento do Manipulador (`detalharManipulador`)**:
+   Classifica e decompõe a função receptora:
+   * **Arrow Functions**: identifica parâmetros formais (ex.: `(evt, target) => ...` ou `e => ...`) e extrai o corpo integral da função.
+   * **Funções Tradicionais**: identifica se é anônima ou nomeada (`function aoClicar(e)`), mapeia parâmetros e preserva o código.
+   * **Referências**: identifica funções passadas por identificador (ex.: `handleClick`, `controller.onPress`).
+   * **Opções**: preserva o terceiro argumento passado ao ouvinte (ex.: `{ once: true }` ou `false`).
+3. **Manipuladores Inline**:
+   Extrai o código fonte do atributo `onclick="..."`, registrando `tipoManipulador: "inline"` e parâmetros disponíveis (`["event"]`).
+4. **Objeto do Evento Mapeado**:
+   Cada evento associado a um elemento contém:
+
+```json
+{
+  "evento": "click",
+  "origem": "addEventListenerVariavel",
+  "tipoManipulador": "arrow_function",
+  "nomeFuncao": null,
+  "parametros": [],
+  "codigo": "() => {\n    const val = inputEl.value.trim() || \"/api/v1/fallback\";\n    ...\n}",
+  "opcoes": null,
+  "seletor": "#btn-run-test",
+  "variavel": "btnRun",
+  "metodo": "getElementById"
+}
+```
+
+5. **Auditoria de Interatividade (`gerarRelatorioInteratividade`)**:
+   Cruza elementos interativos (`button`, `a`, `input`, etc.) indicando quais possuem eventos mapeados, quais estão sem ouvintes configurados e se há seletores órfãos no script.
 
 ---
 
-### 7. Funções de Consulta Disponíveis
+### 7. Exportação Estruturada em JSON (`salvarResultadoJson` e `processarHtml`)
 
-* `buscarElementoPorNome(elementos, nome)`: retorna a primeira ocorrência completa do elemento;
-* `buscarTodosPorNome(elementos, nome)`: retorna todos os elementos daquela tag;
+O pipeline exporta os resultados da análise diretamente em arquivos JSON formatados com indentação na pasta `output/`:
+
+* `output/code.json`: análise completa de `code.html`.
+* `output/index.json`: análise completa de `index.html`.
+* `output/resultado.json`: espelho do resultado principal.
+
+#### Estrutura do JSON gerado:
+
+```json
+{
+  "arquivo": "code.html",
+  "caminhoOrigem": "...",
+  "geradoEm": "2026-10-18T...",
+  "estatisticas": {
+    "tamanhoBytes": 112733,
+    "totalTags": 1016,
+    "totalElementos": 513,
+    "totalElementosInterativos": 41,
+    "elementosComEventos": 5,
+    "totalEventosMapeados": 5
+  },
+  "validacao": {
+    "valido": true,
+    "totalErros": 0,
+    "totalAvisos": 0,
+    "erros": [],
+    "avisos": []
+  },
+  "interatividade": {
+    "totalVinculos": 5,
+    "vinculos": [ ... ],
+    "seletoresNaoEncontrados": [],
+    "interativosSemEventos": [ ... ]
+  },
+  "elementosComEventos": [
+    {
+      "tag": "button",
+      "id": "btn-run-test",
+      "linha": 1153,
+      "coluna": 37,
+      "totalEventos": 1,
+      "eventos": [ ... ]
+    }
+  ],
+  "elementos": [ ... ]
+}
+```
+
+---
+
+### 8. Funções de Consulta Disponíveis
+
+* `buscarElementoPorNome(elementos, nome)`: primeira ocorrência completa do elemento;
+* `buscarTodosPorNome(elementos, nome)`: todos os elementos daquela tag;
 * `buscarPorId(elementos, id)`: busca por identificador único (`id="meu-id"` ou `#meu-id`);
 * `buscarPorClasse(elementos, classe)`: localiza elementos que possuam a classe especificada;
-* `buscarPorAtributo(elementos, nomeAtributo, valorEsperado?)`: localiza elementos por chave e valor de atributo.
+* `buscarPorAtributo(elementos, nomeAtributo, valorEsperado?)`: localiza elementos por chave e valor de atributo;
+* `processarHtml(caminho, opcoes)`: executa todo o pipeline e gera o JSON na pasta `output/`;
+* `salvarResultadoJson(nomeArquivo, dados, pasta)`: utilitário de persistência em disco.
 
 ---
 
@@ -151,46 +230,41 @@ A análise estática vincula o comportamento declarado nos scripts aos elementos
 * **Tags**: 1.016 tags localizadas com sucesso.
 * **Elementos**: 513 elementos mapeados.
 * **Validação Estrutural**: **100% válido (0 erros)**.
-* **Listeners JS Vinculados**:
-  * `<button id="btn-run-test">` -> evento `click` via variável `btnRun` (`getElementById`);
-  * `<button id="star-btn">` -> evento `click` via variável `starBtn` (`getElementById`);
-  * `<button id="copy-link-btn">` -> evento `click` via variável `copyLinkBtn` (`getElementById`).
-* **Eventos Inline**:
-  * 2 botões com manipuladores `onclick` multilinhas complexos (linhas 902 e 1053) extraídos sem perda de formatação.
-* **Seletores Órfãos**: 0 seletores não encontrados.
+* **Eventos Mapeados**:
+  * `<button id="btn-run-test">` -> `click` via variável `btnRun` (`arrow_function` com 30+ linhas de simulação de endpoint);
+  * `<button id="star-btn">` -> `click` via variável `starBtn` (`arrow_function` alternando estado `isStarred`);
+  * `<button id="copy-link-btn">` -> `click` via variável `copyLinkBtn` (`arrow_function` com `navigator.clipboard.writeText`);
+  * `<button>` (linha 902) -> `click` inline (`navigator.clipboard.writeText(...)` com remoção de classe hidden e `setTimeout`);
+  * `<button>` (linha 1053) -> `click` inline (`navigator.clipboard.writeText(...)`).
+* **Seletores Órfãos**: 0.
 
 ### `index.html` (Página de Testes com Falhas Sintáticas Deliberadas)
 * **Tags**: 131 tags.
 * **Elementos**: 56 elementos.
-* **Validação Estrutural**: **21 erros estruturais detectados**, identificando com precisão de linha e coluna:
-  * Fechamentos órfãos de `</strong>`, `</em>`, `</p>` e `</h3>` (linhas 18 e 27);
-  * Tags `</li>` fechando fora de lista e tag `</ul>` órfã (linhas 29–32);
-  * Fechamento truncado `<</details>summary ...>` (linha 69).
-* **Listeners JS Vinculados**:
-  * `<button id="botao-contador">` (linha 66) -> evento `click` via `botao` (`document.querySelector("#botao-contador")`).
+* **Validação Estrutural**: **21 erros estruturais detectados** com precisão de linha e coluna.
+* **Eventos Mapeados**:
+  * `<button id="botao-contador">` (linha 66) -> `click` via `botao` (`arrow_function` incrementando o contador e atualizando `#resultado`).
 
 ---
 
 ## Como Executar
 
-### 1. Executar a análise padrão
+### 1. Executar a análise padrão e gerar os arquivos JSON
 ```bash
 node script.js
 ```
-Imprime o primeiro bloco `<header>` de `code.html` e um resumo da validação estrutural e eventos correlacionados.
+Imprime o primeiro bloco `<header>` de `code.html`, o resumo com código de cada manipulador mapeado e gera os arquivos na pasta `output/` (`code.json`, `index.json`, `resultado.json`).
 
-### 2. Executar a suíte de testes unitários e de integração
+### 2. Executar a suíte de testes automatizados
 ```bash
 node --test test.js
 ```
-Executa os 14 testes cobrindo tokenização com aspas e comentários, validação estrutural, preservação de formatação, extração de atributos e correlação JS.
+Executa os 17 testes cobrindo tokenização, validação estrutural, preservação de formatação, detalhamento de manipuladores, parâmetros formais, opções de listeners e geração do JSON na pasta `output/`.
 
 ---
 
 ## Limitações Atuais e Próximas Evoluções
 
-Embora o parser resolva tags complexas, atributos e eventos sem dependências externas, permanecem algumas restrições intencionais da abordagem baseada em texto:
-
-* **Seletores CSS compostos**: expressões encadeadas complexas (ex.: `div.card > ul li:first-child`) são categorizadas como `complexo` e não possuem resolução completa de árvore descendente;
-* **JavaScript dinâmico**: referências construídas em tempo de execução via concatenação de strings (ex.: `document.getElementById("btn-" + id)`) exigem interpretação dinâmica de runtime, fora do escopo de análise estática simples;
-* **SVG embutido com namespaces**: tags e atributos com namespaces específicos de XML/SVG (como `xlink:href`) são preservados textualmente, mas tratados com normalização em minúsculas nos atributos.
+* **Seletores CSS descendentes complexos**: expressões encadeadas (ex.: `div.card > ul li:first-child`) são categorizadas como `complexo` e não possuem resolução completa de árvore descendente;
+* **JavaScript dinâmico em tempo de execução**: referências montadas via interpolação de strings dinâmicas (ex.: `document.getElementById("btn-" + id)`) exigem interpretação dinâmica de runtime, fora do escopo de análise estática de texto;
+* **SVG com namespaces**: atributos XML/SVG com namespaces (como `xlink:href`) são preservados textualmente, mas normalizados em minúsculas nos atributos.

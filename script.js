@@ -1,4 +1,4 @@
-const { readFile } = require("node:fs/promises");
+const { readFile, writeFile, mkdir } = require("node:fs/promises");
 const path = require("node:path");
 
 // --- Constantes
@@ -30,7 +30,9 @@ const ELEMENTOS_VAZIOS = new Set([
  * @typedef {Object} EventoInline
  * @property {string} atributo - Nome do atributo HTML (ex.: "onclick").
  * @property {string} evento - Nome do evento correspondente (ex.: "click").
- * @property {string} codigo - Código JavaScript inline no atributo.
+ * @property {string} codigo - Código JavaScript inline contido no atributo.
+ * @property {"inline"} tipoManipulador - Classificação do manipulador.
+ * @property {string[]} parametros - Parâmetros disponíveis (padrão: ["event"]).
  */
 
 /**
@@ -54,15 +56,26 @@ const ELEMENTOS_VAZIOS = new Set([
  */
 
 /**
- * @typedef {Object} ListenerJS
- * @property {string} evento - Tipo de evento ouvido (ex.: "click", "submit").
+ * @typedef {Object} ManipuladorDetalhado
+ * @property {"arrow_function" | "funcao_anonima" | "funcao_nomeada" | "referencia" | "inline" | "desconhecido"} tipoManipulador - Tipo de manipulador.
+ * @property {string | null} nomeFuncao - Nome da função quando identificável.
+ * @property {string[]} parametros - Lista de parâmetros formais da função.
+ * @property {string} codigo - Código fonte literal do manipulador.
+ */
+
+/**
+ * @typedef {Object} EventoMapeado
+ * @property {string} evento - Tipo de evento ouvido (ex.: "click", "submit", "keydown").
+ * @property {"addEventListenerVariavel" | "addEventListenerDireto" | "propriedadeOn" | "inline"} origem - Origem da vinculação.
+ * @property {"arrow_function" | "funcao_anonima" | "funcao_nomeada" | "referencia" | "inline" | "desconhecido"} tipoManipulador - Tipo do manipulador.
+ * @property {string | null} nomeFuncao - Nome da função declarada ou referenciada.
+ * @property {string[]} parametros - Parâmetros formais recebidos pelo manipulador.
+ * @property {string} codigo - Código fonte completo do corpo da função ou manipulador inline.
+ * @property {string | null} opcoes - Terceiro argumento de opções passado ao listener (ex.: "{ once: true }").
  * @property {string | null} seletor - Seletor CSS ou ID consultado (ex.: "#botao-contador").
- * @property {"id" | "class" | "tag" | "complexo" | "desconhecido"} tipoSeletor - Categoria do seletor.
- * @property {string | null} argumentoOriginal - Argumento original passado à chamada DOM.
- * @property {string | null} variavel - Nome da variável associada ao elemento (se houver).
+ * @property {string | null} variavel - Nome da variável no script que recebeu o elemento.
  * @property {string | null} metodo - Método DOM utilizado (ex.: "querySelector", "getElementById").
- * @property {string} origem - Identificador do padrão ("addEventListenerVariavel", "addEventListenerDireto", "propriedadeOn").
- * @property {number} scriptInicio - Offset de início do ouvinte no código.
+ * @property {Object | null} posicao - Posição do ouvinte no código.
  */
 
 /**
@@ -80,7 +93,8 @@ const ELEMENTOS_VAZIOS = new Set([
  * @property {string | null} id - Identificador `id` do elemento.
  * @property {string[]} classes - Lista de classes CSS do elemento.
  * @property {EventoInline[]} eventosInline - Eventos inline (ex.: onclick).
- * @property {ListenerJS[]} eventosJS - Ouvintes de eventos JavaScript vinculados via scripts.
+ * @property {EventoMapeado[]} eventosJS - Ouvintes de eventos JavaScript vinculados via scripts.
+ * @property {EventoMapeado[]} eventos - Lista consolidada de todos os eventos mapeados do elemento.
  * @property {Tag} tagAbertura - Tag de abertura ou auto-fechável.
  * @property {Tag | null} tagFechamento - Tag de fechamento correspondente (ou null para vazios).
  * @property {boolean} vazio - Se é um elemento vazio ou auto-fechável.
@@ -119,6 +133,24 @@ function calcularLinhaColuna(html, offset) {
   const linha = linhas.length;
   const coluna = linhas[linhas.length - 1].length + 1;
   return { linha, coluna };
+}
+
+/**
+ * Remove aspas simples ou duplas envolventes de uma string.
+ * @param {string} str - Texto a limpar.
+ * @returns {string} Texto sem aspas.
+ */
+function limparAspas(str) {
+  if (!str) return "";
+  const s = str.trim();
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'")) ||
+    (s.startsWith("`") && s.endsWith("`"))
+  ) {
+    return s.slice(1, -1);
+  }
+  return s;
 }
 
 /**
@@ -172,6 +204,8 @@ function extrairAtributos(textoTag) {
         atributo: nome,
         evento: nome.slice(2).toLowerCase(),
         codigo: valor.trim(),
+        tipoManipulador: "inline",
+        parametros: ["event"],
       });
     }
   }
@@ -371,14 +405,12 @@ function validarEstrutura(tags) {
         continue;
       }
 
-      // Procura tag de abertura correspondente descendo a pilha
       let idx = pilha.length - 1;
       while (idx >= 0 && pilha[idx].nome !== tag.nome) {
         idx--;
       }
 
       if (idx === -1) {
-        // Tag não existe na pilha: fechamento órfão
         erros.push({
           tipo: "fechamento_orfa",
           mensagem: `Tag de fechamento </${tag.nome}> não possui tag de abertura correspondente na pilha atual (esperava-se </${topo.nome}>).`,
@@ -387,7 +419,6 @@ function validarEstrutura(tags) {
           coluna: tag.coluna,
         });
       } else {
-        // Fechamento cruzado: tags intermediárias não foram fechadas antes desta
         const naoFechadas = pilha.slice(idx + 1);
         for (const pendente of naoFechadas) {
           erros.push({
@@ -404,7 +435,6 @@ function validarEstrutura(tags) {
     }
   }
 
-  // Tags remanescentes na pilha nunca foram fechadas
   while (pilha.length > 0) {
     const pendente = pilha.pop();
     erros.push({
@@ -489,6 +519,7 @@ function mapearElementos(tags, html, { incluirVazios = true } = {}) {
           classes: tag.atributos.classes,
           eventosInline: tag.atributos.eventosInline,
           eventosJS: [],
+          eventos: [],
           tagAbertura: tag,
           tagFechamento: null,
           vazio: true,
@@ -531,6 +562,7 @@ function mapearElementos(tags, html, { incluirVazios = true } = {}) {
       classes: abertura.atributos.classes,
       eventosInline: abertura.atributos.eventosInline,
       eventosJS: [],
+      eventos: [],
       tagAbertura: abertura,
       tagFechamento: tag,
       vazio: false,
@@ -626,13 +658,182 @@ function extrairIdsConsultados(script) {
   ].map(([, id]) => id);
 }
 
-// --- Análise Estática de JavaScript e Associação com Elementos
+// --- Análise Estática de JavaScript e Detalhamento de Eventos
+
+/**
+ * Extrai os argumentos de uma chamada de função delimitada por parênteses,
+ * rastreando strings (com aspas e template literals), comentários e blocos aninhados.
+ * @param {string} codigo - Código fonte JavaScript.
+ * @param {number} posAberturaParen - Offset do parêntese '(' que abre a lista de argumentos.
+ * @returns {{ args: string[], fimChamada: number }} Lista de argumentos e offset final da chamada.
+ */
+function extrairArgumentosChamada(codigo, posAberturaParen) {
+  let i = posAberturaParen + 1;
+  const args = [];
+  let argInicio = i;
+  let depthParen = 0;
+  let depthBrace = 0;
+  let depthBracket = 0;
+  let quote = null;
+  const inTemplateBrace = [];
+  const len = codigo.length;
+
+  while (i < len) {
+    const c = codigo[i];
+    const prev = i > 0 ? codigo[i - 1] : "";
+
+    // 1. Strings e interpolações em template literals
+    if (quote) {
+      if (quote === "`" && c === "$" && codigo[i + 1] === "{" && prev !== "\\") {
+        inTemplateBrace.push(depthBrace);
+        i += 2;
+        depthBrace++;
+        quote = null;
+        continue;
+      }
+      if (c === quote && prev !== "\\") {
+        quote = null;
+      }
+      i++;
+      continue;
+    }
+
+    if (
+      inTemplateBrace.length > 0 &&
+      c === "}" &&
+      depthBrace === inTemplateBrace[inTemplateBrace.length - 1] + 1
+    ) {
+      depthBrace--;
+      inTemplateBrace.pop();
+      quote = "`";
+      i++;
+      continue;
+    }
+
+    // 2. Comentários JS
+    if (c === "/" && codigo[i + 1] === "/") {
+      const fimLinha = codigo.indexOf("\n", i + 2);
+      i = fimLinha === -1 ? len : fimLinha + 1;
+      continue;
+    }
+    if (c === "/" && codigo[i + 1] === "*") {
+      const fimBloco = codigo.indexOf("*/", i + 2);
+      i = fimBloco === -1 ? len : fimBloco + 2;
+      continue;
+    }
+
+    // 3. Abertura de strings
+    if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      i++;
+      continue;
+    }
+
+    // 4. Parênteses, chaves e separadores
+    if (c === "(") depthParen++;
+    else if (c === ")") {
+      if (depthParen === 0 && depthBrace === 0 && depthBracket === 0) {
+        const argFinal = codigo.slice(argInicio, i).trim();
+        if (argFinal) args.push(argFinal);
+        return { args, fimChamada: i + 1 };
+      }
+      depthParen--;
+    } else if (c === "{") depthBrace++;
+    else if (c === "}") depthBrace--;
+    else if (c === "[") depthBracket++;
+    else if (c === "]") depthBracket--;
+    else if (
+      c === "," &&
+      depthParen === 0 &&
+      depthBrace === 0 &&
+      depthBracket === 0
+    ) {
+      args.push(codigo.slice(argInicio, i).trim());
+      argInicio = i + 1;
+    }
+
+    i++;
+  }
+
+  return { args, fimChamada: i };
+}
+
+/**
+ * Detalha a estrutura de um manipulador de evento extraído: identifica se é arrow function,
+ * função anônima, função nomeada ou referência, extraindo parâmetros e o código completo.
+ * @param {string} codigoArg - Texto literal do argumento do manipulador.
+ * @returns {ManipuladorDetalhado} Detalhes interpretados do manipulador.
+ */
+function detalharManipulador(codigoArg) {
+  if (!codigoArg) {
+    return {
+      tipoManipulador: "desconhecido",
+      parametros: [],
+      nomeFuncao: null,
+      codigo: "",
+    };
+  }
+
+  const codigo = codigoArg.trim();
+
+  // Arrow function com parênteses: () => ... ou (e, target) => ...
+  const matchArrowParen = codigo.match(/^\(([^)]*)\)\s*=>/);
+  if (matchArrowParen) {
+    const params = matchArrowParen[1]
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    return {
+      tipoManipulador: "arrow_function",
+      parametros: params,
+      nomeFuncao: null,
+      codigo,
+    };
+  }
+
+  // Arrow function sem parênteses: e => ...
+  const matchArrowSimples = codigo.match(/^([a-zA-Z_$][\w$]*)\s*=>/);
+  if (matchArrowSimples) {
+    return {
+      tipoManipulador: "arrow_function",
+      parametros: [matchArrowSimples[1]],
+      nomeFuncao: null,
+      codigo,
+    };
+  }
+
+  // Função tradicional: function(...) ou async function(...)
+  const matchFuncao = codigo.match(
+    /^(?:async\s+)?function\s*([a-zA-Z_$][\w$]*)?\s*\(([^)]*)\)/,
+  );
+  if (matchFuncao) {
+    const nome = matchFuncao[1] || null;
+    const params = matchFuncao[2]
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    return {
+      tipoManipulador: nome ? "funcao_nomeada" : "funcao_anonima",
+      nomeFuncao: nome,
+      parametros: params,
+      codigo,
+    };
+  }
+
+  // Identificador ou referência de função (ex.: handleClick, objeto.acao)
+  return {
+    tipoManipulador: "referencia",
+    nomeFuncao: codigo,
+    parametros: [],
+    codigo,
+  };
+}
 
 /**
  * Analisa blocos `<script>` para descobrir variáveis associadas a elementos DOM
- * e chamadas a `addEventListener` ou propriedades de evento (`onclick`).
+ * e mapear detalhadamente ouvintes de eventos (`addEventListener` e propriedades `on...`).
  * @param {Elemento[]} elementos - Elementos mapeados do HTML.
- * @returns {{ scriptsAnalisados: number, variaveisDeclaradas: Array<Object>, listeners: ListenerJS[] }}
+ * @returns {{ scriptsAnalisados: number, variaveisDeclaradas: Array<Object>, listeners: EventoMapeado[] }}
  */
 function analisarScripts(elementos) {
   const scripts = elementos.filter((el) => el.nome === "script");
@@ -682,11 +883,11 @@ function analisarScripts(elementos) {
     }
 
     // 2. addEventListener direto em expressão document.*:
-    // document.querySelector(...).addEventListener("click", ...)
+    // document.getElementById(...).addEventListener(...)
     const regexListenerDireto =
-      /document\.(querySelector(?:All)?|getElementById|getElementsByClassName|getElementsByTagName)\s*\(\s*(["'`])([^"'`]+)\2\s*\)\.addEventListener\s*\(\s*(["'`])([^"'`]+)\4/g;
+      /document\.(querySelector(?:All)?|getElementById|getElementsByClassName|getElementsByTagName)\s*\(\s*(["'`])([^"'`]+)\2\s*\)\.addEventListener\s*\(/g;
     while ((match = regexListenerDireto.exec(codigoJs)) !== null) {
-      const [, metodo, , argumento, , evento] = match;
+      const [, metodo, , argumento] = match;
       let tipoSeletor = "complexo";
       let seletorFormatado = argumento;
       if (metodo === "getElementById") {
@@ -700,45 +901,72 @@ function analisarScripts(elementos) {
         else if (argumento.startsWith(".")) tipoSeletor = "class";
       }
 
+      const posParen = match.index + match[0].length - 1;
+      const { args } = extrairArgumentosChamada(codigoJs, posParen);
+      const tipoEvento = limparAspas(args[0]);
+      const manipulador = detalharManipulador(args[1]);
+      const opcoes = args[2] || null;
+
       listeners.push({
-        evento,
+        evento: tipoEvento,
         seletor: seletorFormatado,
         tipoSeletor,
         argumentoOriginal: argumento,
         variavel: null,
         metodo,
         origem: "addEventListenerDireto",
+        tipoManipulador: manipulador.tipoManipulador,
+        nomeFuncao: manipulador.nomeFuncao,
+        parametros: manipulador.parametros,
+        codigo: manipulador.codigo,
+        opcoes,
         scriptInicio: scriptEl.inicioConteudo + match.index,
       });
     }
 
     // 3. addEventListener através de variável:
-    // botao.addEventListener("click", ...)
+    // botao.addEventListener(...)
     const regexListenerVar =
-      /([a-zA-Z_$][\w$]*)\.addEventListener\s*\(\s*(["'`])([^"'`]+)\2/g;
+      /([a-zA-Z_$][\w$]*)\.addEventListener\s*\(/g;
     while ((match = regexListenerVar.exec(codigoJs)) !== null) {
-      const [, nomeVar, , evento] = match;
+      const [, nomeVar] = match;
+      const posParen = match.index + match[0].length - 1;
+      const { args } = extrairArgumentosChamada(codigoJs, posParen);
+      const tipoEvento = limparAspas(args[0]);
+      const manipulador = detalharManipulador(args[1]);
+      const opcoes = args[2] || null;
+
       if (variaveisLocais.has(nomeVar)) {
         const varInfo = variaveisLocais.get(nomeVar);
         listeners.push({
-          evento,
+          evento: tipoEvento,
           seletor: varInfo.seletor,
           tipoSeletor: varInfo.tipoSeletor,
           argumentoOriginal: varInfo.argumento,
           variavel: nomeVar,
           metodo: varInfo.metodo,
           origem: "addEventListenerVariavel",
+          tipoManipulador: manipulador.tipoManipulador,
+          nomeFuncao: manipulador.nomeFuncao,
+          parametros: manipulador.parametros,
+          codigo: manipulador.codigo,
+          opcoes,
           scriptInicio: scriptEl.inicioConteudo + match.index,
         });
       } else {
         listeners.push({
-          evento,
+          evento: tipoEvento,
           seletor: null,
           tipoSeletor: "desconhecido",
           argumentoOriginal: null,
           variavel: nomeVar,
           metodo: null,
           origem: "addEventListenerVariavelDesconhecida",
+          tipoManipulador: manipulador.tipoManipulador,
+          nomeFuncao: manipulador.nomeFuncao,
+          parametros: manipulador.parametros,
+          codigo: manipulador.codigo,
+          opcoes,
           scriptInicio: scriptEl.inicioConteudo + match.index,
         });
       }
@@ -746,10 +974,12 @@ function analisarScripts(elementos) {
 
     // 4. Atribuição de propriedades on...:
     // botao.onclick = ...
-    const regexPropriedadeOn = /([a-zA-Z_$][\w$]*)\.(on[a-zA-Z]+)\s*=/g;
+    const regexPropriedadeOn = /([a-zA-Z_$][\w$]*)\.(on[a-zA-Z]+)\s*=\s*([^;\n]+)/g;
     while ((match = regexPropriedadeOn.exec(codigoJs)) !== null) {
-      const [, nomeVar, prop] = match;
+      const [, nomeVar, prop, expressaoDireita] = match;
       const evento = prop.slice(2).toLowerCase();
+      const manipulador = detalharManipulador(expressaoDireita);
+
       if (variaveisLocais.has(nomeVar)) {
         const varInfo = variaveisLocais.get(nomeVar);
         listeners.push({
@@ -760,6 +990,11 @@ function analisarScripts(elementos) {
           variavel: nomeVar,
           metodo: varInfo.metodo,
           origem: "propriedadeOn",
+          tipoManipulador: manipulador.tipoManipulador,
+          nomeFuncao: manipulador.nomeFuncao,
+          parametros: manipulador.parametros,
+          codigo: manipulador.codigo,
+          opcoes: null,
           scriptInicio: scriptEl.inicioConteudo + match.index,
         });
       }
@@ -774,16 +1009,62 @@ function analisarScripts(elementos) {
 }
 
 /**
- * Associa os ouvintes de eventos extraídos dos scripts aos elementos correspondentes
+ * Associa os ouvintes de eventos extraídos dos scripts e eventos inline aos elementos correspondentes
  * na lista de elementos mapeados do HTML.
  * @param {Elemento[]} elementos - Lista de elementos mapeados.
- * @param {{ listeners: ListenerJS[] }} analiseScripts - Resultado de `analisarScripts`.
- * @returns {{ vinculos: Array<Object>, seletoresNaoEncontrados: ListenerJS[] }}
+ * @param {{ listeners: EventoMapeado[] }} analiseScripts - Resultado de `analisarScripts`.
+ * @returns {{ vinculos: Array<Object>, seletoresNaoEncontrados: EventoMapeado[] }}
  */
 function associarEventos(elementos, analiseScripts) {
   const vinculos = [];
   const seletoresNaoEncontrados = [];
 
+  // Limpa listas de eventos nos elementos para evitar duplicações em múltiplas chamadas
+  for (const el of elementos) {
+    el.eventos = [];
+    el.eventosJS = [];
+  }
+
+  // 1. Vincula eventos inline declarados no próprio HTML (ex.: onclick="...")
+  for (const el of elementos) {
+    for (const inline of el.eventosInline) {
+      const eventoMapeado = {
+        evento: inline.evento,
+        origem: "inline",
+        tipoManipulador: "inline",
+        nomeFuncao: null,
+        parametros: inline.parametros,
+        codigo: inline.codigo,
+        opcoes: null,
+        seletor: el.id ? `#${el.id}` : null,
+        variavel: null,
+        metodo: null,
+        posicao: { linha: el.linha, coluna: el.coluna },
+      };
+
+      el.eventos.push(eventoMapeado);
+
+      vinculos.push({
+        elemento: `<${el.nome}${el.id ? ` id="${el.id}"` : ""}>`,
+        tag: el.nome,
+        id: el.id,
+        linha: el.linha,
+        coluna: el.coluna,
+        evento: inline.evento,
+        origem: "inline",
+        tipoManipulador: "inline",
+        nomeFuncao: null,
+        parametros: inline.parametros,
+        codigo: inline.codigo,
+        opcoes: null,
+        seletor: el.id ? `#${el.id}` : null,
+        variavel: null,
+        metodo: null,
+      });
+    }
+  }
+
+  // 2. Vincula ouvintes de eventos extraídos dos scripts JavaScript
   for (const listener of analiseScripts.listeners) {
     if (!listener.seletor) continue;
 
@@ -807,13 +1088,39 @@ function associarEventos(elementos, analiseScripts) {
       seletoresNaoEncontrados.push(listener);
     } else {
       for (const el of correspondentes) {
-        el.eventosJS.push(listener);
-        vinculos.push({
-          elemento: `<${el.nome}${el.id ? ` id="${el.id}"` : ""}>`,
-          linha: el.linha,
+        const eventoMapeado = {
           evento: listener.evento,
+          origem: listener.origem,
+          tipoManipulador: listener.tipoManipulador,
+          nomeFuncao: listener.nomeFuncao || null,
+          parametros: listener.parametros || [],
+          codigo: listener.codigo,
+          opcoes: listener.opcoes || null,
           seletor: listener.seletor,
           variavel: listener.variavel,
+          metodo: listener.metodo,
+          posicao: { scriptInicio: listener.scriptInicio },
+        };
+
+        el.eventosJS.push(eventoMapeado);
+        el.eventos.push(eventoMapeado);
+
+        vinculos.push({
+          elemento: `<${el.nome}${el.id ? ` id="${el.id}"` : ""}>`,
+          tag: el.nome,
+          id: el.id,
+          linha: el.linha,
+          coluna: el.coluna,
+          evento: listener.evento,
+          origem: listener.origem,
+          tipoManipulador: listener.tipoManipulador,
+          nomeFuncao: listener.nomeFuncao || null,
+          parametros: listener.parametros || [],
+          codigo: listener.codigo,
+          opcoes: listener.opcoes || null,
+          seletor: listener.seletor,
+          variavel: listener.variavel,
+          metodo: listener.metodo,
         });
       }
     }
@@ -826,45 +1133,164 @@ function associarEventos(elementos, analiseScripts) {
 }
 
 /**
- * Gera um relatório consolidado da interatividade da página, cruzando
- * elementos interativos (botões, links, formulários), eventos inline e listeners JS.
+ * Gera um relatório consolidado da interatividade da página com o mapeamento completo dos eventos,
+ * cruzando elementos interativos (botões, links, formulários), eventos inline e listeners JS.
  * @param {Elemento[]} elementos - Elementos mapeados.
  * @param {ReturnType<typeof analisarScripts>} analiseScripts - Análise dos scripts.
- * @returns {Object} Relatório estruturado de interatividade.
+ * @returns {Object} Relatório estruturado com eventos completos mapeados.
  */
-function gerarRelatorioInteratividade(elementos, analiseScripts) {
-  const associacao = associarEventos(elementos, analiseScripts);
-  const elementosInterativos = elementos.filter((el) =>
-    ["button", "a", "input", "select", "textarea", "form"].includes(el.nome) ||
-    el.eventosInline.length > 0 ||
-    el.eventosJS.length > 0
+function gerarRelatorioInteratividade(
+  elementos,
+  analiseScripts,
+  associacaoPrevia,
+) {
+  const associacao =
+    associacaoPrevia || associarEventos(elementos, analiseScripts);
+
+  const elementosInterativos = elementos.filter(
+    (el) =>
+      ["button", "a", "input", "select", "textarea", "form"].includes(
+        el.nome,
+      ) ||
+      el.eventos.length > 0,
   );
 
-  const comEventos = elementos.filter(
-    (el) => el.eventosInline.length > 0 || el.eventosJS.length > 0,
-  );
+  const comEventos = elementos.filter((el) => el.eventos.length > 0);
 
   const interativosSemEventos = elementosInterativos.filter(
-    (el) => el.eventosInline.length === 0 && el.eventosJS.length === 0,
+    (el) => el.eventos.length === 0,
   );
 
   return {
     totalElementos: elementos.length,
     totalInterativos: elementosInterativos.length,
+    totalComEventos: comEventos.length,
     comEventos: comEventos.map((el) => ({
       tag: el.nome,
       id: el.id,
+      classes: el.classes,
       linha: el.linha,
-      eventosInline: el.eventosInline.map((ev) => ev.evento),
-      eventosJS: el.eventosJS.map((ev) => `${ev.evento} (${ev.seletor})`),
+      coluna: el.coluna,
+      totalEventos: el.eventos.length,
+      eventos: el.eventos,
     })),
     interativosSemEventos: interativosSemEventos.map((el) => ({
       tag: el.nome,
       id: el.id,
       linha: el.linha,
+      coluna: el.coluna,
     })),
     vinculosRealizados: associacao.vinculos,
     seletoresNaoEncontrados: associacao.seletoresNaoEncontrados,
+  };
+}
+
+// --- Exportação e Persistência em JSON
+
+/**
+ * Salva um objeto serializado em formato JSON com indentação de 2 espaços
+ * em uma pasta especificada (padrão: "output").
+ * @param {string} nomeArquivo - Nome do arquivo JSON de destino (ex.: "code.json").
+ * @param {Object} dados - Objeto a ser serializado.
+ * @param {string} [pasta="output"] - Subpasta onde o arquivo será salvo.
+ * @returns {Promise<string>} O caminho absoluto do arquivo salvo.
+ */
+async function salvarResultadoJson(nomeArquivo, dados, pasta = "output") {
+  const pastaOutput = path.isAbsolute(pasta)
+    ? pasta
+    : path.join(__dirname, pasta);
+
+  await mkdir(pastaOutput, { recursive: true });
+  const caminhoFinal = path.join(pastaOutput, nomeArquivo);
+  const conteudoJson = JSON.stringify(dados, null, 2);
+  await writeFile(caminhoFinal, conteudoJson, "utf8");
+  return caminhoFinal;
+}
+
+/**
+ * Processa um arquivo HTML de ponta a ponta: localiza tags, valida a estrutura,
+ * mapeia elementos, analisa scripts, vincula eventos com código completo e opcionalmente
+ * salva o resultado em JSON na pasta de saída informada.
+ * @param {string} caminhoArquivo - Caminho para o arquivo HTML a ser processado.
+ * @param {{ salvarJson?: boolean, pastaOutput?: string }} [opcoes] - Opções de processamento.
+ * @returns {Promise<Object>} Resultado consolidado do processamento.
+ */
+async function processarHtml(
+  caminhoArquivo,
+  { salvarJson = true, pastaOutput = "output" } = {},
+) {
+  const caminhoResolvido = path.isAbsolute(caminhoArquivo)
+    ? caminhoArquivo
+    : path.join(__dirname, caminhoArquivo);
+
+  const html = await readFile(caminhoResolvido, "utf8");
+  const nomeArquivo = path.basename(caminhoResolvido);
+
+  const tags = localizarTags(html);
+  const validacao = validarEstrutura(tags);
+  const elementos = mapearElementos(tags, html);
+  const analiseScripts = analisarScripts(elementos);
+  const associacao = associarEventos(elementos, analiseScripts);
+  const relatorio = gerarRelatorioInteratividade(
+    elementos,
+    analiseScripts,
+    associacao,
+  );
+
+  const resultado = {
+    arquivo: nomeArquivo,
+    caminhoOrigem: caminhoResolvido,
+    geradoEm: new Date().toISOString(),
+    estatisticas: {
+      tamanhoBytes: Buffer.byteLength(html, "utf8"),
+      totalTags: tags.length,
+      totalElementos: elementos.length,
+      totalElementosInterativos: relatorio.totalInterativos,
+      elementosComEventos: relatorio.totalComEventos,
+      totalEventosMapeados: relatorio.vinculosRealizados.length,
+    },
+    validacao: {
+      valido: validacao.valido,
+      totalErros: validacao.totalErros,
+      totalAvisos: validacao.totalAvisos,
+      erros: validacao.erros,
+      avisos: validacao.avisos,
+    },
+    interatividade: {
+      totalVinculos: relatorio.vinculosRealizados.length,
+      vinculos: relatorio.vinculosRealizados,
+      seletoresNaoEncontrados: relatorio.seletoresNaoEncontrados,
+      interativosSemEventos: relatorio.interativosSemEventos,
+    },
+    elementosComEventos: relatorio.comEventos,
+    elementos: elementos.map((el) => ({
+      nome: el.nome,
+      id: el.id,
+      classes: el.classes,
+      linha: el.linha,
+      coluna: el.coluna,
+      inicio: el.inicio,
+      fim: el.fim,
+      vazio: el.vazio,
+      atributos: el.atributos,
+      eventos: el.eventos,
+      texto: el.texto,
+    })),
+  };
+
+  if (salvarJson) {
+    const nomeBase = path.basename(caminhoResolvido, path.extname(caminhoResolvido));
+    await salvarResultadoJson(`${nomeBase}.json`, resultado, pastaOutput);
+  }
+
+  return {
+    tags,
+    elementos,
+    validacao,
+    analiseScripts,
+    associacao,
+    relatorio,
+    resultado,
   };
 }
 
@@ -904,45 +1330,61 @@ async function percorrerHtml() {
 
 /**
  * Lê o `code.html`, mapeia tags, elementos e imprime o primeiro bloco `<header>`.
- * Executa também a validação estrutural e a correlação de eventos JavaScript.
+ * Executa também a validação estrutural, a correlação de eventos com mapeamento completo
+ * e salva o resultado JSON na pasta `output/`.
+ * @param {string} [arquivo="code.html"] - Nome do arquivo HTML a ser processado.
  * @async
  * @returns {Promise<Tag[]>} A lista de tags extraídas do HTML.
  */
-async function mapearTags() {
-  const caminhoHtml = path.join(__dirname, "code.html");
-  const html = await readFile(caminhoHtml, "utf8");
+async function mapearTags(arquivo = "code.html") {
+  const caminhoHtml = path.isAbsolute(arquivo)
+    ? arquivo
+    : path.join(__dirname, arquivo);
 
-  const tags = localizarTags(html);
-  const elementos = mapearElementos(tags, html);
+  const { tags, elementos, validacao, relatorio, resultado } =
+    await processarHtml(caminhoHtml, { salvarJson: true });
+
   const header = buscarElementoPorNome(elementos, "header");
 
   if (!header) {
     console.log("Nenhum elemento <header> completo foi encontrado.");
-    return tags;
+  } else {
+    console.log(`Primeiro <header> (intervalo ${header.inicio}-${header.fim}):`);
+    console.log(header.texto);
   }
 
-  console.log(`Primeiro <header> (intervalo ${header.inicio}-${header.fim}):`);
-  console.log(header.texto);
-
-  const validacao = validarEstrutura(tags);
-  const analiseScripts = analisarScripts(elementos);
-  const associacao = associarEventos(elementos, analiseScripts);
-
-  console.log("\n--- Análise e Validação do Documento ---");
+  console.log("\n--- Análise e Mapeamento Completo de Eventos ---");
   console.log(`Tags: ${tags.length} | Elementos: ${elementos.length}`);
-  console.log(`Estrutura válida: ${validacao.valido ? "Sim (0 erros)" : `Não (${validacao.totalErros} erros)`}`);
-  console.log(`Listeners JS vinculados: ${associacao.vinculos.length}`);
-  for (const v of associacao.vinculos) {
-    console.log(`  - ${v.elemento} -> evento '${v.evento}' via ${v.variavel ? `var '${v.variavel}'` : v.seletor}`);
-  }
+  console.log(
+    `Estrutura válida: ${validacao.valido ? "Sim (0 erros)" : `Não (${validacao.totalErros} erros)`}`,
+  );
+  console.log(`Elementos com eventos mapeados: ${relatorio.comEventos.length}`);
 
-  const comOnclick = buscarPorAtributo(elementos, "onclick");
-  if (comOnclick.length > 0) {
-    console.log(`Elementos com onclick inline: ${comOnclick.length}`);
-    for (const el of comOnclick) {
-      console.log(`  - <${el.nome}${el.id ? ` id="${el.id}"` : ""}> (linha ${el.linha})`);
+  for (const item of relatorio.comEventos) {
+    for (const ev of item.eventos) {
+      const codigoLimpo = ev.codigo.replace(/\s+/g, " ");
+      const resumoCodigo =
+        codigoLimpo.length > 55 ? `${codigoLimpo.slice(0, 52)}...` : codigoLimpo;
+      console.log(
+        `  - <${item.tag}${item.id ? ` id="${item.id}"` : ""}> (L${item.linha}) -> [${ev.evento}] via ${ev.origem} (${ev.tipoManipulador}): "${resumoCodigo}"`,
+      );
     }
   }
+
+  // Salva também output/resultado.json como espelho padrão
+  await salvarResultadoJson("resultado.json", resultado);
+
+  // Também processa e salva index.html na pasta output se existir
+  const caminhoIndex = path.join(__dirname, "index.html");
+  try {
+    await processarHtml(caminhoIndex, { salvarJson: true });
+  } catch {
+    // Silencioso se index.html não existir
+  }
+
+  console.log(
+    `\n[JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json).`,
+  );
 
   return tags;
 }
@@ -960,6 +1402,7 @@ if (require.main === module) {
 module.exports = {
   ELEMENTOS_VAZIOS,
   calcularLinhaColuna,
+  limparAspas,
   extrairAtributos,
   localizarTags,
   validarEstrutura,
@@ -973,9 +1416,13 @@ module.exports = {
   buscarPorAtributo,
   extrairIds,
   extrairIdsConsultados,
+  extrairArgumentosChamada,
+  detalharManipulador,
   analisarScripts,
   associarEventos,
   gerarRelatorioInteratividade,
+  salvarResultadoJson,
+  processarHtml,
   lerHtml,
   percorrerHtml,
   mapearTags,

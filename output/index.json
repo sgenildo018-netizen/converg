@@ -1,0 +1,1333 @@
+{
+  "arquivo": "index.html",
+  "caminhoOrigem": "C:\\Users\\genil\\Documents\\projetos\\converg\\index.html",
+  "geradoEm": "2026-10-18T07:07:03.616Z",
+  "estatisticas": {
+    "tamanhoBytes": 5253,
+    "totalTags": 131,
+    "totalElementos": 56,
+    "totalElementosInterativos": 2,
+    "elementosComEventos": 1,
+    "totalEventosMapeados": 1
+  },
+  "validacao": {
+    "valido": false,
+    "totalErros": 21,
+    "totalAvisos": 0,
+    "erros": [
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </strong> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "strong",
+          "tipo": "fecha",
+          "posicao": 1146,
+          "fim": 1155,
+          "texto": "</strong>",
+          "linha": 18,
+          "coluna": 79,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 18,
+        "coluna": 79
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </em> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "em",
+          "tipo": "fecha",
+          "posicao": 1182,
+          "fim": 1187,
+          "texto": "</em>",
+          "linha": 18,
+          "coluna": 115,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 18,
+        "coluna": 115
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </p> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "p",
+          "tipo": "fecha",
+          "posicao": 1311,
+          "fim": 1315,
+          "texto": "</p>",
+          "linha": 18,
+          "coluna": 244,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 18,
+        "coluna": 244
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </p> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "p",
+          "tipo": "fecha",
+          "posicao": 1472,
+          "fim": 1476,
+          "texto": "</p>",
+          "linha": 19,
+          "coluna": 157,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 19,
+        "coluna": 157
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </h3> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "h3",
+          "tipo": "fecha",
+          "posicao": 2016,
+          "fim": 2021,
+          "texto": "</h3>",
+          "linha": 27,
+          "coluna": 48,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 27,
+        "coluna": 48
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </li> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "li",
+          "tipo": "fecha",
+          "posicao": 2090,
+          "fim": 2095,
+          "texto": "</li>",
+          "linha": 29,
+          "coluna": 48,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 29,
+        "coluna": 48
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </li> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "li",
+          "tipo": "fecha",
+          "posicao": 2137,
+          "fim": 2142,
+          "texto": "</li>",
+          "linha": 30,
+          "coluna": 42,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 30,
+        "coluna": 42
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </li> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "li",
+          "tipo": "fecha",
+          "posicao": 2185,
+          "fim": 2190,
+          "texto": "</li>",
+          "linha": 31,
+          "coluna": 43,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 31,
+        "coluna": 43
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </ul> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "ul",
+          "tipo": "fecha",
+          "posicao": 2207,
+          "fim": 2212,
+          "texto": "</ul>",
+          "linha": 32,
+          "coluna": 17,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 32,
+        "coluna": 17
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </h3> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "h3",
+          "tipo": "fecha",
+          "posicao": 2256,
+          "fim": 2261,
+          "texto": "</h3>",
+          "linha": 33,
+          "coluna": 44,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 33,
+        "coluna": 44
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </li> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "li",
+          "tipo": "fecha",
+          "posicao": 2387,
+          "fim": 2392,
+          "texto": "</li>",
+          "linha": 36,
+          "coluna": 52,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 36,
+        "coluna": 52
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </li> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "li",
+          "tipo": "fecha",
+          "posicao": 2442,
+          "fim": 2447,
+          "texto": "</li>",
+          "linha": 37,
+          "coluna": 50,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 37,
+        "coluna": 50
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </ol> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "ol",
+          "tipo": "fecha",
+          "posicao": 2464,
+          "fim": 2469,
+          "texto": "</ol>",
+          "linha": 38,
+          "coluna": 17,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 38,
+        "coluna": 17
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </thead> não possui tag de abertura correspondente na pilha atual (esperava-se </table>).",
+        "tag": {
+          "nome": "thead",
+          "tipo": "fecha",
+          "posicao": 3124,
+          "fim": 3132,
+          "texto": "</thead>",
+          "linha": 49,
+          "coluna": 21,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 49,
+        "coluna": 21
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </tr> não possui tag de abertura correspondente na pilha atual (esperava-se </table>).",
+        "tag": {
+          "nome": "tr",
+          "tipo": "fecha",
+          "posicao": 3416,
+          "fim": 3421,
+          "texto": "</tr>",
+          "linha": 54,
+          "coluna": 25,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 54,
+        "coluna": 25
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </tr> não possui tag de abertura correspondente na pilha atual (esperava-se </table>).",
+        "tag": {
+          "nome": "tr",
+          "tipo": "fecha",
+          "posicao": 3679,
+          "fim": 3684,
+          "texto": "</tr>",
+          "linha": 58,
+          "coluna": 25,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 58,
+        "coluna": 25
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </tbody> não possui tag de abertura correspondente na pilha atual (esperava-se </table>).",
+        "tag": {
+          "nome": "tbody",
+          "tipo": "fecha",
+          "posicao": 3705,
+          "fim": 3713,
+          "texto": "</tbody>",
+          "linha": 59,
+          "coluna": 21,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 59,
+        "coluna": 21
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </summary> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "summary",
+          "tipo": "fecha",
+          "posicao": 4437,
+          "fim": 4447,
+          "texto": "</summary>",
+          "linha": 69,
+          "coluna": 110,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 69,
+        "coluna": 110
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </p> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "p",
+          "tipo": "fecha",
+          "posicao": 4554,
+          "fim": 4558,
+          "texto": "</p>",
+          "linha": 70,
+          "coluna": 107,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 70,
+        "coluna": 107
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </details> não possui tag de abertura correspondente na pilha atual (esperava-se </section>).",
+        "tag": {
+          "nome": "details",
+          "tipo": "fecha",
+          "posicao": 4575,
+          "fim": 4585,
+          "texto": "</details>",
+          "linha": 71,
+          "coluna": 17,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 71,
+        "coluna": 17
+      },
+      {
+        "tipo": "fechamento_orfa",
+        "mensagem": "Tag de fechamento </small> não possui tag de abertura correspondente na pilha atual (esperava-se </footer>).",
+        "tag": {
+          "nome": "small",
+          "tipo": "fecha",
+          "posicao": 4817,
+          "fim": 4825,
+          "texto": "</small>",
+          "linha": 76,
+          "coluna": 82,
+          "atributos": {
+            "todos": {},
+            "id": null,
+            "classes": [],
+            "eventosInline": []
+          }
+        },
+        "linha": 76,
+        "coluna": 82
+      }
+    ],
+    "avisos": []
+  },
+  "interatividade": {
+    "totalVinculos": 1,
+    "vinculos": [
+      {
+        "elemento": "<button id=\"botao-contador\">",
+        "tag": "button",
+        "id": "botao-contador",
+        "linha": 66,
+        "coluna": 17,
+        "evento": "click",
+        "origem": "addEventListenerVariavel",
+        "tipoManipulador": "arrow_function",
+        "nomeFuncao": null,
+        "parametros": [],
+        "codigo": "() => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            }",
+        "opcoes": null,
+        "seletor": "#botao-contador",
+        "variavel": "botao",
+        "metodo": "querySelector"
+      }
+    ],
+    "seletoresNaoEncontrados": [],
+    "interativosSemEventos": [
+      {
+        "tag": "a",
+        "id": null,
+        "linha": 19,
+        "coluna": 41
+      }
+    ]
+  },
+  "elementosComEventos": [
+    {
+      "tag": "button",
+      "id": "botao-contador",
+      "classes": [],
+      "linha": 66,
+      "coluna": 17,
+      "totalEventos": 1,
+      "eventos": [
+        {
+          "evento": "click",
+          "origem": "addEventListenerVariavel",
+          "tipoManipulador": "arrow_function",
+          "nomeFuncao": null,
+          "parametros": [],
+          "codigo": "() => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            }",
+          "opcoes": null,
+          "seletor": "#botao-contador",
+          "variavel": "botao",
+          "metodo": "querySelector",
+          "posicao": {
+            "scriptInicio": 5041
+          }
+        }
+      ]
+    }
+  ],
+  "elementos": [
+    {
+      "nome": "html",
+      "id": null,
+      "classes": [],
+      "linha": 2,
+      "coluna": 1,
+      "inicio": 16,
+      "fim": 5227,
+      "vazio": false,
+      "atributos": {
+        "lang": "pt-BR"
+      },
+      "eventos": [],
+      "texto": "<html lang=\"pt-BR\">\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Página de demonstração</title>\n    </head>\n    <body style=\"margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;\">\n        <header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>\n\n        <main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>\n\n        <footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>\n\n        <script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>\n    </body>\n</html>"
+    },
+    {
+      "nome": "head",
+      "id": null,
+      "classes": [],
+      "linha": 3,
+      "coluna": 5,
+      "inicio": 40,
+      "fim": 218,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Página de demonstração</title>\n    </head>"
+    },
+    {
+      "nome": "meta",
+      "id": null,
+      "classes": [],
+      "linha": 4,
+      "coluna": 9,
+      "inicio": 55,
+      "fim": 79,
+      "vazio": true,
+      "atributos": {
+        "charset": "UTF-8"
+      },
+      "eventos": [],
+      "texto": "<meta charset=\"UTF-8\" />"
+    },
+    {
+      "nome": "meta",
+      "id": null,
+      "classes": [],
+      "linha": 5,
+      "coluna": 9,
+      "inicio": 88,
+      "fim": 160,
+      "vazio": true,
+      "atributos": {
+        "name": "viewport",
+        "content": "width=device-width, initial-scale=1.0"
+      },
+      "eventos": [],
+      "texto": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
+    },
+    {
+      "nome": "title",
+      "id": null,
+      "classes": [],
+      "linha": 6,
+      "coluna": 9,
+      "inicio": 169,
+      "fim": 206,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<title>Página de demonstração</title>"
+    },
+    {
+      "nome": "body",
+      "id": null,
+      "classes": [],
+      "linha": 8,
+      "coluna": 5,
+      "inicio": 223,
+      "fim": 5219,
+      "vazio": false,
+      "atributos": {
+        "style": "margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;"
+      },
+      "eventos": [],
+      "texto": "<body style=\"margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;\">\n        <header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>\n\n        <main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>\n\n        <footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>\n\n        <script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>\n    </body>"
+    },
+    {
+      "nome": "header",
+      "id": null,
+      "classes": [],
+      "linha": 9,
+      "coluna": 9,
+      "inicio": 359,
+      "fim": 793,
+      "vazio": false,
+      "atributos": {
+        "style": "max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;"
+      },
+      "eventos": [],
+      "texto": "<header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>"
+    },
+    {
+      "nome": "p",
+      "id": null,
+      "classes": [],
+      "linha": 10,
+      "coluna": 13,
+      "inicio": 498,
+      "fim": 607,
+      "vazio": false,
+      "atributos": {
+        "style": "margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;"
+      },
+      "eventos": [],
+      "texto": "<p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>"
+    },
+    {
+      "nome": "h1",
+      "id": null,
+      "classes": [],
+      "linha": 11,
+      "coluna": 13,
+      "inicio": 620,
+      "fim": 680,
+      "vazio": false,
+      "atributos": {
+        "style": "margin: 8px 0;"
+      },
+      "eventos": [],
+      "texto": "<h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>"
+    },
+    {
+      "nome": "p",
+      "id": null,
+      "classes": [],
+      "linha": 12,
+      "coluna": 13,
+      "inicio": 693,
+      "fim": 775,
+      "vazio": false,
+      "atributos": {
+        "style": "margin: 0;"
+      },
+      "eventos": [],
+      "texto": "<p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>"
+    },
+    {
+      "nome": "main",
+      "id": null,
+      "classes": [],
+      "linha": 15,
+      "coluna": 9,
+      "inicio": 803,
+      "fim": 4624,
+      "vazio": false,
+      "atributos": {
+        "style": "max-width: 800px; margin: 0 auto;"
+      },
+      "eventos": [],
+      "texto": "<main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>"
+    },
+    {
+      "nome": "section",
+      "id": null,
+      "classes": [],
+      "linha": 16,
+      "coluna": 13,
+      "inicio": 864,
+      "fim": 1763,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
+      },
+      "eventos": [],
+      "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>"
+    },
+    {
+      "nome": "h2",
+      "id": null,
+      "classes": [],
+      "linha": 17,
+      "coluna": 17,
+      "inicio": 1001,
+      "fim": 1067,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-top: 0; color: #1d4ed8;"
+      },
+      "eventos": [],
+      "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>"
+    },
+    {
+      "nome": "p",
+      "id": null,
+      "classes": [],
+      "linha": 18,
+      "coluna": 17,
+      "inicio": 1084,
+      "fim": 1112,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<p>Este parágrafo contém</p>"
+    },
+    {
+      "nome": "strong",
+      "id": null,
+      "classes": [],
+      "linha": 18,
+      "coluna": 52,
+      "inicio": 1119,
+      "fim": 1138,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<strong>em</strong>"
+    },
+    {
+      "nome": "em",
+      "id": null,
+      "classes": [],
+      "linha": 18,
+      "coluna": 96,
+      "inicio": 1163,
+      "fim": 1172,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<em></em>"
+    },
+    {
+      "nome": "code",
+      "id": null,
+      "classes": [],
+      "linha": 18,
+      "coluna": 144,
+      "inicio": 1211,
+      "fim": 1310,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 2px 6px; background: #e2e8f0; border-radius: 4px;"
+      },
+      "eventos": [],
+      "texto": "<code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>"
+    },
+    {
+      "nome": "p",
+      "id": null,
+      "classes": [],
+      "linha": 19,
+      "coluna": 17,
+      "inicio": 1332,
+      "fim": 1339,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<p></p>"
+    },
+    {
+      "nome": "a",
+      "id": null,
+      "classes": [],
+      "linha": 19,
+      "coluna": 41,
+      "inicio": 1356,
+      "fim": 1471,
+      "vazio": false,
+      "atributos": {
+        "href": "https://developer.mozilla.org/pt-BR/docs/Web/HTML",
+        "style": "color: #1d4ed8;"
+      },
+      "eventos": [],
+      "texto": "<a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>"
+    },
+    {
+      "nome": "blockquote",
+      "id": null,
+      "classes": [],
+      "linha": 20,
+      "coluna": 17,
+      "inicio": 1493,
+      "fim": 1740,
+      "vazio": false,
+      "atributos": {
+        "style": "margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;"
+      },
+      "eventos": [],
+      "texto": "<blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>"
+    },
+    {
+      "nome": "section",
+      "id": null,
+      "classes": [],
+      "linha": 25,
+      "coluna": 13,
+      "inicio": 1777,
+      "fim": 2492,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
+      },
+      "eventos": [],
+      "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>"
+    },
+    {
+      "nome": "h2",
+      "id": null,
+      "classes": [],
+      "linha": 26,
+      "coluna": 17,
+      "inicio": 1914,
+      "fim": 1968,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-top: 0; color: #1d4ed8;"
+      },
+      "eventos": [],
+      "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>"
+    },
+    {
+      "nome": "h3",
+      "id": null,
+      "classes": [],
+      "linha": 27,
+      "coluna": 17,
+      "inicio": 1985,
+      "fim": 1997,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<h3>Uma</h3>"
+    },
+    {
+      "nome": "ul",
+      "id": null,
+      "classes": [],
+      "linha": 28,
+      "coluna": 17,
+      "inicio": 2038,
+      "fim": 2048,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<ul>\n</ul>"
+    },
+    {
+      "nome": "li",
+      "id": null,
+      "classes": [],
+      "linha": 29,
+      "coluna": 26,
+      "inicio": 2068,
+      "fim": 2077,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<li></li>"
+    },
+    {
+      "nome": "li",
+      "id": null,
+      "classes": [],
+      "linha": 30,
+      "coluna": 21,
+      "inicio": 2116,
+      "fim": 2125,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<li></li>"
+    },
+    {
+      "nome": "li",
+      "id": null,
+      "classes": [],
+      "linha": 31,
+      "coluna": 21,
+      "inicio": 2163,
+      "fim": 2175,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<li>Ter</li>"
+    },
+    {
+      "nome": "h3",
+      "id": null,
+      "classes": [],
+      "linha": 33,
+      "coluna": 17,
+      "inicio": 2229,
+      "fim": 2238,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<h3></h3>"
+    },
+    {
+      "nome": "ol",
+      "id": null,
+      "classes": [],
+      "linha": 34,
+      "coluna": 17,
+      "inicio": 2278,
+      "fim": 2287,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<ol></ol>"
+    },
+    {
+      "nome": "li",
+      "id": null,
+      "classes": [],
+      "linha": 35,
+      "coluna": 21,
+      "inicio": 2308,
+      "fim": 2335,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<li>Ler o arquivo HTML</li>"
+    },
+    {
+      "nome": "li",
+      "id": null,
+      "classes": [],
+      "linha": 36,
+      "coluna": 21,
+      "inicio": 2356,
+      "fim": 2365,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<li></li>"
+    },
+    {
+      "nome": "li",
+      "id": null,
+      "classes": [],
+      "linha": 37,
+      "coluna": 21,
+      "inicio": 2413,
+      "fim": 2422,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<li></li>"
+    },
+    {
+      "nome": "section",
+      "id": null,
+      "classes": [],
+      "linha": 41,
+      "coluna": 13,
+      "inicio": 2506,
+      "fim": 3761,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
+      },
+      "eventos": [],
+      "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>"
+    },
+    {
+      "nome": "h2",
+      "id": null,
+      "classes": [],
+      "linha": 42,
+      "coluna": 17,
+      "inicio": 2643,
+      "fim": 2697,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-top: 0; color: #1d4ed8;"
+      },
+      "eventos": [],
+      "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>"
+    },
+    {
+      "nome": "table",
+      "id": null,
+      "classes": [],
+      "linha": 43,
+      "coluna": 17,
+      "inicio": 2714,
+      "fim": 3738,
+      "vazio": false,
+      "atributos": {
+        "style": "width: 100%; border-collapse: collapse; text-align: left;"
+      },
+      "eventos": [],
+      "texto": "<table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>"
+    },
+    {
+      "nome": "thead",
+      "id": null,
+      "classes": [],
+      "linha": 44,
+      "coluna": 21,
+      "inicio": 2808,
+      "fim": 2823,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<thead></thead>"
+    },
+    {
+      "nome": "tr",
+      "id": null,
+      "classes": [],
+      "linha": 45,
+      "coluna": 25,
+      "inicio": 2848,
+      "fim": 3103,
+      "vazio": false,
+      "atributos": {
+        "style": "background: #e2e8f0;"
+      },
+      "eventos": [],
+      "texto": "<tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>"
+    },
+    {
+      "nome": "th",
+      "id": null,
+      "classes": [],
+      "linha": 46,
+      "coluna": 29,
+      "inicio": 2910,
+      "fim": 2979,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 10px; border: 1px solid #cbd5e1;"
+      },
+      "eventos": [],
+      "texto": "<th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>"
+    },
+    {
+      "nome": "th",
+      "id": null,
+      "classes": [],
+      "linha": 47,
+      "coluna": 29,
+      "inicio": 3008,
+      "fim": 3073,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 10px; border: 1px solid #cbd5e1;"
+      },
+      "eventos": [],
+      "texto": "<th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>"
+    },
+    {
+      "nome": "tbody",
+      "id": null,
+      "classes": [],
+      "linha": 50,
+      "coluna": 21,
+      "inicio": 3153,
+      "fim": 3168,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<tbody></tbody>"
+    },
+    {
+      "nome": "tr",
+      "id": null,
+      "classes": [],
+      "linha": 51,
+      "coluna": 25,
+      "inicio": 3193,
+      "fim": 3202,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<tr></tr>"
+    },
+    {
+      "nome": "td",
+      "id": null,
+      "classes": [],
+      "linha": 52,
+      "coluna": 29,
+      "inicio": 3231,
+      "fim": 3294,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 10px; border: 1px solid #cbd5e1;"
+      },
+      "eventos": [],
+      "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>"
+    },
+    {
+      "nome": "td",
+      "id": null,
+      "classes": [],
+      "linha": 53,
+      "coluna": 29,
+      "inicio": 3323,
+      "fim": 3391,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 10px; border: 1px solid #cbd5e1;"
+      },
+      "eventos": [],
+      "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>"
+    },
+    {
+      "nome": "tr",
+      "id": null,
+      "classes": [],
+      "linha": 55,
+      "coluna": 25,
+      "inicio": 3446,
+      "fim": 3455,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<tr></tr>"
+    },
+    {
+      "nome": "td",
+      "id": null,
+      "classes": [],
+      "linha": 56,
+      "coluna": 29,
+      "inicio": 3484,
+      "fim": 3553,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 10px; border: 1px solid #cbd5e1;"
+      },
+      "eventos": [],
+      "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>"
+    },
+    {
+      "nome": "td",
+      "id": null,
+      "classes": [],
+      "linha": 57,
+      "coluna": 29,
+      "inicio": 3582,
+      "fim": 3654,
+      "vazio": false,
+      "atributos": {
+        "style": "padding: 10px; border: 1px solid #cbd5e1;"
+      },
+      "eventos": [],
+      "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>"
+    },
+    {
+      "nome": "section",
+      "id": null,
+      "classes": [],
+      "linha": 63,
+      "coluna": 13,
+      "inicio": 3775,
+      "fim": 4608,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
+      },
+      "eventos": [],
+      "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>"
+    },
+    {
+      "nome": "h2",
+      "id": null,
+      "classes": [],
+      "linha": 64,
+      "coluna": 17,
+      "inicio": 3912,
+      "fim": 3977,
+      "vazio": false,
+      "atributos": {
+        "style": "margin-top: 0; color: #1d4ed8;"
+      },
+      "eventos": [],
+      "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>"
+    },
+    {
+      "nome": "p",
+      "id": null,
+      "classes": [],
+      "linha": 65,
+      "coluna": 17,
+      "inicio": 3994,
+      "fim": 4043,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<p>Clique no botão para atualizar o contador:</p>"
+    },
+    {
+      "nome": "button",
+      "id": "botao-contador",
+      "classes": [],
+      "linha": 66,
+      "coluna": 17,
+      "inicio": 4060,
+      "fim": 4233,
+      "vazio": false,
+      "atributos": {
+        "id": "botao-contador",
+        "type": "button",
+        "style": "padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;"
+      },
+      "eventos": [
+        {
+          "evento": "click",
+          "origem": "addEventListenerVariavel",
+          "tipoManipulador": "arrow_function",
+          "nomeFuncao": null,
+          "parametros": [],
+          "codigo": "() => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            }",
+          "opcoes": null,
+          "seletor": "#botao-contador",
+          "variavel": "botao",
+          "metodo": "querySelector",
+          "posicao": {
+            "scriptInicio": 5041
+          }
+        }
+      ],
+      "texto": "<button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>"
+    },
+    {
+      "nome": "p",
+      "id": "resultado",
+      "classes": [],
+      "linha": 67,
+      "coluna": 17,
+      "inicio": 4250,
+      "fim": 4301,
+      "vazio": false,
+      "atributos": {
+        "id": "resultado",
+        "aria-live": "polite"
+      },
+      "eventos": [],
+      "texto": "<p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>"
+    },
+    {
+      "nome": "details",
+      "id": null,
+      "classes": [],
+      "linha": 68,
+      "coluna": 17,
+      "inicio": 4318,
+      "fim": 4359,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<details>\n                    <</details>"
+    },
+    {
+      "nome": "p",
+      "id": null,
+      "classes": [],
+      "linha": 70,
+      "coluna": 21,
+      "inicio": 4468,
+      "fim": 4475,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<p></p>"
+    },
+    {
+      "nome": "footer",
+      "id": null,
+      "classes": [],
+      "linha": 75,
+      "coluna": 9,
+      "inicio": 4634,
+      "fim": 4843,
+      "vazio": false,
+      "atributos": {
+        "style": "max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;"
+      },
+      "eventos": [],
+      "texto": "<footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>"
+    },
+    {
+      "nome": "small",
+      "id": null,
+      "classes": [],
+      "linha": 76,
+      "coluna": 13,
+      "inicio": 4748,
+      "fim": 4763,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<small></small>"
+    },
+    {
+      "nome": "script",
+      "id": null,
+      "classes": [],
+      "linha": 79,
+      "coluna": 9,
+      "inicio": 4853,
+      "fim": 5207,
+      "vazio": false,
+      "atributos": {},
+      "eventos": [],
+      "texto": "<script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>"
+    }
+  ]
+}
