@@ -1,110 +1,196 @@
 # Experimento: mapear HTML sem dependências
 
-Este documento descreve o experimento em `script.js`: ler um arquivo HTML como texto, localizar tags, calcular seus intervalos e associar tags de abertura e fechamento para extrair elementos completos. A ideia é dividir o trabalho em etapas pequenas, sem instalar um parser externo.
+Este documento descreve a arquitetura e os experimentos implementados em `script.js`: ler um arquivo HTML como texto, localizar tags com precisão posicional, calcular seus intervalos `[inicio, fim)`, validar a integridade estrutural, interpretar atributos e associar dinâmicas de JavaScript (como `addEventListener` e seletores DOM) aos elementos correspondentes, sem utilizar qualquer biblioteca externa ou parser pesado.
 
 ## Objetivo
 
-Extrair trechos do HTML original — por exemplo, um `<header>` ou um `<script>` — preservando o texto e a formatação que estão no arquivo. A leitura pelo Node.js não executa o JavaScript que esteja dentro do HTML; ela apenas carrega o arquivo como uma string.
+Extrair trechos do HTML original — como blocos `<header>`, `<main>`, botões e `<script>` — preservando estritamente os caracteres, espaçamentos, indentação e quebras de linha do arquivo de origem. Ao operar diretamente com offsets (`String.prototype.slice`), o código dispensa ferramentas de serialização que reformatam a árvore sintática, mantendo a fidelidade total do texto.
 
-## Fluxo do mapeamento
+---
 
-### 1. Ler o arquivo
+## Fluxo do Mapeamento
 
-`readFile(caminhoHtml, "utf8")`, de `node:fs/promises`, lê o arquivo e retorna seu conteúdo como uma string. Na função principal `mapearTags()`, o caminho é montado com `__dirname`, então `code.html` é procurado na mesma pasta de `script.js`. As funções exploratórias `lerHtml()` e `percorrerHtml()` ainda apontam para `index.html`.
+```
+[HTML como String] 
+       │
+       ▼
+ 1. Localização Posicional (localizarTags)
+    - Ignora comentários <!-- ... -->
+    - Preserva tags raw-text (script/style)
+    - Suporta '>' dentro de aspas
+       │
+       ├─────────────────────────────────────────┐
+       ▼                                         ▼
+ 2. Validação Estrutural (validarEstrutura)    3. Mapeamento de Elementos (mapearElementos)
+    - Detecta tags não fechadas                   - Casamento por pilha LIFO
+    - Detecta fechamentos órfãos                  - Extração de atributos (id, class, inline on...)
+    - Detecta fechamentos cruzados                - Recortes exatos de texto e conteúdo
+       │                                         │
+       └────────────────────┬────────────────────┘
+                            ▼
+ 4. Análise Estática de JS (analisarScripts)
+    - Captura variáveis e seletores (querySelector, getElementById, etc.)
+    - Identifica listeners (addEventListener, propriedades on...)
+                            │
+                            ▼
+ 5. Vínculo de Interatividade (associarEventos)
+    - Conecta ouvintes JS e eventos inline aos elementos HTML mapeados
+    - Audita seletores não encontrados no documento
+```
+
+---
+
+### 1. Ler o Arquivo
+
+`readFile(caminhoHtml, "utf8")` (`node:fs/promises`) lê o arquivo como string sem executar qualquer código embutido:
 
 ```js
 const html = await readFile(caminhoHtml, "utf8");
 ```
 
-Essa etapa não interpreta o HTML nem percorre seus elementos.
+---
 
-### 2. Localizar as tags
+### 2. Localizar as Tags (`localizarTags`)
 
-`mapearTags()` usa uma expressão regular com `matchAll()` para encontrar sequências que parecem tags. Para cada ocorrência, cria um registro com:
+Diferente de expressões regulares simplificadas que falham quando encontram atributos como `title="a > b"` ou blocos internos de script, `localizarTags()` implementa um tokenizer com regras específicas:
 
-- `nome`: nome da tag em letras minúsculas;
-- `tipo`: `abre`, `fecha` ou `auto`;
-- `posicao`: índice em que a tag começa na string;
-- `texto`: texto original da tag, por exemplo, `<p id="resultado">`.
+1. **Comentários HTML (`<!-- ... -->`)**: o conteúdo interno é ignorado, evitando falsos positivos com tags comentadas.
+2. **Atributos entre aspas**: respeita delimitadores de aspas duplas (`"..."`) e simples (`'...'`), assegurando que caracteres `>` em expressões ou valores textuais não fechem a tag precocemente.
+3. **Tags raw-text (`<script>` e `<style>`)**: seu miolo é tratado como texto bruto até a respectiva tag de fechamento (`</script>` ou `</style>`), evitando que trechos de código (como `<span ...>` em template strings ou comparações `i < len`) sejam interpretados como elementos DOM.
+4. **Coordenadas**: calcula a posição de início e fim, além do número da linha e da coluna base 1 (`calcularLinhaColuna`).
 
-Assim, uma saída como `fecha script @5207` indica que `</script>` começa no índice `5207`.
+---
 
-### 3. Calcular intervalos
+### 3. Interpretação de Atributos (`extrairAtributos`)
 
-`criarIntervalos(tags)` transforma a posição e o comprimento de cada tag em um intervalo:
+Cada tag de abertura é analisada para estruturar:
+
+* `id`: valor normalizado do identificador único (se houver);
+* `classes`: array de classes CSS divididas por espaço em branco;
+* `eventosInline`: lista de handlers inline iniciados com `on` (como `onclick`, `onchange`), separando o nome do evento e o código JS literal;
+* `todos`: dicionário com todos os atributos encontrados (com suporte a atributos booleanos como `disabled` ou `required`).
+
+---
+
+### 4. Validação Estrutural (`validarEstrutura`)
+
+Antes ou em conjunto com a montagem dos elementos, `validarEstrutura()` percorre as tags com uma pilha e avalia a conformidade hierárquica do documento:
+
+* **Tags vazias (Void Elements)**: tags como `<br>`, `<img>`, `<input>`, `<meta>` e `<link>` não exigem fechamento. Se uma tag `</input>` for encontrada, um aviso (`fechamento_elemento_vazio`) é registrado.
+* **Fechamentos órfãos (`fechamento_orfa`)**: tags de fechamento cujo par de abertura nunca existiu na pilha.
+* **Fechamentos cruzados (`fechamento_cruzado`)**: fechamento fora de ordem, como `<b><i></b></i>`, indicando que tags filhas não foram fechadas antes da mãe.
+* **Tags não fechadas (`tag_nao_fechada`)**: tags de abertura restantes na pilha ao final do arquivo.
+
+O validador retorna um relatório com `valido: boolean`, `totalErros`, `totalAvisos`, `erros` e `avisos`, informando linha e coluna exatas de cada ocorrência.
+
+---
+
+### 5. Associação e Montagem de Elementos (`mapearElementos`)
+
+`mapearElementos()` associa pares de abertura e fechamento mantendo a integridade textual:
 
 ```js
 {
-  inicio: posicao,
-  fim: posicao + texto.length
+  nome: "header",
+  inicio: 27332,
+  fim: 31324,
+  inicioConteudo: 27552,
+  fimConteudo: 31315,
+  linha: 382,
+  coluna: 13,
+  texto: "<header ...>...</header>",
+  conteudo: "\n  ...",
+  atributos: { class: "fixed ...", ... },
+  id: "...",
+  classes: ["fixed", "top-0", ...],
+  eventosInline: [],
+  eventosJS: [],
+  vazio: false
 }
 ```
 
-`fim` é exclusivo, como o segundo argumento de `String.prototype.slice()`. Portanto, o texto exato da tag pode ser recuperado com:
+* **Elementos vazios**: podem ser opcionalmente incluídos (`incluirVazios: true`), viabilizando a busca e vinculação de elementos interativos como `<input id="endpoint-input">`.
+* **Sem re-serialização**: `texto` e `conteudo` provêm de `html.slice()`, garantindo que toda a indentação original seja conservada.
 
-```js
-html.slice(inicio, fim);
-```
+---
 
-`filtrarPorNome()` mostra como filtrar esses registros pelo nome da tag, por exemplo, `p`. Esse filtro retorna cada tag individualmente: `<p>` e `</p>` são ocorrências distintas.
+### 6. Análise Estática de JavaScript e Associação de Eventos
 
-### 4. Associar abertura e fechamento
+A análise estática vincula o comportamento declarado nos scripts aos elementos HTML do template:
 
-`mapearElementos(tags, html)` percorre as tags na ordem em que aparecem e usa uma pilha:
+1. **Detecção de Seletores DOM (`analisarScripts`)**:
+   Localiza variáveis e chamadas diretas como:
+   * `document.querySelector("#botao-contador")` / `document.querySelectorAll(".card")`
+   * `document.getElementById("btn-run-test")`
+   * `document.getElementsByClassName(...)` / `document.getElementsByTagName(...)`
+2. **Detecção de Ouvintes de Evento**:
+   * Padrão com variável: `botao.addEventListener("click", ...)` ou `botao.onclick = ...`
+   * Padrão direto: `document.getElementById("x").addEventListener("click", ...)`
+3. **Associação Bidirecional (`associarEventos`)**:
+   Encontra os elementos correspondentes por `id`, `class` ou `tag` e anexa os ouvintes ao array `elemento.eventosJS`.
+4. **Auditoria de Interatividade (`gerarRelatorioInteratividade`)**:
+   * Identifica elementos com eventos (inline ou via script);
+   * Identifica elementos interativos (`<button>`, `<a>`, `<input>`) que não possuem nenhum manipulador configurado;
+   * Identifica seletores no script que não encontram nenhum elemento correspondente no HTML (seletores órfãos ou código morto).
 
-1. Ao encontrar uma tag de abertura, guarda-a na pilha.
-2. Ao encontrar uma tag de fechamento, procura a abertura correspondente na pilha.
-3. Quando encontra o par, calcula o intervalo do elemento e o intervalo do conteúdo interno.
+---
 
-O elemento resultante contém:
+### 7. Funções de Consulta Disponíveis
 
-- `inicio` e `fim`: intervalo da abertura até depois da tag de fechamento;
-- `inicioConteudo` e `fimConteudo`: intervalo entre as tags;
-- `texto`: elemento completo, obtido de `html.slice(inicio, fim)`;
-- `conteudo`: conteúdo interno, obtido de `html.slice(inicioConteudo, fimConteudo)`.
+* `buscarElementoPorNome(elementos, nome)`: retorna a primeira ocorrência completa do elemento;
+* `buscarTodosPorNome(elementos, nome)`: retorna todos os elementos daquela tag;
+* `buscarPorId(elementos, id)`: busca por identificador único (`id="meu-id"` ou `#meu-id`);
+* `buscarPorClasse(elementos, classe)`: localiza elementos que possuam a classe especificada;
+* `buscarPorAtributo(elementos, nomeAtributo, valorEsperado?)`: localiza elementos por chave e valor de atributo.
 
-Isso permite manter o trecho original sem serializar ou reformatar o HTML: como `texto` vem diretamente de `html.slice()`, espaços, quebras de linha, indentação e a formatação das tags são preservados. O script não executa o Prettier nem reconstrói o HTML.
+---
 
-### 5. Selecionar um elemento
+## Resultados nos Arquivos de Teste
 
-`buscarElementoPorNome(elementos, nome)` seleciona o primeiro elemento completo mapeado com aquele nome. O teste atual lê `code.html` e usa essa função para imprimir o primeiro bloco `<header>` encontrado. O arquivo possui mais de um `<header>`; por isso, a busca retorna o primeiro na ordem do documento.
+### `code.html` (Dashboard Real Tailwind ~112 KB)
+* **Tags**: 1.016 tags localizadas com sucesso.
+* **Elementos**: 513 elementos mapeados.
+* **Validação Estrutural**: **100% válido (0 erros)**.
+* **Listeners JS Vinculados**:
+  * `<button id="btn-run-test">` -> evento `click` via variável `btnRun` (`getElementById`);
+  * `<button id="star-btn">` -> evento `click` via variável `starBtn` (`getElementById`);
+  * `<button id="copy-link-btn">` -> evento `click` via variável `copyLinkBtn` (`getElementById`).
+* **Eventos Inline**:
+  * 2 botões com manipuladores `onclick` multilinhas complexos (linhas 902 e 1053) extraídos sem perda de formatação.
+* **Seletores Órfãos**: 0 seletores não encontrados.
 
-## Como executar
+### `index.html` (Página de Testes com Falhas Sintáticas Deliberadas)
+* **Tags**: 131 tags.
+* **Elementos**: 56 elementos.
+* **Validação Estrutural**: **21 erros estruturais detectados**, identificando com precisão de linha e coluna:
+  * Fechamentos órfãos de `</strong>`, `</em>`, `</p>` e `</h3>` (linhas 18 e 27);
+  * Tags `</li>` fechando fora de lista e tag `</ul>` órfã (linhas 29–32);
+  * Fechamento truncado `<</details>summary ...>` (linha 69).
+* **Listeners JS Vinculados**:
+  * `<button id="botao-contador">` (linha 66) -> evento `click` via `botao` (`document.querySelector("#botao-contador")`).
 
-Na pasta do projeto, rode:
+---
 
+## Como Executar
+
+### 1. Executar a análise padrão
 ```bash
 node script.js
 ```
+Imprime o primeiro bloco `<header>` de `code.html` e um resumo da validação estrutural e eventos correlacionados.
 
-O resultado depende da estrutura literal de `code.html`. Na execução atual, o primeiro `<header>` ocupa o intervalo `[27332, 31324)` e corresponde à barra fixa da interface. O arquivo contém também um segundo `<header>`, referente ao cabeçalho do artigo. A busca atual retorna apenas o primeiro. Os offsets mudam quando o arquivo é formatado porque passam a contar os espaços e as quebras de linha inseridos.
+### 2. Executar a suíte de testes unitários e de integração
+```bash
+node --test test.js
+```
+Executa os 14 testes cobrindo tokenização com aspas e comentários, validação estrutural, preservação de formatação, extração de atributos e correlação JS.
 
-## Formatação preservada e próximos passos
+---
 
-O `code.html` está formatado com quebras de linha e indentação. A saída do mapeador manteve essa apresentação porque extraiu o trecho original por intervalo, sem convertê-lo para uma árvore DOM e serializá-lo novamente. Isso revela uma vantagem para o objetivo do experimento: além da estrutura e do conteúdo, é possível preservar a forma textual exata do bloco.
+## Limitações Atuais e Próximas Evoluções
 
-O teste anterior de IDs demonstrou uma primeira associação estática entre elementos HTML e seletores JavaScript. Ainda há espaço para evoluir o mapeador, em etapas independentes:
+Embora o parser resolva tags complexas, atributos e eventos sem dependências externas, permanecem algumas restrições intencionais da abordagem baseada em texto:
 
-- validar tags abertas, fechamentos e erros estruturais antes de mapear elementos;
-- interpretar atributos como `id`, `class` e atributos inline `on...`;
-- associar seletores JavaScript, como `querySelector`, aos elementos correspondentes;
-- identificar chamadas a `addEventListener` e relacioná-las ao elemento selecionado;
-- manter os recortes da fonte original para não perder formatação durante essas análises.
-
-A identificação de eventos seria uma análise estática do código e não executaria o JavaScript. Referências dinâmicas ou construídas em tempo de execução podem não ser resolvidas apenas pela inspeção do texto.
-
-## Experimento anterior: `<script>` e IDs
-
-Em um teste anterior com `index.html`, a tag `<script>` estava fechando imediatamente. Depois da correção, o mapeador associou os IDs `botao-contador` e `resultado` encontrados na última seção aos seletores `querySelector` dentro do script. Isso demonstrou por que é importante mapear o conteúdo entre as tags de abertura e fechamento, não apenas procurar nomes de tags.
-
-## Limitações deste experimento
-
-Este código é um mapeador didático, não um parser completo de HTML. A expressão regular localiza formas comuns de tags, mas não implementa todas as regras da linguagem. Em especial:
-
-- `>` dentro de um atributo entre aspas pode confundir a expressão regular;
-- texto que parece uma tag dentro de comentários ou de JavaScript pode ser interpretado como tag;
-- HTML malformado pode produzir associações diferentes da estrutura que um navegador construiria;
-- a lista de elementos vazios é explícita e precisa ser mantida;
-- a extração de atributos é limitada a valores `id` entre aspas; ainda não há um parser geral de atributos nem suporte para filtrar por `class`.
-
-A pilha é uma forma simples de acompanhar a hierarquia, mas a qualidade do resultado depende das tags encontradas e de quão bem formado está o HTML. Para um mapeamento sem perdas de formatação original, manter os intervalos na string de origem é útil; para interpretar o DOM como um navegador, seria necessário usar um parser DOM.
+* **Seletores CSS compostos**: expressões encadeadas complexas (ex.: `div.card > ul li:first-child`) são categorizadas como `complexo` e não possuem resolução completa de árvore descendente;
+* **JavaScript dinâmico**: referências construídas em tempo de execução via concatenação de strings (ex.: `document.getElementById("btn-" + id)`) exigem interpretação dinâmica de runtime, fora do escopo de análise estática simples;
+* **SVG embutido com namespaces**: tags e atributos com namespaces específicos de XML/SVG (como `xlink:href`) são preservados textualmente, mas tratados com normalização em minúsculas nos atributos.
