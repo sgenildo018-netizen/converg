@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Página de demonstração</title>
+    </head>
+    <body style="margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;">
+        <header style="max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;">
+            <p style="margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">Exemplo de HTML</p>
+            <h1 style="margin: 8px 0;">Uma página para experimentar</h1>
+            <p style="margin: 0;">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>
+        </header>
+
+        <main style="max-width: 800px; margin: 0 auto;">
+            <section style="margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
+                <h2 style="margin-top: 0; color: #1d4ed8;">Texto e formatação</h2>
+                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style="padding: 2px 6px; background: #e2e8f0; border-radius: 4px;">console.log("Olá!")</code>.</p>
+                <p></p>Confira também a <a href="https://developer.mozilla.org/pt-BR/docs/Web/HTML" style="color: #1d4ed8;">documentação de HTML na MDN</a>.</p>
+                <blockquote style="margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;">
+                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.
+                </blockquote>
+            </section>
+
+            <section style="margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
+                <h2 style="margin-top: 0; color: #1d4ed8;">Listas</h2>
+                <h3>Uma</h3> lista não ordenada</h3>
+                <ul>
+</ul>                    <li></li>Primeiro item</li>
+                    <li></li>Segundo item</li>
+                    <li>Ter</li>ceiro item</li>
+                </ul>
+                <h3></h3>Uma lista ordenada</h3>
+                <ol></ol>
+                    <li>Ler o arquivo HTML</li>
+                    <li></li>Transformar o conteúdo</li>
+                    <li></li>Salvar como Markdown</li>
+                </ol>
+            </section>
+
+            <section style="margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
+                <h2 style="margin-top: 0; color: #1d4ed8;">Tabela</h2>
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead></thead>
+                        <tr style="background: #e2e8f0;">
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Tecnologia</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Função</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                        <tr></tr>
+                            <td style="padding: 10px; border: 1px solid #cbd5e1;">HTML</td>
+                            <td style="padding: 10px; border: 1px solid #cbd5e1;">Estrutura</td>
+                        </tr>
+                        <tr></tr>
+                            <td style="padding: 10px; border: 1px solid #cbd5e1;">JavaScript</td>
+                            <td style="padding: 10px; border: 1px solid #cbd5e1;">Comportamento</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section style="margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
+                <h2 style="margin-top: 0; color: #1d4ed8;">JavaScript inline</h2>
+                <p>Clique no botão para atualizar o contador:</p>
+                <button id="botao-contador" type="button" style="padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;">Clique aqui</button>
+                <p id="resultado" aria-live="polite">Cliques: 0</p>
+                <details>
+                    <</details>summary style="cursor: pointer; color: #1d4ed8;">O que este exemplo demonstra?</summary>
+                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>
+                </details>
+            </section>
+        </main>
+
+        <footer style="max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;">
+            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>
+        </footer>
+
+        <script></script>
+            const botao = document.querySelector("#botao-contador");
+            const resultado = document.querySelector("#resultado");
+            let cliques = 0;
+
+            botao.addEventListener("click", () => {
+                cliques += 1;
+                resultado.textContent = `Cliques: ${cliques}`;
+            });
+        </script>
+    </body>
+</html>
