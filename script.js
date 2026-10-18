@@ -199,13 +199,12 @@ function mapearElementos(tags, html) {
 // ---
 
 /**
- * Lê o `index.html`, mapeia os elementos da última `<section>` e compara os
- * IDs dela com seletores `querySelector` encontrados no conteúdo mapeado de `<script>`.
+ * Lê o `code.html`, mapeia os elementos e imprime o primeiro bloco `<header>`.
  * @async
  * @returns {Promise<Tag[]>} A lista de tags extraídas do HTML.
  */
 async function mapearTags() {
-  const caminhoHtml = path.join(__dirname, "index.html");
+  const caminhoHtml = path.join(__dirname, "code.html");
   const html = await readFile(caminhoHtml, "utf8");
 
   const tags = [...html.matchAll(/<\/?([a-zA-Z][\w-]*)\b[^>]*>/g)].map((m) => {
@@ -223,27 +222,15 @@ async function mapearTags() {
   });
 
   const elementos = mapearElementos(tags, html);
-  const sections = elementos.filter((elemento) => elemento.nome === "section");
-  const ultimaSection = sections[sections.length - 1];
-  const script = buscarElementoPorNome(elementos, "script");
+  const header = buscarElementoPorNome(elementos, "header");
 
-  if (!ultimaSection) {
-    console.log("Nenhum elemento <section> completo foi encontrado.");
+  if (!header) {
+    console.log("Nenhum elemento <header> completo foi encontrado.");
     return tags;
   }
 
-  const idsSection = extrairIds(ultimaSection.texto);
-  const idsConsultados = extrairIdsConsultados(script?.conteudo ?? "");
-  const idsEncontrados = idsConsultados.filter((id) => idsSection.includes(id));
-
-  console.log("Última <section>:", ultimaSection.texto);
-  console.log("IDs na última <section>:", idsSection);
-  console.log("IDs consultados dentro de <script>:", idsConsultados);
-  console.log("IDs do script encontrados na <section>:", idsEncontrados);
-  console.log(
-    "Conteúdo mapeado de <script>:",
-    script?.conteudo ?? "não encontrado",
-  );
+  console.log(`Primeiro <header> (intervalo ${header.inicio}-${header.fim}):`);
+  console.log(header.texto);
 
   return tags;
 }

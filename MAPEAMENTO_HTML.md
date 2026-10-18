@@ -10,7 +10,7 @@ Extrair trechos do HTML original — por exemplo, um `<header>` ou um `<script>`
 
 ### 1. Ler o arquivo
 
-`readFile(caminhoHtml, "utf8")`, de `node:fs/promises`, lê o arquivo e retorna seu conteúdo como uma string. A resolução do caminho usa `__dirname`, então `index.html` é procurado na mesma pasta de `script.js`.
+`readFile(caminhoHtml, "utf8")`, de `node:fs/promises`, lê o arquivo e retorna seu conteúdo como uma string. Na função principal `mapearTags()`, o caminho é montado com `__dirname`, então `code.html` é procurado na mesma pasta de `script.js`. As funções exploratórias `lerHtml()` e `percorrerHtml()` ainda apontam para `index.html`.
 
 ```js
 const html = await readFile(caminhoHtml, "utf8");
@@ -63,11 +63,11 @@ O elemento resultante contém:
 - `texto`: elemento completo, obtido de `html.slice(inicio, fim)`;
 - `conteudo`: conteúdo interno, obtido de `html.slice(inicioConteudo, fimConteudo)`.
 
-Isso permite manter o trecho original sem serializar ou reformatar o HTML.
+Isso permite manter o trecho original sem serializar ou reformatar o HTML: como `texto` vem diretamente de `html.slice()`, espaços, quebras de linha, indentação e a formatação das tags são preservados. O script não executa o Prettier nem reconstrói o HTML.
 
 ### 5. Selecionar um elemento
 
-`buscarElementoPorNome(elementos, nome)` seleciona o primeiro elemento completo mapeado com aquele nome. O teste atual filtra os elementos `<section>` e pega o último. `extrairIds()` lista os atributos `id` encontrados nesse bloco, enquanto `extrairIdsConsultados()` procura seletores `querySelector("#...")` dentro do conteúdo mapeado de `<script>`. A comparação mostra quais IDs da seção são consultados pelo script.
+`buscarElementoPorNome(elementos, nome)` seleciona o primeiro elemento completo mapeado com aquele nome. O teste atual lê `code.html` e usa essa função para imprimir o primeiro bloco `<header>` encontrado. O arquivo possui mais de um `<header>`; por isso, a busca retorna o primeiro na ordem do documento.
 
 ## Como executar
 
@@ -77,19 +77,25 @@ Na pasta do projeto, rode:
 node script.js
 ```
 
-O resultado depende da estrutura literal que está atualmente em `index.html`. Na execução atual, a última `<section>` contém os IDs `botao-contador` e `resultado`; o conteúdo mapeado de `<script>` consulta esses mesmos IDs. A comparação retorna ambos como correspondências. Em uma etapa anterior, o teste da primeira abertura de `<section>` retornou o índice `864`.
+O resultado depende da estrutura literal de `code.html`. Na execução atual, o primeiro `<header>` ocupa o intervalo `[27332, 31324)` e corresponde à barra fixa da interface. O arquivo contém também um segundo `<header>`, referente ao cabeçalho do artigo. A busca atual retorna apenas o primeiro. Os offsets mudam quando o arquivo é formatado porque passam a contar os espaços e as quebras de linha inseridos.
 
-## O teste com `<script>` e IDs
+## Formatação preservada e próximos passos
 
-Durante o experimento, a tag estava escrita como `<script></script>`, deixando o JavaScript fora do elemento. O mapeador retornava um conteúdo de script vazio e nenhum seletor. Depois que a estrutura foi corrigida para manter o código entre `<script>` e `</script>`, a comparação encontrou os dois IDs da última seção:
+O `code.html` está formatado com quebras de linha e indentação. A saída do mapeador manteve essa apresentação porque extraiu o trecho original por intervalo, sem convertê-lo para uma árvore DOM e serializá-lo novamente. Isso revela uma vantagem para o objetivo do experimento: além da estrutura e do conteúdo, é possível preservar a forma textual exata do bloco.
 
-```text
-IDs na última <section>: [ 'botao-contador', 'resultado' ]
-IDs consultados dentro de <script>: [ 'botao-contador', 'resultado' ]
-IDs do script encontrados na <section>: [ 'botao-contador', 'resultado' ]
-```
+O teste anterior de IDs demonstrou uma primeira associação estática entre elementos HTML e seletores JavaScript. Ainda há espaço para evoluir o mapeador, em etapas independentes:
 
-Esse teste mostra por que é importante mapear o conteúdo entre as tags de abertura e fechamento, não apenas procurar nomes de tags.
+- validar tags abertas, fechamentos e erros estruturais antes de mapear elementos;
+- interpretar atributos como `id`, `class` e atributos inline `on...`;
+- associar seletores JavaScript, como `querySelector`, aos elementos correspondentes;
+- identificar chamadas a `addEventListener` e relacioná-las ao elemento selecionado;
+- manter os recortes da fonte original para não perder formatação durante essas análises.
+
+A identificação de eventos seria uma análise estática do código e não executaria o JavaScript. Referências dinâmicas ou construídas em tempo de execução podem não ser resolvidas apenas pela inspeção do texto.
+
+## Experimento anterior: `<script>` e IDs
+
+Em um teste anterior com `index.html`, a tag `<script>` estava fechando imediatamente. Depois da correção, o mapeador associou os IDs `botao-contador` e `resultado` encontrados na última seção aos seletores `querySelector` dentro do script. Isso demonstrou por que é importante mapear o conteúdo entre as tags de abertura e fechamento, não apenas procurar nomes de tags.
 
 ## Limitações deste experimento
 
