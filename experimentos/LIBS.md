@@ -130,3 +130,7 @@ parse5 + acorn + css-select somam cerca de 1,5 MB e resolvem quase tudo; o gross
 ## Se um dia fosse usar
 
 Trocar no `script.js` o tokenizer por **parse5** e as regex de script por **acorn** (com **css-select** para os seletores), mantendo o recorte pelo texto cru. Isso tira os `todo` F-24 a F-29, mas o projeto deixa de ser "sem dependências". Pela regra do projeto, antes viria a bateria: testes novos para a linha do handler escrita fora da chamada, as dependências do handler e o `querySelector` que liga só ao primeiro, além de ajustar F-15 e F-32.
+
+## Próximo experimento nesta pasta
+
+Usar o **Astro** como validador do contrato do `--foco`: reconstruir o bloco num `.astro` a partir do contrato e comparar com o original no Playwright. Detalhes e cuidados em "Próximos experimentos" no [README](../README.md). Planejado, ainda não feito.

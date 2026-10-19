@@ -181,6 +181,24 @@ Os testes que chamam `mapearTags` (F-40, F-46 e F-47) gravam numa pasta temporá
 | T-25 | `mapearTags` com `foco` | rótulos do bloco e do escopo, `.txt` próprio (`code.foco-header.txt`) e a saída padrão `code.txt` intacta |
 | T-26 | `analisarFoco` (contrato) em `code.html` | `#copy-link-btn`: a classe `text-primary` aplicada pelo JS é resolvida pelo token `primary` do `tailwind.config`; APIs `navigator.clipboard`, `window.location`, `setTimeout` |
 
+## Histórico da bateria
+
+Como a suíte cresceu, passo a passo. Cada linha é um commit; a regra "bateria primeiro" vale desde o commit da bateria de fixtures.
+
+| Data | Commit | O que entrou | Testes | Estado |
+|---|---|---|---|---|
+| 2026-10-19 | `3cbc2dc` | testes unitários do tokenizer, validação, elementos e eventos | T-01 a T-17 | 17 |
+| 2026-10-19 | `b511b0a` | CSS por elemento: `tailwind.config`, regras de `<style>`, style inline | T-18 a T-23 | 23 |
+| 2026-10-19 | `72f0c00` | bateria de fixtures e este documento; limitações conhecidas viram `todo` | F-01 a F-29 | 52 (7 `todo`) |
+| 2026-10-19 | `111c53f` | a saída diz qual elemento é a amostra e qual é o escopo da análise | T-24 | 53 |
+| 2026-10-19 | `366bd93` | modo foco (`--foco <seletor>`) | F-30 a F-34, T-25 | 59 |
+| 2026-10-19 | `cb25020` | experimento com libs prontas em `experimentos/` (sem teste novo); levantou as observações do F-15 e do F-32 abaixo | nenhum | 59 |
+| 2026-10-19 | `1c1312c` | aviso para CSS e JS em arquivos externos (`[LER ARQUIVO DE ESTILO x] [FONTE: ...]`) | F-35 a F-40 | 65 |
+| 2026-10-19 | `2e04615` | contrato do componente no modo foco; testes de saída gravam numa pasta temporária | F-41 a F-46, T-26 | 72 |
+| 2026-10-19 | `7a19709` | contrato também em `.md` | F-47 | 73 (66 passam, 7 `todo`) |
+
+**Próximo passo planejado:** **Astro como validador do contrato** (planejado, ainda não feito): gerar a partir do contrato de um `--foco` um `Componente.astro` (markup exato, CSS do contrato e handlers em `<script is:inline>`), montar com o Astro e comparar com o original num navegador sem tela (Playwright): estilos calculados de cada elemento e o efeito de cada evento contra o "altera" do contrato. Se a reconstrução se comporta igual, o contrato estava completo; cada diferença aponta o que faltou. Ficaria em `experimentos/`, sem afetar o `script.js`. Os testes viriam antes, como sempre: uma fixture pequena e o contrato dela reconstruído e comparado.
+
 ## Observações da bateria
 
 Coisas que a bateria mostrou e que não são erro de teste, mas valem anotar:

@@ -148,6 +148,11 @@ Saídas na pasta `output/`:
 - `experimentos/`: comparação do script com libs prontas (parse5, html-validate, postcss, css-select, acorn, DOMPurify), com `package.json` próprio. O `script.js` continua sem dependências. Resultado em [experimentos/LIBS.md](experimentos/LIBS.md).
 - `MAPEAMENTO_HTML.md`: **como** o script funciona por dentro (arquitetura e formato do JSON). Este README cobre o **porquê**.
 
+## Próximos experimentos
+
+- **Astro como validador do contrato** (planejado, ainda não feito): gerar a partir do contrato de um `--foco` um `Componente.astro` (markup exato, CSS do contrato e handlers em `<script is:inline>`), montar com o Astro e comparar com o original num navegador sem tela (Playwright): estilos calculados de cada elemento e o efeito de cada evento contra o "altera" do contrato. Se a reconstrução se comporta igual, o contrato estava completo; cada diferença aponta o que faltou. Ficaria em `experimentos/`, sem afetar o `script.js`. Cuidados já vistos: compilar o `.md` só prova que o Markdown é válido; no MDX o HTML vira JSX, então `style="..."` em texto e `onclick="..."` quebram (por isso o bloco iria num `.astro`, que aceita HTML como está); o VitePress compila o Markdown como template Vue e interpretaria chaves duplas e diretivas no HTML.
+- **Contrato em `.mdx`**: o `.md` já põe tags do texto corrido entre crases, o que o MDX também exige; chaves soltas no texto ainda precisariam de tratamento.
+
 ## Limitações conhecidas
 
 - **CSS do Tailwind só vem do `tailwind.config`.** Classes com token do config (`bg-surface-container-lowest` → `background-color: #0a0e14`) e valores arbitrários (`w-[42%]`) são resolvidas com a linha do token. Classes da escala padrão do Tailwind (`flex`, `p-4`, `font-semibold`) aparecem como "sem token no config": o experimento não reproduz o Tailwind inteiro.
@@ -155,5 +160,6 @@ Saídas na pasta `output/`:
 - **Regras de `<style>`:** combinadores (` `, `>`, `+`, `~`), atributos e pseudo-classes estruturais (`:first-child`, `:nth-child`, `:not`, `:is`) são avaliados. Estados dinâmicos (`:hover`, `:focus`) casam e ficam anotados como estado. CSS de `<link rel="stylesheet">` e `@import` não é lido: o script só avisa em qual arquivo procurar.
 - **Seletores simples apenas.** `#id`, `.classe` e `tag` são resolvidos. Seletores compostos e IDs montados em runtime (`"btn-" + id`) não.
 - **Casos de HTML que o tokenizer ainda erra** (cada um tem um teste `todo` em [TESTES.md](TESTES.md), F-23 a F-29): aspas soltas em valor sem aspas (`title=it's`), `<textarea>`/`<title>` com tags dentro, tags de fechamento opcionais (`<li>`, `<p>`) acusadas como erro, listeners dentro de comentários JS contados como ativos.
-- **Código de handler:** `elemento.onclick = function () {…}` com várias linhas é cortado na primeira, e entidades em `onclick` (`&quot;`) não são decodificadas.
+- **Código de handler:** `elemento.onclick = function () {…}` com várias linhas é cortado na primeira (o contrato herda o corte), e entidades em `onclick` (`&quot;`) não são decodificadas.
+- **Leitura dos handlers no contrato:** o que o handler altera, consulta e as APIs que usa vêm de padrões de texto (`classList.add`, `textContent =`, `getElementById("x")`, variáveis DOM declaradas com `const x = document...`). Alvos que o script não sabe resolver viram pendência (`alvo-nao-resolvido`), em vez de sumir.
 - **JSON grande:** cada elemento guarda o texto de todos os descendentes (`code.json` fica ~14× maior que o HTML).
