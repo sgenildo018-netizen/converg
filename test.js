@@ -469,3 +469,19 @@ test("T-23 extrairDeclaracoes deve respeitar ponto e vírgula dentro de parênte
     { propriedade: "background", valor: "url(a;b)", importante: true },
   ]);
 });
+
+test("T-24 mapearTags deve deixar claro o elemento da amostra e o escopo da análise", async () => {
+  const { mapearTags } = require("./script.js");
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await mapearTags("code.html");
+  } finally {
+    console.log = originalLog;
+  }
+
+  const saida = fs.readFileSync(path.join(__dirname, "output", "code.txt"), "utf8");
+  assert.match(saida, /^=== Amostra: primeiro <header> de code\.html \(L506-L572, offsets 27332-31324\) ===$/m);
+  assert.match(saida, /^=== Fim da amostra <header> ===$/m);
+  assert.match(saida, /^Escopo: arquivo inteiro code\.html \(L1-L1804\), não só a amostra acima$/m);
+});

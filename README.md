@@ -27,7 +27,12 @@ Na prática, o que mais ajuda é a **saída do console**, que resume em poucas l
 ## Exemplo de saída
 
 ```
+=== Amostra: primeiro <header> de code.html (L506-L572, offsets 27332-31324) ===
+<header ...>   (trecho exato do arquivo)
+=== Fim da amostra <header> ===
+
 --- Análise e Mapeamento Completo de Eventos ---
+Escopo: arquivo inteiro code.html (L1-L1804), não só a amostra acima
 Tags: 1016 | Elementos: 513
 Estrutura válida: Sim (0 erros)
 tailwind.config: L43 | colors 47 · borderRadius 4 · spacing 9 · fontFamily 10 · fontSize 10
@@ -48,13 +53,15 @@ Elementos com eventos mapeados: 5
       ...
 ```
 
+A amostra do `<header>` é só um recorte para conferir que o texto sai idêntico ao original; tudo a partir de "Análise" vale para o arquivo inteiro.
+
 Cada linha de evento mostra: elemento → linha do elemento → evento → **linha do handler** → como foi registrado → tipo do handler → início do código. Embaixo vem o CSS do elemento: cada classe com as declarações que gera e a **linha do token** no `tailwind.config`, as regras de `<style>` que casam e o style inline.
 
 ## Como rodar
 
 ```bash
 node script.js         # analisa code.html (e index.html)
-node --test            # 52 testes (45 passam, 7 todo de limitações conhecidas)
+node --test            # 53 testes (46 passam, 7 todo de limitações conhecidas)
 ```
 
 Saídas na pasta `output/`:

@@ -1,4 +1,4 @@
-Primeiro <header> (intervalo 27332-31324):
+=== Amostra: primeiro <header> de code.html (L506-L572, offsets 27332-31324) ===
 <header
                 class="fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 z-40 px-space-md flex items-center justify-between gap-space-md"
             >
@@ -66,8 +66,10 @@ Primeiro <header> (intervalo 27332-31324):
                     </div>
                 </div>
             </header>
+=== Fim da amostra <header> ===
 
 --- Análise e Mapeamento Completo de Eventos ---
+Escopo: arquivo inteiro code.html (L1-L1804), não só a amostra acima
 Tags: 1016 | Elementos: 513
 Estrutura válida: Sim (0 erros)
 tailwind.config: L43 | colors 47 · borderRadius 4 · spacing 9 · fontFamily 10 · fontSize 10

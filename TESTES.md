@@ -22,7 +22,7 @@ node --test fixtures.test.js   # só a bateria de fixtures (F-xx)
 
 Motor: `node:test` + `node:assert/strict`, nativos do Node (sem dependências).
 
-Estado atual: **52 testes, 45 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
+Estado atual: **53 testes, 46 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
 
 Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece com ⚠ no relatório, mas não quebra a suíte. Quando a limitação for resolvida, ele passa a passar e o `todo` deve ser removido.
 
@@ -134,6 +134,7 @@ Os testes calculam as linhas esperadas procurando o trecho no próprio arquivo (
 | T-21 | `casarSeletor` / `calcularEspecificidade` | combinadores, `:first-child`, `:not`, `:nth-child`, atributos, estados, pseudo-elemento, especificidade com `:where` |
 | T-22 | `mapearCss` | classes, regras de `<style>` e style inline ligados aos elementos de `code.html` e `index.html` |
 | T-23 | `extrairDeclaracoes` | `;` dentro de parênteses |
+| T-24 | `mapearTags` (saída do console / `code.txt`) | a amostra diz qual elemento foi recortado (`<header>`, linhas e offsets) e a análise diz que o escopo é o arquivo inteiro |
 
 ## Observações da bateria
 

@@ -2448,16 +2448,29 @@ async function mapearTags(arquivo = "code.html") {
   const { html, tags, elementos, validacao, css, relatorio, resultado } =
     await processarHtml(caminhoHtml, { salvarJson: true });
 
+  const nomeArquivo = path.basename(caminhoHtml);
   const header = buscarElementoPorNome(elementos, "header");
 
+  // A amostra é só um recorte para conferência; a análise abaixo cobre o arquivo inteiro
   if (!header) {
-    log("Nenhum elemento <header> completo foi encontrado.");
+    log(`Nenhum elemento <header> completo foi encontrado em ${nomeArquivo}.`);
   } else {
-    log(`Primeiro <header> (intervalo ${header.inicio}-${header.fim}):`);
+    const linhaFimHeader = calcularLinhaColuna(html, header.fim).linha;
+    log(
+      `=== Amostra: primeiro <header> de ${nomeArquivo} (L${header.linha}-L${linhaFimHeader}, offsets ${header.inicio}-${header.fim}) ===`,
+    );
     log(header.texto);
+    log("=== Fim da amostra <header> ===");
   }
 
+  const totalLinhas = html.endsWith("\n")
+    ? html.split("\n").length - 1
+    : html.split("\n").length;
+
   log("\n--- Análise e Mapeamento Completo de Eventos ---");
+  log(
+    `Escopo: arquivo inteiro ${nomeArquivo} (L1-L${totalLinhas})${header ? ", não só a amostra acima" : ""}`,
+  );
   log(`Tags: ${tags.length} | Elementos: ${elementos.length}`);
   log(
     `Estrutura válida: ${validacao.valido ? "Sim (0 erros)" : `Não (${validacao.totalErros} erros)`}`,

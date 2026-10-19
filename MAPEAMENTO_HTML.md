@@ -306,13 +306,13 @@ Oito HTMLs pequenos, cada um isolando um caso: erros estruturais, CSS puro, só 
 ```bash
 node script.js
 ```
-Imprime o primeiro bloco `<header>` de `code.html`, o resumo com código de cada manipulador mapeado e gera os arquivos na pasta `output/` (`code.json`, `index.json`, `resultado.json`).
+Imprime uma amostra do primeiro `<header>` de `code.html` (marcada com linhas e offsets, para não ser confundida com o escopo da análise), a linha de escopo (arquivo inteiro), o resumo com código de cada manipulador mapeado e gera os arquivos na pasta `output/` (`code.json`, `index.json`, `resultado.json`).
 
 ### 2. Executar a suíte de testes automatizados
 ```bash
 node --test
 ```
-Roda os 52 testes: os unitários de `test.js` (T-01 a T-23) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-29), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
+Roda os 53 testes: os unitários de `test.js` (T-01 a T-24) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-29), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
 
 ---
 
