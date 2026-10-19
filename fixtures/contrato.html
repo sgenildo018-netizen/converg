@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: contrato do componente</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body { font-family: Georgia, serif; color: #222; margin: 0; }
+            main { line-height: 1.5; padding: 8px; }
+            .cartao { border: 1px solid #ccc; }
+            .botao { background: navy; }
+            .ativo { color: green; }
+            .titulo { font-size: 20px; }
+        </style>
+    </head>
+    <body>
+        <main id="app" style="letter-spacing: 1px; display: block">
+            <section id="cartao" class="cartao p-4">
+                <h2 class="titulo">Contador</h2>
+                <button id="incrementar" class="botao">+1</button>
+                <button id="zerar">Zerar</button>
+                <span id="valor">0</span>
+                <a href="#" id="ajuda">Ajuda</a>
+            </section>
+            <p id="status">pronto</p>
+        </main>
+        <script>
+            function zerar() {
+                valor.textContent = "0";
+                document.getElementById("cartao").classList.toggle("vazio");
+            }
+
+            const botao = document.getElementById("incrementar");
+            const valor = document.getElementById("valor");
+            botao.addEventListener("click", () => {
+                // botao.classList.add("comentada");
+                valor.textContent = Number(valor.textContent) + 1;
+                botao.classList.add("ativo");
+                document.getElementById("status").textContent = "clicado";
+                localStorage.setItem("contador", valor.textContent);
+                setTimeout(() => botao.classList.remove("ativo"), 500);
+            });
+
+            document.getElementById("zerar").addEventListener("click", zerar);
+        </script>
+    </body>
+</html>

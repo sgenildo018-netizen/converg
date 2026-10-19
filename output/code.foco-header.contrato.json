@@ -1,0 +1,809 @@
+{
+  "alvo": {
+    "rotulo": "<header>",
+    "seletor": "header",
+    "linhaInicio": 506,
+    "linhaFim": 572,
+    "inicio": 27332,
+    "fim": 31324,
+    "totalElementos": 22,
+    "texto": "<header\n                class=\"fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 z-40 px-space-md flex items-center justify-between gap-space-md\"\n            >\n                <div class=\"flex items-center gap-space-sm flex-1 max-w-xl\">\n                    <button\n                        class=\"w-full flex items-center justify-between px-space-sm py-1.5 bg-surface-container-low hover:bg-surface-container rounded-lg border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all\"\n                        type=\"button\"\n                    >\n                        <div class=\"flex items-center gap-2\">\n                            <span\n                                class=\"material-symbols-outlined text-[16px] text-outline\"\n                                >search</span\n                            ><span class=\"font-body-sm text-body-sm\"\n                                >Buscar notas, tags ou snippets...</span\n                            >\n                        </div>\n                        <kbd\n                            class=\"px-1.5 py-0.5 text-label-kbd font-label-kbd bg-surface-container-high border border-outline-variant/40 rounded text-outline shadow-sm\"\n                            >⌘K</kbd\n                        >\n                    </button>\n                </div>\n                <div class=\"flex items-center gap-space-sm\">\n                    <button\n                        class=\"flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors\"\n                        type=\"button\"\n                    >\n                        <span class=\"material-symbols-outlined text-[16px]\"\n                            >download</span\n                        ><span class=\"hidden xl:inline\"\n                            >Exportar Markdown</span\n                        ></button\n                    ><button\n                        class=\"flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors\"\n                        type=\"button\"\n                    >\n                        <span class=\"material-symbols-outlined text-[16px]\"\n                            >center_focus_strong</span\n                        ><span class=\"hidden xl:inline\">Modo Foco</span></button\n                    ><button\n                        class=\"p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors relative\"\n                        title=\"Notificações\"\n                        type=\"button\"\n                    >\n                        <span class=\"material-symbols-outlined text-[18px]\"\n                            >notifications</span\n                        ><span\n                            class=\"absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-primary\"\n                        ></span></button\n                    ><button\n                        class=\"flex items-center gap-1.5 bg-primary-container text-on-primary-container px-space-sm py-1 rounded-lg font-medium text-body-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-95 transition-all\"\n                        type=\"button\"\n                    >\n                        <span class=\"material-symbols-outlined text-[16px]\"\n                            >add</span\n                        ><span>Novo Artigo</span>\n                    </button>\n                    <div\n                        class=\"w-8 h-8 rounded-full bg-primary flex items-center justify-center\"\n                    >\n                        <span\n                            class=\"material-symbols-outlined text-on-primary text-[18px]\"\n                            >person</span\n                        >\n                    </div>\n                </div>\n            </header>"
+  },
+  "usa": {
+    "classes": [
+      {
+        "classe": "fixed",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "top-0",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "left-64",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "right-0",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "h-14",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "bg-surface-container-lowest/80",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "background-color",
+            "valor": "rgba(10, 14, 20, 0.8)"
+          }
+        ],
+        "linhaToken": 78
+      },
+      {
+        "classe": "backdrop-blur-xl",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "border-b",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "border-outline-variant/20",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "border-color",
+            "valor": "rgba(66, 71, 84, 0.2)"
+          }
+        ],
+        "linhaToken": 85
+      },
+      {
+        "classe": "z-40",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "px-space-md",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "padding-left",
+            "valor": "0.75rem"
+          },
+          {
+            "propriedade": "padding-right",
+            "valor": "0.75rem"
+          }
+        ],
+        "linhaToken": 107
+      },
+      {
+        "classe": "flex",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "items-center",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "justify-between",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "gap-space-md",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "gap",
+            "valor": "0.75rem"
+          }
+        ],
+        "linhaToken": 107
+      },
+      {
+        "classe": "gap-space-sm",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "gap",
+            "valor": "0.5rem"
+          }
+        ],
+        "linhaToken": 104
+      },
+      {
+        "classe": "flex-1",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "max-w-xl",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "w-full",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "px-space-sm",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "padding-left",
+            "valor": "0.5rem"
+          },
+          {
+            "propriedade": "padding-right",
+            "valor": "0.5rem"
+          }
+        ],
+        "linhaToken": 104
+      },
+      {
+        "classe": "py-1.5",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "bg-surface-container-low",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "background-color",
+            "valor": "#181c22"
+          }
+        ],
+        "linhaToken": 71
+      },
+      {
+        "classe": "hover:bg-surface-container",
+        "origem": "tailwind.config",
+        "variantes": [
+          "hover"
+        ],
+        "declaracoes": [
+          {
+            "propriedade": "background-color",
+            "valor": "#1c2026"
+          }
+        ],
+        "linhaToken": 65
+      },
+      {
+        "classe": "rounded-lg",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "border-radius",
+            "valor": "0.25rem"
+          }
+        ],
+        "linhaToken": 98
+      },
+      {
+        "classe": "border",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "border-outline-variant/30",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "border-color",
+            "valor": "rgba(66, 71, 84, 0.3)"
+          }
+        ],
+        "linhaToken": 85
+      },
+      {
+        "classe": "text-on-surface-variant",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "color",
+            "valor": "#c2c6d6"
+          }
+        ],
+        "linhaToken": 57
+      },
+      {
+        "classe": "hover:text-on-surface",
+        "origem": "tailwind.config",
+        "variantes": [
+          "hover"
+        ],
+        "declaracoes": [
+          {
+            "propriedade": "color",
+            "valor": "#dfe2eb"
+          }
+        ],
+        "linhaToken": 76
+      },
+      {
+        "classe": "transition-all",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "gap-2",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "material-symbols-outlined",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "text-[16px]",
+        "origem": "arbitrario",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "font-size",
+            "valor": "16px"
+          }
+        ],
+        "linhaToken": null
+      },
+      {
+        "classe": "text-outline",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "color",
+            "valor": "#8c909f"
+          }
+        ],
+        "linhaToken": 91
+      },
+      {
+        "classe": "font-body-sm",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "font-family",
+            "valor": "Geist"
+          }
+        ],
+        "linhaToken": 114
+      },
+      {
+        "classe": "text-body-sm",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "font-size",
+            "valor": "12px"
+          },
+          {
+            "propriedade": "line-height",
+            "valor": "18px"
+          },
+          {
+            "propriedade": "letter-spacing",
+            "valor": "0em"
+          },
+          {
+            "propriedade": "font-weight",
+            "valor": "400"
+          }
+        ],
+        "linhaToken": 126
+      },
+      {
+        "classe": "px-1.5",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "py-0.5",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "text-label-kbd",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "font-size",
+            "valor": "11px"
+          },
+          {
+            "propriedade": "line-height",
+            "valor": "14px"
+          },
+          {
+            "propriedade": "letter-spacing",
+            "valor": "0.02em"
+          },
+          {
+            "propriedade": "font-weight",
+            "valor": "500"
+          }
+        ],
+        "linhaToken": 150
+      },
+      {
+        "classe": "font-label-kbd",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "font-family",
+            "valor": "\"JetBrains Mono\""
+          }
+        ],
+        "linhaToken": 117
+      },
+      {
+        "classe": "bg-surface-container-high",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "background-color",
+            "valor": "#262a31"
+          }
+        ],
+        "linhaToken": 88
+      },
+      {
+        "classe": "border-outline-variant/40",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "border-color",
+            "valor": "rgba(66, 71, 84, 0.4)"
+          }
+        ],
+        "linhaToken": 85
+      },
+      {
+        "classe": "rounded",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "border-radius",
+            "valor": "0.125rem"
+          }
+        ],
+        "linhaToken": 97
+      },
+      {
+        "classe": "shadow-sm",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "gap-1",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "px-space-xs",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "padding-left",
+            "valor": "0.25rem"
+          },
+          {
+            "propriedade": "padding-right",
+            "valor": "0.25rem"
+          }
+        ],
+        "linhaToken": 105
+      },
+      {
+        "classe": "py-1",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "transition-colors",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "hidden",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "xl:inline",
+        "origem": "padrao",
+        "variantes": [
+          "xl"
+        ],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "p-1",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "relative",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "text-[18px]",
+        "origem": "arbitrario",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "font-size",
+            "valor": "18px"
+          }
+        ],
+        "linhaToken": null
+      },
+      {
+        "classe": "absolute",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "top-1",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "right-1",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "w-1.5",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "h-1.5",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "rounded-full",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "border-radius",
+            "valor": "0.75rem"
+          }
+        ],
+        "linhaToken": 100
+      },
+      {
+        "classe": "bg-primary",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "background-color",
+            "valor": "#adc6ff"
+          }
+        ],
+        "linhaToken": 81
+      },
+      {
+        "classe": "gap-1.5",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "bg-primary-container",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "background-color",
+            "valor": "#4d8eff"
+          }
+        ],
+        "linhaToken": 64
+      },
+      {
+        "classe": "text-on-primary-container",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "color",
+            "valor": "#00285d"
+          }
+        ],
+        "linhaToken": 89
+      },
+      {
+        "classe": "font-medium",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]",
+        "origem": "arbitrario",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "box-shadow",
+            "valor": "inset 0 1px 0 rgba(255,255,255,0.2)"
+          }
+        ],
+        "linhaToken": null
+      },
+      {
+        "classe": "hover:opacity-95",
+        "origem": "padrao",
+        "variantes": [
+          "hover"
+        ],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "w-8",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "h-8",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "justify-center",
+        "origem": "padrao",
+        "variantes": [],
+        "declaracoes": [],
+        "linhaToken": null
+      },
+      {
+        "classe": "text-on-primary",
+        "origem": "tailwind.config",
+        "variantes": [],
+        "declaracoes": [
+          {
+            "propriedade": "color",
+            "valor": "#002e6a"
+          }
+        ],
+        "linhaToken": 87
+      }
+    ],
+    "regras": [],
+    "inline": [],
+    "classesDoJs": [],
+    "herdado": [
+      {
+        "propriedade": "font-family",
+        "valor": "Geist",
+        "de": "body",
+        "linha": 212,
+        "fonte": "classe font-body-md (tailwind.config L120)"
+      },
+      {
+        "propriedade": "color",
+        "valor": "#dfe2eb",
+        "de": "body",
+        "linha": 212,
+        "fonte": "classe text-on-surface (tailwind.config L76)"
+      }
+    ],
+    "externos": {
+      "estilos": [
+        {
+          "href": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200",
+          "tipo": "icones",
+          "origem": "link",
+          "local": "head",
+          "remoto": true,
+          "linha": 8,
+          "classes": [
+            "material-symbols-outlined"
+          ]
+        },
+        {
+          "href": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap",
+          "tipo": "icones",
+          "origem": "link",
+          "local": "head",
+          "remoto": true,
+          "linha": 12,
+          "classes": [
+            "material-symbols-outlined"
+          ]
+        }
+      ],
+      "scripts": []
+    }
+  },
+  "comportamentos": [],
+  "pendencias": [
+    {
+      "tipo": "classe-sem-css",
+      "classes": [
+        "fixed",
+        "top-0",
+        "left-64",
+        "right-0",
+        "h-14",
+        "backdrop-blur-xl",
+        "border-b",
+        "z-40",
+        "flex",
+        "items-center",
+        "justify-between",
+        "flex-1",
+        "max-w-xl",
+        "w-full",
+        "py-1.5",
+        "border",
+        "transition-all",
+        "gap-2",
+        "px-1.5",
+        "py-0.5",
+        "shadow-sm",
+        "gap-1",
+        "py-1",
+        "transition-colors",
+        "hidden",
+        "xl:inline",
+        "p-1",
+        "relative",
+        "absolute",
+        "top-1",
+        "right-1",
+        "w-1.5",
+        "h-1.5",
+        "gap-1.5",
+        "font-medium",
+        "hover:opacity-95",
+        "w-8",
+        "h-8",
+        "justify-center"
+      ],
+      "texto": "classes fixed, top-0, left-64, right-0, h-14, backdrop-blur-xl, border-b, z-40, flex, items-center, justify-between, flex-1, max-w-xl, w-full, py-1.5, border, transition-all, gap-2, px-1.5, py-0.5, shadow-sm, gap-1, py-1, transition-colors, hidden, xl:inline, p-1, relative, absolute, top-1, right-1, w-1.5, h-1.5, gap-1.5, font-medium, hover:opacity-95, w-8, h-8, justify-center: escala padrão do Tailwind; o script não resolve o CSS (tailwind.config L43)"
+    },
+    {
+      "tipo": "classe-em-arquivo-externo",
+      "classes": [
+        "material-symbols-outlined"
+      ],
+      "texto": "classe material-symbols-outlined: [LER ARQUIVO DE ESTILO fonts.googleapis.com (Material Symbols Outlined)] [FONTE: <link> no <head> L8; <link> no <head> L12]"
+    },
+    {
+      "tipo": "interativo-sem-evento",
+      "texto": "<button> (L510) é interativo e não tem evento mapeado"
+    },
+    {
+      "tipo": "interativo-sem-evento",
+      "texto": "<button> (L529) é interativo e não tem evento mapeado"
+    },
+    {
+      "tipo": "interativo-sem-evento",
+      "texto": "<button> (L538) é interativo e não tem evento mapeado"
+    },
+    {
+      "tipo": "interativo-sem-evento",
+      "texto": "<button> (L545) é interativo e não tem evento mapeado"
+    },
+    {
+      "tipo": "interativo-sem-evento",
+      "texto": "<button> (L555) é interativo e não tem evento mapeado"
+    }
+  ]
+}

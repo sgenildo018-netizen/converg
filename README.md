@@ -73,6 +73,34 @@ A amostra do `<header>` é só um recorte para conferir que o texto sai idêntic
 
 Para analisar **só um bloco**, use `--foco <seletor>`. A saída começa com `=== Foco: <header> ... ===` e a linha `Escopo: só <header> e descendentes (L506-L572): 22 de 513 elementos`. Tags, validação, eventos, CSS e a lista de **interativos sem evento** passam a contar só dentro do bloco. Os `<script>` e `<style>` continuam sendo lidos do arquivo inteiro, então um handler escrito fora do bloco ainda aparece com a linha certa.
 
+No foco, a saída termina com o **contrato do componente** (também gravado em `output/<arquivo>.foco-<seletor>.contrato.json`). Exemplo de `node script.js code.html --foco "#copy-link-btn"`, resumido:
+
+```
+=== Contrato do componente: <button id="copy-link-btn"> ===
+Alvo: <button id="copy-link-btn"> L742-L752 (offsets 42207-42914), 2 elementos; o texto exato está no topo desta saída
+Usa:
+  Classes do bloco: 8 (5 com CSS do tailwind.config ou arbitrário)
+    - hover:bg-surface-container-high -> background-color: #262a31 [hover] (token L88)
+  Classes aplicadas pelo JS: 1
+    - text-primary (add, remove em #copy-link-btn, handler <button id="copy-link-btn"> L1788) -> color: #adc6ff (colors "primary", L81)
+  CSS herdado dos ancestrais: 1
+    - font-family: Geist (de <body> L212, classe font-body-md (tailwind.config L120))
+Comportamentos: 1
+  - <button id="copy-link-btn"> (L742) [click] handler L1788-L1798 (addEventListenerVariavel, arrow_function)
+      altera: classe text-primary (add) em #copy-link-btn; classe text-primary (remove) em #copy-link-btn
+      consulta: #copy-link-btn (dentro do bloco)
+      APIs: navigator.clipboard, window.location, setTimeout
+      código:
+        L1788 |                         copyLinkBtn.addEventListener("click", () => {
+        ...
+Pendências: 2
+  - classes p-1.5, transition-colors: escala padrão do Tailwind; o script não resolve o CSS (tailwind.config L43)
+  - classe material-symbols-outlined: [LER ARQUIVO DE ESTILO fonts.googleapis.com (Material Symbols Outlined)] [FONTE: <link> no <head> L8; <link> no <head> L12]
+=== Fim do contrato ===
+```
+
+O contrato junta o que já estava espalhado pela saída e acrescenta o que faltava para recriar o bloco: as **classes que o JS aplica** (com o CSS delas), o **CSS herdado** dos ancestrais, o **código inteiro** de cada handler com as linhas originais, o que cada handler **altera**, os elementos que ele **consulta dentro e fora do bloco** e as **APIs** do navegador que usa. O que o script não resolve vai para **Pendências**, em vez de ficar para alguém adivinhar.
+
 **CSS e JS em arquivos externos.** Páginas como as do Claude Design ligam o CSS e o JS pelo `<head>` (`<link rel="stylesheet">`, `@import`, `<script src>`). O script não lê esses arquivos, mas lista cada um com a linha e avisa onde procurar:
 
 ```
@@ -95,7 +123,7 @@ Cada linha de evento mostra: elemento → linha do elemento → evento → **lin
 node script.js                         # analisa code.html inteiro (e index.html)
 node script.js --foco header           # analisa só o primeiro <header> e seus descendentes
 node script.js code.html --foco "#copy-link-btn"   # qualquer seletor: tag, #id, .classe, "main .card"
-node --test            # 65 testes (58 passam, 7 todo de limitações conhecidas)
+node --test            # 72 testes (65 passam, 7 todo de limitações conhecidas)
 ```
 
 Saídas na pasta `output/`:
@@ -103,15 +131,16 @@ Saídas na pasta `output/`:
 | Arquivo | Conteúdo |
 |---|---|
 | `code.txt` | cópia exata do que o console imprime (o mais útil para leitura) |
-| `code.foco-<seletor>.txt` | a mesma saída no modo foco (ex.: `code.foco-header.txt`); não sobrescreve o `code.txt` |
+| `code.foco-<seletor>.txt` | a mesma saída no modo foco (ex.: `code.foco-header.txt`), terminando com o contrato do componente; não sobrescreve o `code.txt` |
+| `code.foco-<seletor>.contrato.json` | o contrato do componente em JSON, para outra ferramenta ou um LLM ler |
 | `code.json` / `index.json` | análise completa: tags, elementos, validação, eventos com código integral |
 | `resultado.json` | espelho de `code.json` |
 
 ## Arquivos
 
 - `script.js`: o mapeador (tokenizer, validação estrutural, elementos, análise de scripts, vínculo de eventos).
-- `test.js`: testes unitários com `node:test` (T-01 a T-25).
-- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-34): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco e as limitações conhecidas.
+- `test.js`: testes unitários com `node:test` (T-01 a T-26).
+- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-46): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco, arquivos externos, contrato do componente e as limitações conhecidas.
 - `TESTES.md`: **cada teste** descrito, com o que verifica e o esperado. Antes de implementar algo novo, a bateria de testes vem primeiro (o fluxo está lá).
 - `code.html`: página real (~112 KB, Tailwind), caso de uso principal.
 - `index.html`: página pequena com erros estruturais propositais, para testar a validação.

@@ -505,3 +505,14 @@ test("T-25 mapearTags com foco deve rotular o bloco, o escopo e gravar um .txt p
   const padrao = fs.readFileSync(path.join(__dirname, "output", "code.txt"), "utf8");
   assert.match(padrao, /^Escopo: arquivo inteiro code\.html/m);
 });
+
+test("T-26 contrato em code.html: classe aplicada pelo JS resolvida pelo tailwind.config e APIs do handler", async () => {
+  const { processarHtml, analisarFoco } = require("./script.js");
+  const resultado = await processarHtml("code.html", { salvarJson: false });
+  const { contrato } = analisarFoco(resultado, "#copy-link-btn");
+  const [classe] = contrato.usa.classesDoJs;
+  assert.equal(classe.classe, "text-primary");
+  assert.deepEqual(classe.acoes, ["add", "remove"]);
+  assert.equal(classe.tailwind.token, "primary");
+  assert.deepEqual(contrato.comportamentos[0].apis, ["navigator.clipboard", "window.location", "setTimeout"]);
+});

@@ -17,6 +17,8 @@ const {
 } = require("./script.js");
 
 const PASTA = path.join(__dirname, "fixtures");
+// Testes que rodam mapearTags gravam numa pasta temporária, para não sobrescrever output/
+const SAIDA = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "converg-"));
 
 /** Linha (base 1) da primeira ocorrência de `trecho` no arquivo. */
 function linhaDe(html, trecho, desde = 0) {
@@ -538,11 +540,11 @@ test("F-40 externos: a saída do console mostra os avisos no formato [LER ...] [
   const originalLog = console.log;
   console.log = () => {};
   try {
-    await mapearTags(path.join(PASTA, "arquivos-externos.html"));
+    await mapearTags(path.join(PASTA, "arquivos-externos.html"), { pastaOutput: SAIDA });
   } finally {
     console.log = originalLog;
   }
-  const saida = fs.readFileSync(path.join(__dirname, "output", "arquivos-externos.txt"), "utf8");
+  const saida = fs.readFileSync(path.join(SAIDA, "arquivos-externos.txt"), "utf8");
   const html = fs.readFileSync(path.join(PASTA, "arquivos-externos.html"), "utf8");
   const l = (t) => linhaDe(html, t);
 
@@ -557,4 +559,104 @@ test("F-40 externos: a saída do console mostra os avisos no formato [LER ...] [
       `Interativos sem evento no arquivo: 2 [LER SCRIPT EXTERNO js/app.js, js/rodape.js] [FONTE: <script src> no <head> L${l("js/app.js")}; <script src> no <body> L${l("js/rodape.js")}]`,
     ),
   );
+});
+
+// --- contrato.html (contrato do componente no modo foco)
+
+async function contratoDe(seletor = "#cartao") {
+  const resultado = await carregar("contrato.html");
+  return { resultado, contrato: analisarFoco(resultado, seletor).contrato };
+}
+
+test("F-41 contrato: alvo com bloco, linhas e CSS das classes do bloco", async () => {
+  const { resultado, contrato } = await contratoDe();
+  const { html } = resultado;
+  assert.equal(contrato.alvo.rotulo, '<section id="cartao">');
+  assert.equal(contrato.alvo.linhaInicio, linhaDe(html, '<section id="cartao"'));
+  assert.equal(contrato.alvo.linhaFim, linhaDe(html, "</section>"));
+  assert.equal(contrato.alvo.totalElementos, 6);
+  assert.deepEqual(contrato.usa.regras.map((r) => r.seletor), [".cartao", ".botao", ".titulo"]);
+});
+
+test("F-42 contrato: classes aplicadas pelo JS com o CSS delas; comentário não conta", async () => {
+  const { resultado, contrato } = await contratoDe();
+  const resumo = contrato.usa.classesDoJs.map((c) => [c.classe, c.acoes, c.alvo, c.css.map((r) => r.seletor)]);
+  assert.deepEqual(resumo, [
+    ["ativo", ["add", "remove"], "#incrementar", [".ativo"]],
+    ["vazio", ["toggle"], "#cartao", []],
+  ]);
+  assert.equal(contrato.usa.classesDoJs[0].css[0].linha, linhaDe(resultado.html, ".ativo {"));
+});
+
+test("F-43 contrato: CSS herdado dos ancestrais, o mais próximo primeiro, só propriedades que herdam", async () => {
+  const { resultado, contrato } = await contratoDe();
+  const { html } = resultado;
+  assert.deepEqual(
+    contrato.usa.herdado.map((h) => [h.propriedade, h.valor, h.de, h.fonte]),
+    [
+      ["letter-spacing", "1px", "main", "style inline"],
+      ["line-height", "1.5", "main", `<style> main (L${linhaDe(html, "main { line-height")})`],
+      ["font-family", "Georgia, serif", "body", `<style> body (L${linhaDe(html, "body { font-family")})`],
+      ["color", "#222", "body", `<style> body (L${linhaDe(html, "body { font-family")})`],
+    ],
+  );
+});
+
+test("F-44 contrato: comportamentos com o que o handler altera, consulta e APIs", async () => {
+  const { resultado, contrato } = await contratoDe();
+  const { html } = resultado;
+  const [incrementar, zerar] = contrato.comportamentos;
+
+  assert.equal(incrementar.elemento, '<button id="incrementar">');
+  assert.equal(incrementar.evento, "click");
+  assert.equal(incrementar.linhaInicio, linhaDe(html, 'botao.addEventListener("click"'));
+  assert.equal(incrementar.linhaFim, linhaDe(html, "});", html.indexOf("setTimeout")));
+  assert.match(incrementar.codigo, /localStorage\.setItem/);
+  assert.deepEqual(incrementar.altera, [
+    "textContent em #valor",
+    "classe ativo (add) em #incrementar",
+    "textContent em #status",
+    "classe ativo (remove) em #incrementar",
+  ]);
+  assert.deepEqual(incrementar.consultaDentro, ["#incrementar", "#valor"]);
+  assert.deepEqual(incrementar.consultaFora, ["#status"]);
+  assert.deepEqual(incrementar.apis, ["localStorage", "setTimeout"]);
+
+  // Handler por referência: o corpo da função vem de onde ela foi escrita
+  assert.equal(zerar.tipo, "referencia");
+  assert.equal(zerar.linhaInicio, linhaDe(html, "function zerar()"));
+  assert.deepEqual(zerar.altera, ["textContent em #valor", "classe vazio (toggle) em #cartao"]);
+  assert.deepEqual(zerar.consultaFora, []);
+});
+
+test("F-45 contrato: pendências explícitas do que o script não resolve", async () => {
+  const { resultado, contrato } = await contratoDe();
+  const { html } = resultado;
+  assert.deepEqual(
+    contrato.pendencias.map((p) => p.tipo),
+    ["classe-sem-css", "classe-do-js-sem-css", "dependencia-fora-do-bloco", "interativo-sem-evento"],
+  );
+  assert.match(contrato.pendencias[0].texto, /^classe p-4: escala padrão do Tailwind/);
+  assert.match(contrato.pendencias[1].texto, /^classe vazio: aplicada pelo JS/);
+  assert.match(contrato.pendencias[2].texto, new RegExp(`^#status \\(<p> L${linhaDe(html, 'id="status"')}\\) fica fora do bloco`));
+  assert.match(contrato.pendencias[3].texto, /^<a id="ajuda">/);
+});
+
+test("F-46 contrato: a saída do foco termina com o contrato e o código inteiro do handler", async () => {
+  const { mapearTags } = require("./script.js");
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await mapearTags(path.join(PASTA, "contrato.html"), { foco: "#cartao", pastaOutput: SAIDA });
+  } finally {
+    console.log = originalLog;
+  }
+  const saida = fs.readFileSync(path.join(SAIDA, "contrato.foco-cartao.txt"), "utf8");
+  assert.match(saida, /^=== Contrato do componente: <section id="cartao"> ===$/m);
+  assert.match(saida, /^Pendências: 4$/m);
+  assert.match(saida, /^ {8}L\d+ \| [ ]{16}localStorage\.setItem\("contador", valor\.textContent\);$/m);
+  // O contrato também sai em JSON próprio
+  const json = JSON.parse(fs.readFileSync(path.join(SAIDA, "contrato.foco-cartao.contrato.json"), "utf8"));
+  assert.equal(json.pendencias.length, 4);
+  assert.match(saida, /^=== Fim do contrato ===$/m);
 });

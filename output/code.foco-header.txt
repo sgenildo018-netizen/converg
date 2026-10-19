@@ -134,4 +134,54 @@ Elementos interativos sem evento no foco: 5
         shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] -> box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) (valor arbitrário)
         sem token no config: flex items-center gap-1.5 py-1 font-medium hover:opacity-95 transition-all
 
+=== Contrato do componente: <header> ===
+Alvo: <header> L506-L572 (offsets 27332-31324), 22 elementos; o texto exato está no topo desta saída
+Usa:
+  Classes do bloco: 69 (29 com CSS do tailwind.config ou arbitrário)
+    - bg-surface-container-lowest/80 -> background-color: rgba(10, 14, 20, 0.8) (token L78)
+    - border-outline-variant/20 -> border-color: rgba(66, 71, 84, 0.2) (token L85)
+    - px-space-md -> padding-left: 0.75rem; padding-right: 0.75rem (token L107)
+    - gap-space-md -> gap: 0.75rem (token L107)
+    - gap-space-sm -> gap: 0.5rem (token L104)
+    - px-space-sm -> padding-left: 0.5rem; padding-right: 0.5rem (token L104)
+    - bg-surface-container-low -> background-color: #181c22 (token L71)
+    - hover:bg-surface-container -> background-color: #1c2026 [hover] (token L65)
+    - rounded-lg -> border-radius: 0.25rem (token L98)
+    - border-outline-variant/30 -> border-color: rgba(66, 71, 84, 0.3) (token L85)
+    - text-on-surface-variant -> color: #c2c6d6 (token L57)
+    - hover:text-on-surface -> color: #dfe2eb [hover] (token L76)
+    - text-[16px] -> font-size: 16px
+    - text-outline -> color: #8c909f (token L91)
+    - font-body-sm -> font-family: Geist (token L114)
+    - text-body-sm -> font-size: 12px; line-height: 18px; letter-spacing: 0em; font-weight: 400 (token L126)
+    - text-label-kbd -> font-size: 11px; line-height: 14px; letter-spacing: 0.02em; font-weight: 500 (token L150)
+    - font-label-kbd -> font-family: "JetBrains Mono" (token L117)
+    - bg-surface-container-high -> background-color: #262a31 (token L88)
+    - border-outline-variant/40 -> border-color: rgba(66, 71, 84, 0.4) (token L85)
+    - rounded -> border-radius: 0.125rem (token L97)
+    - px-space-xs -> padding-left: 0.25rem; padding-right: 0.25rem (token L105)
+    - text-[18px] -> font-size: 18px
+    - rounded-full -> border-radius: 0.75rem (token L100)
+    - bg-primary -> background-color: #adc6ff (token L81)
+    - bg-primary-container -> background-color: #4d8eff (token L64)
+    - text-on-primary-container -> color: #00285d (token L89)
+    - shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] -> box-shadow: inset 0 1px 0 rgba(255,255,255,0.2)
+    - text-on-primary -> color: #002e6a (token L87)
+  Regras de <style> do bloco: 0
+  Classes aplicadas pelo JS: 0
+  CSS herdado dos ancestrais: 2
+    - font-family: Geist (de <body> L212, classe font-body-md (tailwind.config L120))
+    - color: #dfe2eb (de <body> L212, classe text-on-surface (tailwind.config L76))
+  Arquivos externos que o bloco usa: fonts.googleapis.com (Material Symbols Outlined)
+Comportamentos: 0
+Pendências: 7
+  - classes fixed, top-0, left-64, right-0, h-14, backdrop-blur-xl, border-b, z-40, flex, items-center, justify-between, flex-1, max-w-xl, w-full, py-1.5, border, transition-all, gap-2, px-1.5, py-0.5, shadow-sm, gap-1, py-1, transition-colors, hidden, xl:inline, p-1, relative, absolute, top-1, right-1, w-1.5, h-1.5, gap-1.5, font-medium, hover:opacity-95, w-8, h-8, justify-center: escala padrão do Tailwind; o script não resolve o CSS (tailwind.config L43)
+  - classe material-symbols-outlined: [LER ARQUIVO DE ESTILO fonts.googleapis.com (Material Symbols Outlined)] [FONTE: <link> no <head> L8; <link> no <head> L12]
+  - <button> (L510) é interativo e não tem evento mapeado
+  - <button> (L529) é interativo e não tem evento mapeado
+  - <button> (L538) é interativo e não tem evento mapeado
+  - <button> (L545) é interativo e não tem evento mapeado
+  - <button> (L555) é interativo e não tem evento mapeado
+=== Fim do contrato ===
+
 [JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json). O JSON traz o arquivo inteiro; o foco vale só para esta saída.

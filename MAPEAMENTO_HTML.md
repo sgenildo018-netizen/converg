@@ -210,6 +210,17 @@ Restringe a análise a um elemento e seus descendentes, para quem quer extrair u
 * Scripts e `<style>` continuam vindo do arquivo inteiro: um `addEventListener` escrito fora do bloco ainda é ligado ao elemento de dentro, com a linha do handler.
 * Regras de CSS são contadas por quantos elementos **do foco** atingem; classes distintas são só as do bloco; elementos interativos sem evento do bloco são listados com o CSS de cada um.
 * Saída em `output/<arquivo>.foco-<seletor>.txt` (o `code.txt` padrão não é tocado). O JSON continua com o arquivo inteiro.
+* No fim, o **contrato do componente** (abaixo), também em `output/<arquivo>.foco-<seletor>.contrato.json`.
+
+### 7c. Contrato do Componente (`montarContrato` e `descreverContrato`)
+
+Responde, sem deixar decisão para quem lê adivinhar: qual bloco é o alvo, o que ele usa e quais comportamentos estão ligados a ele. Tudo com métodos de string sobre o texto original.
+
+* **`alvo`**: rótulo, seletor, linhas, offsets, total de elementos e o texto exato.
+* **`usa`**: classes do bloco (com variantes e linha do token), regras de `<style>` que atingem o bloco (sem as globais), style inline, **`classesDoJs`** (classes que os handlers do bloco adicionam, removem ou alternam, com o alvo, as regras de `<style>` que citam a classe e o token do `tailwind.config` quando há), **`herdado`** (propriedades que herdam, como `color`, `font-*`, `line-height` e `--variáveis`, vindas dos ancestrais: o mais próximo primeiro, ignorando o que o próprio alvo já declara) e os arquivos externos que o bloco usa.
+* **`comportamentos`**: um por evento de cada elemento do bloco. Linha de início e fim do handler (para handler por referência, a função onde foi escrita, com `acharFuncaoNomeada`), código inteiro, **`altera`** (`classList`, `textContent`, `innerHTML`, `value`, `className`, `style.x`, `setAttribute`...), **`consultaDentro`** / **`consultaFora`** (seletores e variáveis DOM usados no código, classificados pela posição do elemento) e **`apis`** (`navigator.*`, `window.*`, `localStorage`, `fetch`, `setTimeout`...). Comentários JS são trocados por espaços antes da leitura (`removerComentariosJs`), então código comentado não conta.
+* **`pendencias`**: `classe-sem-css` (escala padrão do Tailwind ou nenhum CSS), `classe-em-arquivo-externo`, `classe-do-js-sem-css`, `dependencia-fora-do-bloco`, `seletor-sem-elemento`, `alvo-nao-resolvido`, `handler-nao-encontrado` e `interativo-sem-evento`.
+* No console, o código de cada handler sai com as **linhas originais do arquivo, numeradas** (`L1788 | ...`), sem reformatar.
 
 ---
 
@@ -343,7 +354,7 @@ Imprime o bloco escolhido com linhas e offsets e a análise restrita a ele; grav
 ```bash
 node --test
 ```
-Roda os 65 testes: os unitários de `test.js` (T-01 a T-25) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-40), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco e arquivos externos. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
+Roda os 72 testes: os unitários de `test.js` (T-01 a T-26) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-46), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco, arquivos externos e o contrato do componente. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
 
 ---
 

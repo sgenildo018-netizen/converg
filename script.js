@@ -2175,6 +2175,17 @@ function extrairRecursosExternos(elementos, html) {
   return { estilos: estilos.sort((a, b) => a.posicao - b.posicao), scripts };
 }
 
+/** Classes que algum seletor de `<style>` cita (`.card`, `.hover\:x`): elas têm CSS no próprio arquivo. */
+function classesCitadasEmStyle(regras) {
+  const classes = new Set();
+  for (const regra of regras) {
+    for (const sel of regra.seletores || []) {
+      for (const m of sel.matchAll(/\.((?:\\.|[\w-])+)/g)) classes.add(m[1].replace(/\\(.)/g, "$1"));
+    }
+  }
+  return classes;
+}
+
 /** Scripts externos que podem ligar eventos aos elementos: locais e que não são o Tailwind CDN. */
 function scriptsCandidatos(externos) {
   return externos.scripts.filter((s) => s.tipo === "script" && !s.remoto);
@@ -2186,17 +2197,21 @@ function descreverFonteExterna(recurso) {
   return `${tag} no <${recurso.local}> L${recurso.linha}`;
 }
 
+/**
+ * Nome curto de um arquivo externo. URL do Google Fonts é longa: basta o nome da
+ * família (a URL inteira está na lista de externos).
+ */
+function nomeRecursoExterno(r) {
+  if (r.src !== undefined) return r.src;
+  if (!classesDoGoogleFonts(r.href)) return r.href;
+  const query = r.href.includes("?") ? r.href.slice(r.href.indexOf("?") + 1) : "";
+  const familias = new URLSearchParams(query.replace(/&amp;/g, "&")).getAll("family").map((f) => f.split(":")[0]);
+  return `fonts.googleapis.com (${familias.join(", ")})`;
+}
+
 /** `[LER ARQUIVO DE ESTILO a.css, b.css] [FONTE: <link> no <head> L6; ...]` */
 function formatarAvisoExterno(rotulo, recursos) {
-  // URL do Google Fonts é longa: no aviso basta o nome da família (a URL inteira está na lista de externos)
-  const nome = (r) => {
-    if (r.src !== undefined) return r.src;
-    if (!classesDoGoogleFonts(r.href)) return r.href;
-    const query = r.href.includes("?") ? r.href.slice(r.href.indexOf("?") + 1) : "";
-    const familias = new URLSearchParams(query.replace(/&amp;/g, "&")).getAll("family").map((f) => f.split(":")[0]);
-    return `fonts.googleapis.com (${familias.join(", ")})`;
-  };
-  const nomes = [...new Set(recursos.map(nome))].join(", ");
+  const nomes = [...new Set(recursos.map(nomeRecursoExterno))].join(", ");
   return `[${rotulo} ${nomes}] [FONTE: ${recursos.map(descreverFonteExterna).join("; ")}]`;
 }
 
@@ -2243,13 +2258,7 @@ function mapearCss(elementos, html, externos = extrairRecursosExternos(elementos
   const contagemPorRegra = new Array(regras.length).fill(0);
   const cacheClasses = new Map();
 
-  // Classes que algum seletor de <style> cita: elas têm CSS no próprio arquivo
-  const classesNoStyle = new Set();
-  for (const regra of regras) {
-    for (const sel of regra.seletores || []) {
-      for (const m of sel.matchAll(/\.((?:\\.|[\w-])+)/g)) classesNoStyle.add(m[1].replace(/\\(.)/g, "$1"));
-    }
-  }
+  const classesNoStyle = classesCitadasEmStyle(regras);
   const estilosCandidatos = externos.estilos.filter((e) => e.tipo === "estilo");
   const usaTailwind = tailwind.encontrado || externos.scripts.some((s) => s.tipo === "tailwind-cdn");
   const avisoDaClasse = (c) => {
@@ -2591,6 +2600,509 @@ async function percorrerHtml() {
 
 // --- Modo Foco (análise restrita a um elemento e seus descendentes)
 
+// --- Contrato do componente (modo foco)
+
+/** Propriedades CSS que os filhos herdam do pai (custom properties `--x` também herdam). */
+const PROPRIEDADES_HERDADAS = new Set([
+  "color",
+  "font",
+  "font-family",
+  "font-size",
+  "font-style",
+  "font-variant",
+  "font-weight",
+  "font-stretch",
+  "line-height",
+  "letter-spacing",
+  "word-spacing",
+  "text-align",
+  "text-indent",
+  "text-transform",
+  "text-shadow",
+  "white-space",
+  "word-break",
+  "overflow-wrap",
+  "direction",
+  "visibility",
+  "cursor",
+  "list-style",
+  "list-style-type",
+  "list-style-position",
+  "quotes",
+  "caret-color",
+  "-webkit-font-smoothing",
+]);
+
+/** APIs do navegador que um handler pode usar e que o componente vai precisar ter. */
+const REGEX_APIS =
+  /(?<![\w$.])(navigator\.[A-Za-z_$][\w$]*|window\.[A-Za-z_$][\w$]*|location\.[A-Za-z_$][\w$]*|history\.[A-Za-z_$][\w$]*|document\.cookie|localStorage|sessionStorage|fetch|setTimeout|setInterval|requestAnimationFrame|alert|confirm|prompt|XMLHttpRequest|WebSocket|IntersectionObserver|MutationObserver|ResizeObserver)\b/g;
+
+/**
+ * Troca comentários JS por espaços, mantendo offsets e quebras de linha.
+ * Strings e template strings são respeitadas (`"http://x"` não é comentário).
+ */
+function removerComentariosJs(codigo) {
+  let saida = "";
+  let aspas = null;
+  for (let i = 0; i < codigo.length; i++) {
+    const c = codigo[i];
+    if (aspas) {
+      saida += c;
+      if (c === "\\") saida += codigo[++i] ?? "";
+      else if (c === aspas) aspas = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      aspas = c;
+      saida += c;
+      continue;
+    }
+    if (c === "/" && codigo[i + 1] === "/") {
+      while (i < codigo.length && codigo[i] !== "\n") saida += codigo[i++] === "\r" ? "\r" : " ";
+      saida += codigo[i] ?? "";
+      continue;
+    }
+    if (c === "/" && codigo[i + 1] === "*") {
+      const fim = codigo.indexOf("*/", i + 2);
+      const ate = fim < 0 ? codigo.length : fim + 2;
+      saida += codigo.slice(i, ate).replace(/[^\r\n]/g, " ");
+      i = ate - 1;
+      continue;
+    }
+    saida += c;
+  }
+  return saida;
+}
+
+// Alvo de uma alteração: variável, document.getElementById("x"), document.querySelector("x"), this ou e.target
+const PADRAO_ALVO = String.raw`(?:document\s*\.\s*getElementById\(\s*["'\x60]([^"'\x60]+)["'\x60]\s*,?\s*\)|document\s*\.\s*querySelector\(\s*["'\x60]([^"'\x60]+)["'\x60]\s*,?\s*\)|(?<![\w$.])(?:e|ev|evt|event)\s*\.\s*(?:target|currentTarget)|(?<![\w$.])([A-Za-z_$][\w$]*))`;
+
+/**
+ * Lê o código de um handler com métodos de string e diz o que ele altera,
+ * quais elementos consulta e quais APIs do navegador usa.
+ * @param {string} codigo - Código do handler.
+ * @param {Map<string, string>} variaveis - Variáveis DOM conhecidas: nome → seletor.
+ * @param {string} proprio - Seletor do elemento que dispara o evento (para `this` e `e.target`).
+ */
+function lerCodigoHandler(codigo, variaveis, proprio) {
+  const limpo = removerComentariosJs(codigo);
+  const resolver = (m, base) => {
+    if (m[base]) return `#${m[base]}`;
+    if (m[base + 1]) return m[base + 1];
+    const nome = m[base + 2];
+    if (nome === undefined || nome === "this") return proprio;
+    return variaveis.get(nome) ?? null;
+  };
+  const nomeDoAlvo = (m, base) => resolver(m, base) ?? `${m[base + 2]} (não resolvido)`;
+
+  const alteracoes = [];
+  const classes = [];
+  const naoResolvidos = new Set();
+  const anotar = (m, base) => {
+    if (resolver(m, base) === null) naoResolvidos.add(m[base + 2]);
+  };
+
+  for (const m of limpo.matchAll(new RegExp(`${PADRAO_ALVO}\\s*\\.\\s*classList\\s*\\.\\s*(add|remove|toggle|replace)\\s*\\(([^)]*)\\)`, "g"))) {
+    const alvo = nomeDoAlvo(m, 1);
+    anotar(m, 1);
+    const nomes = [...m[5].matchAll(/["'`]([^"'`]+)["'`]/g)].map((x) => x[1]);
+    const acao = m[4];
+    nomes.forEach((classe, i) => {
+      const acaoReal = acao === "replace" ? (i === 0 ? "remove" : "add") : acao;
+      alteracoes.push({ pos: m.index, texto: `classe ${classe} (${acaoReal}) em ${alvo}` });
+      classes.push({ classe, acao: acaoReal, alvo, pos: m.index });
+    });
+  }
+  for (const m of limpo.matchAll(new RegExp(`${PADRAO_ALVO}\\s*\\.\\s*(textContent|innerHTML|innerText|outerHTML|value|checked|disabled|hidden|src|href|className)\\s*=(?!=)`, "g"))) {
+    anotar(m, 1);
+    alteracoes.push({ pos: m.index, texto: `${m[4]} em ${nomeDoAlvo(m, 1)}` });
+  }
+  for (const m of limpo.matchAll(new RegExp(`${PADRAO_ALVO}\\s*\\.\\s*style\\s*\\.\\s*([\\w$]+)\\s*=(?!=)`, "g"))) {
+    anotar(m, 1);
+    alteracoes.push({ pos: m.index, texto: `style.${m[4]} em ${nomeDoAlvo(m, 1)}` });
+  }
+  for (const m of limpo.matchAll(new RegExp(`${PADRAO_ALVO}\\s*\\.\\s*(setAttribute|removeAttribute|toggleAttribute)\\s*\\(\\s*["'\`]([^"'\`]+)`, "g"))) {
+    anotar(m, 1);
+    alteracoes.push({ pos: m.index, texto: `atributo ${m[5]} (${m[4]}) em ${nomeDoAlvo(m, 1)}` });
+  }
+
+  // Consultas: seletores literais e variáveis DOM usadas no código
+  const consultas = new Set();
+  for (const m of limpo.matchAll(/getElementById\(\s*["'`]([^"'`]+)["'`]/g)) consultas.add(`#${m[1]}`);
+  for (const m of limpo.matchAll(/querySelector(?:All)?\(\s*["'`]([^"'`]+)["'`]/g)) consultas.add(m[1]);
+  for (const [nome, seletor] of variaveis) {
+    if (new RegExp(`(?<![\\w$.])${escaparRegex(nome)}(?![\\w$])`).test(limpo)) consultas.add(seletor);
+  }
+  if (/(?<![\w$.])this\b|(?<![\w$.])(?:e|ev|evt|event)\s*\.\s*(?:target|currentTarget)/.test(limpo)) consultas.add(proprio);
+
+  const apis = [];
+  for (const m of limpo.matchAll(REGEX_APIS)) if (!apis.includes(m[1])) apis.push(m[1]);
+
+  return {
+    // Ramos de if/else repetem a mesma alteração: fica a primeira
+    altera: [...new Set(alteracoes.sort((a, b) => a.pos - b.pos).map((a) => a.texto))],
+    classes: classes.sort((a, b) => a.pos - b.pos),
+    consultas: [...consultas].filter(Boolean),
+    apis,
+    naoResolvidos: [...naoResolvidos],
+  };
+}
+
+/** Acha `function nome(...) {...}` ou `const nome = (...) => {...}` nos scripts. */
+function acharFuncaoNomeada(nome, scripts) {
+  const regex = new RegExp(
+    `(?:function\\s+${escaparRegex(nome)}\\s*\\(|(?:const|let|var)\\s+${escaparRegex(nome)}\\s*=\\s*(?:async\\s+)?(?:function\\b|\\([^)]*\\)\\s*=>|[\\w$]+\\s*=>))`,
+  );
+  for (const sc of scripts) {
+    const m = regex.exec(sc.conteudo);
+    if (!m) continue;
+    const chave = sc.conteudo.indexOf("{", m.index + m[0].length - 1);
+    const fim = chave < 0 ? -1 : encontrarFechamento(sc.conteudo, chave);
+    if (fim < 0) continue;
+    return { inicio: sc.inicioConteudo + m.index, fim: sc.inicioConteudo + fim + 1 };
+  }
+  return null;
+}
+
+/** `<button id="x">` ou `<span>` */
+function rotuloElemento(el) {
+  return `<${el.nome}${el.id ? ` id="${el.id}"` : ""}>`;
+}
+
+/**
+ * Monta o contrato do componente: qual bloco é o alvo, o que ele usa e quais
+ * comportamentos estão ligados a ele, com tudo o que o script não resolve em `pendencias`.
+ * @param {Object} resultado - Retorno de {@link processarHtml}.
+ * @param {Object} foco - O foco em montagem ({@link analisarFoco}).
+ * @param {Object} arvore - Árvore de {@link construirArvore}.
+ * @returns {Object} O contrato, só com dados serializáveis.
+ */
+function montarContrato(resultado, foco, arvore) {
+  const { html, elementos, css, analiseScripts, externos } = resultado;
+  const alvo = foco.elemento;
+  const dentro = (el) => el.inicio >= alvo.inicio && el.fim <= alvo.fim;
+  const linha = (pos) => calcularLinhaColuna(html, pos).linha;
+  const scripts = elementos.filter((el) => el.nome === "script" && !el.vazio);
+  const variaveis = new Map(analiseScripts.variaveisDeclaradas.map((v) => [v.variavel, v.seletor]));
+  const usaTailwind = css.tailwindConfig.encontrado || externos.scripts.some((s) => s.tipo === "tailwind-cdn");
+  const origemTailwind = css.tailwindConfig.encontrado
+    ? `tailwind.config L${css.tailwindConfig.linha}`
+    : `Tailwind CDN L${externos.scripts.find((s) => s.tipo === "tailwind-cdn")?.linha}`;
+  const classesNoStyle = classesCitadasEmStyle(css.regras);
+  const pendencias = [];
+
+  const elementosDoSeletor = (seletor) => {
+    if (/^#[\w-]+$/.test(seletor)) {
+      const el = buscarPorId(elementos, seletor.slice(1));
+      return el ? [el] : [];
+    }
+    try {
+      const partes = analisarSeletor(seletor);
+      return elementos.filter((el) => casarSeletor(partes, el, arvore));
+    } catch {
+      return [];
+    }
+  };
+
+  // Comportamentos: cada evento de cada elemento do bloco
+  const comportamentos = [];
+  for (const el of foco.elementos) {
+    const proprio = el.id ? `#${el.id}` : rotuloElemento(el);
+    for (const ev of el.eventos) {
+      let inicio = null;
+      let fim = null;
+      let codigo = ev.codigo;
+      let linhaChamada = null;
+      if (ev.origem === "inline") {
+        const pos = el.texto.indexOf(ev.codigo);
+        if (pos >= 0) {
+          inicio = el.inicio + pos;
+          fim = inicio + ev.codigo.length;
+        }
+      } else {
+        linhaChamada = ev.posicao?.scriptInicio !== undefined ? linha(ev.posicao.scriptInicio) : null;
+        if (ev.tipoManipulador === "referencia") {
+          const funcao = acharFuncaoNomeada(ev.nomeFuncao || ev.codigo, scripts);
+          if (funcao) {
+            inicio = funcao.inicio;
+            fim = funcao.fim;
+            codigo = html.slice(inicio, fim);
+          } else {
+            pendencias.push({
+              tipo: "handler-nao-encontrado",
+              texto: `handler ${ev.codigo} de ${rotuloElemento(el)} (L${linhaChamada}) não foi encontrado nos <script> do arquivo`,
+            });
+          }
+        } else {
+          const pos = html.indexOf(ev.codigo, ev.posicao?.scriptInicio ?? 0);
+          if (pos >= 0) {
+            inicio = ev.posicao.scriptInicio;
+            fim = pos + ev.codigo.length;
+          }
+        }
+      }
+
+      const leitura = lerCodigoHandler(codigo, variaveis, proprio);
+      const consultaDentro = [];
+      const consultaFora = [];
+      const semElemento = [];
+      for (const seletor of leitura.consultas) {
+        const achados = elementosDoSeletor(seletor);
+        if (!achados.length) semElemento.push(seletor);
+        else if (achados.some(dentro)) consultaDentro.push(seletor);
+        else consultaFora.push(seletor);
+      }
+
+      comportamentos.push({
+        elemento: rotuloElemento(el),
+        linhaElemento: el.linha,
+        evento: ev.evento,
+        origem: ev.origem,
+        tipo: ev.tipoManipulador,
+        linhaChamada,
+        linhaInicio: inicio !== null ? linha(inicio) : null,
+        linhaFim: fim !== null ? linha(fim) : null,
+        codigo,
+        altera: leitura.altera,
+        consultaDentro: consultaDentro.sort(),
+        consultaFora: consultaFora.sort(),
+        consultaSemElemento: semElemento.sort(),
+        apis: leitura.apis,
+        classes: leitura.classes,
+        naoResolvidos: leitura.naoResolvidos,
+      });
+    }
+  }
+
+  // CSS que o JS aplica: classes adicionadas ou removidas pelos handlers do bloco
+  const classesDoJs = [];
+  for (const c of comportamentos) {
+    for (const { classe, acao, alvo: alvoClasse } of c.classes) {
+      let item = classesDoJs.find((x) => x.classe === classe && x.alvo === alvoClasse);
+      if (!item) {
+        const resolvida = resolverClasseTailwind(classe, css.tailwindConfig);
+        item = {
+          classe,
+          alvo: alvoClasse,
+          acoes: [],
+          handlers: [],
+          css: css.regras
+            .filter((r) => r.tipo === "regra" && classesCitadasEmStyle([r]).has(classe))
+            .map((r) => ({ seletor: r.seletor, linha: r.linha, declaracoes: r.declaracoes })),
+          tailwind:
+            resolvida.origem === "padrao"
+              ? null
+              : { origem: resolvida.origem, secao: resolvida.secao, token: resolvida.token, linhaToken: resolvida.linhaToken, declaracoes: resolvida.declaracoes },
+        };
+        classesDoJs.push(item);
+      }
+      if (!item.acoes.includes(acao)) item.acoes.push(acao);
+      const h = `${c.elemento} L${c.linhaInicio}`;
+      if (!item.handlers.includes(h)) item.handlers.push(h);
+    }
+  }
+
+  // CSS herdado: propriedades que herdam, vindas dos ancestrais, o mais próximo primeiro
+  const declaradasNoAlvo = new Set([
+    ...alvo.css.inline.map((d) => d.propriedade),
+    ...alvo.css.regras.filter((r) => !r.global).flatMap((r) => r.declaracoes.map((d) => d.propriedade)),
+    ...alvo.css.classes.flatMap((c) => c.declaracoes.map((d) => d.propriedade)),
+  ]);
+  const herdado = [];
+  const vistas = new Set(declaradasNoAlvo);
+  const herda = (p) => PROPRIEDADES_HERDADAS.has(p) || p.startsWith("--");
+  for (let anc = arvore.pai(alvo); anc; anc = arvore.pai(anc)) {
+    const fontes = [
+      ...anc.css.inline.map((d) => ({ d, fonte: "style inline" })),
+      ...[...anc.css.regras]
+        .filter((r) => !r.global && !r.estados.length && !r.pseudoElemento)
+        .sort((a, b) => compararEspecificidade(b.especificidade, a.especificidade))
+        .flatMap((r) => r.declaracoes.map((d) => ({ d, fonte: `<style> ${r.seletor} (L${r.linha})` }))),
+      ...anc.css.classes
+        .filter((c) => !c.variantes.length && c.origem !== "padrao")
+        .flatMap((c) =>
+          c.declaracoes.map((d) => ({
+            d,
+            fonte: c.origem === "tailwind.config" ? `classe ${c.classe} (tailwind.config L${c.linhaToken})` : `classe ${c.classe}`,
+          })),
+        ),
+    ];
+    for (const { d, fonte } of fontes) {
+      if (!herda(d.propriedade) || vistas.has(d.propriedade)) continue;
+      vistas.add(d.propriedade);
+      herdado.push({ propriedade: d.propriedade, valor: d.valor, de: anc.nome, linha: anc.linha, fonte });
+    }
+  }
+
+  // Pendências: o que o script não resolve, dito de forma explícita
+  const semCss = foco.classes.filter(
+    (c) => c.origem === "padrao" && !classesNoStyle.has(c.classe) && !foco.elementos.some((el) => el.css.avisos.some((a) => a.classe === c.classe)),
+  );
+  if (semCss.length) {
+    const nomes = semCss.map((c) => c.classe).join(", ");
+    const rotulo = semCss.length === 1 ? "classe" : "classes";
+    pendencias.unshift({
+      tipo: "classe-sem-css",
+      classes: semCss.map((c) => c.classe),
+      texto: usaTailwind
+        ? `${rotulo} ${nomes}: escala padrão do Tailwind; o script não resolve o CSS (${origemTailwind})`
+        : `${rotulo} ${nomes}: nenhum CSS no arquivo`,
+    });
+  }
+  const avisosExternos = new Map();
+  for (const el of foco.elementos) for (const a of el.css.avisos) if (!avisosExternos.has(a.classe)) avisosExternos.set(a.classe, a);
+  for (const a of avisosExternos.values()) {
+    pendencias.push({ tipo: "classe-em-arquivo-externo", classes: [a.classe], texto: `classe ${a.classe}: ${formatarAvisoClasse(a)}` });
+  }
+  for (const c of classesDoJs.filter((x) => !x.css.length && !x.tailwind)) {
+    pendencias.push({
+      tipo: "classe-do-js-sem-css",
+      classes: [c.classe],
+      texto: `classe ${c.classe}: aplicada pelo JS (${c.acoes.join(", ")} em ${c.alvo}, handler ${c.handlers.join(", ")}) e sem CSS no arquivo${usaTailwind ? " (pode ser da escala padrão do Tailwind)" : ""}`,
+    });
+  }
+  const foraVistos = new Set();
+  for (const c of comportamentos) {
+    for (const seletor of c.consultaFora) {
+      if (foraVistos.has(seletor)) continue;
+      foraVistos.add(seletor);
+      const [el] = elementosDoSeletor(seletor);
+      pendencias.push({
+        tipo: "dependencia-fora-do-bloco",
+        seletor,
+        texto: `${seletor} (<${el.nome}> L${el.linha}) fica fora do bloco: o handler de ${c.elemento} (L${c.linhaInicio}) depende dele`,
+      });
+    }
+    for (const seletor of c.consultaSemElemento) {
+      pendencias.push({
+        tipo: "seletor-sem-elemento",
+        seletor,
+        texto: `${seletor}: o handler de ${c.elemento} (L${c.linhaInicio}) consulta, mas nenhum elemento do arquivo casa`,
+      });
+    }
+    for (const nome of c.naoResolvidos) {
+      pendencias.push({
+        tipo: "alvo-nao-resolvido",
+        texto: `${nome}: o handler de ${c.elemento} (L${c.linhaInicio}) altera essa variável, mas o script não sabe qual elemento ela guarda`,
+      });
+    }
+  }
+  const candidatos = scriptsCandidatos(externos);
+  for (const el of foco.interativosSemEventos) {
+    const aviso = candidatos.length ? ` ${formatarAvisoExterno("LER SCRIPT EXTERNO", candidatos)}` : "";
+    pendencias.push({
+      tipo: "interativo-sem-evento",
+      texto: `${rotuloElemento(el)} (L${el.linha}) é interativo e não tem evento mapeado${aviso}`,
+    });
+  }
+
+  return {
+    alvo: {
+      rotulo: rotuloElemento(alvo),
+      seletor: foco.seletor,
+      linhaInicio: foco.linhaInicio,
+      linhaFim: foco.linhaFim,
+      inicio: alvo.inicio,
+      fim: alvo.fim,
+      totalElementos: foco.elementos.length,
+      texto: alvo.texto,
+    },
+    usa: {
+      classes: foco.classes.map((c) => ({
+        classe: c.classe,
+        origem: c.origem,
+        variantes: c.variantes,
+        declaracoes: c.declaracoes,
+        linhaToken: c.linhaToken,
+      })),
+      regras: foco.regrasCss
+        .filter((r) => r.tipo === "regra" && !r.seletores.every((s) => ehSeletorGlobal(analisarSeletor(s))))
+        .map((r) => ({ seletor: r.seletor, linha: r.linha, contexto: r.contexto, declaracoes: r.declaracoes, totalNoFoco: r.totalNoFoco })),
+      inline: foco.elementos
+        .filter((el) => el.css.inline.length)
+        .map((el) => ({ elemento: rotuloElemento(el), linha: el.linha, declaracoes: el.css.inline })),
+      classesDoJs,
+      herdado,
+      externos: {
+        estilos: [...new Set([...avisosExternos.values()].flatMap((a) => a.arquivos))].map(({ posicao, ...e }) => e),
+        scripts: foco.interativosSemEventos.length ? candidatos.map(({ posicao, ...s }) => s) : [],
+      },
+    },
+    comportamentos: comportamentos.map(({ classes, naoResolvidos, ...c }) => c),
+    pendencias,
+  };
+}
+
+/**
+ * Linhas de console do contrato. O código de cada handler sai com as linhas
+ * originais do arquivo, numeradas, sem reformatar.
+ */
+function descreverContrato(contrato, html) {
+  const linhasHtml = html.split("\n").map((l) => l.replace(/\r$/, ""));
+  const { alvo, usa, comportamentos, pendencias } = contrato;
+  const saida = [];
+  const log = (t) => saida.push(t);
+
+  log(`=== Contrato do componente: ${alvo.rotulo} ===`);
+  const intervalo = alvo.linhaInicio === alvo.linhaFim ? `L${alvo.linhaInicio}` : `L${alvo.linhaInicio}-L${alvo.linhaFim}`;
+  const totalEls = `${alvo.totalElementos} elemento${alvo.totalElementos === 1 ? "" : "s"}`;
+  log(`Alvo: ${alvo.rotulo} ${intervalo} (offsets ${alvo.inicio}-${alvo.fim}), ${totalEls}; o texto exato está no topo desta saída`);
+
+  log("Usa:");
+  const resolvidas = usa.classes.filter((c) => c.origem !== "padrao");
+  log(`  Classes do bloco: ${usa.classes.length} (${resolvidas.length} com CSS do tailwind.config ou arbitrário)`);
+  for (const c of resolvidas) {
+    const estado = c.variantes.length ? ` [${c.variantes.join(":")}]` : "";
+    log(`    - ${c.classe} -> ${formatarDeclaracoes(c.declaracoes)}${estado}${c.linhaToken ? ` (token L${c.linhaToken})` : ""}`);
+  }
+  log(`  Regras de <style> do bloco: ${usa.regras.length}`);
+  for (const r of usa.regras) log(`    - ${r.seletor} (L${r.linha}${r.contexto.length ? `, ${r.contexto.join(", ")}` : ""}) -> ${formatarDeclaracoes(r.declaracoes)}`);
+  if (usa.inline.length) {
+    log(`  Style inline: ${usa.inline.length}`);
+    for (const i of usa.inline) log(`    - ${i.elemento} (L${i.linha}) -> ${formatarDeclaracoes(i.declaracoes)}`);
+  }
+  log(`  Classes aplicadas pelo JS: ${usa.classesDoJs.length}`);
+  for (const c of usa.classesDoJs) {
+    const fontes = [
+      ...c.css.map((r) => `<style> ${r.seletor} (L${r.linha}): ${formatarDeclaracoes(r.declaracoes)}`),
+      ...(c.tailwind ? [`${formatarDeclaracoes(c.tailwind.declaracoes)} (${c.tailwind.token ? `${c.tailwind.secao} "${c.tailwind.token}", L${c.tailwind.linhaToken}` : "valor arbitrário"})`] : []),
+    ];
+    log(`    - ${c.classe} (${c.acoes.join(", ")} em ${c.alvo}, handler ${c.handlers.join(", ")}) -> ${fontes.join(" | ") || "sem CSS no arquivo"}`);
+  }
+  log(`  CSS herdado dos ancestrais: ${usa.herdado.length}`);
+  for (const h of usa.herdado) log(`    - ${h.propriedade}: ${h.valor} (de <${h.de}> L${h.linha}, ${h.fonte})`);
+  if (usa.externos.estilos.length || usa.externos.scripts.length) {
+    const nomes = [...new Set([...usa.externos.estilos, ...usa.externos.scripts].map(nomeRecursoExterno))];
+    log(`  Arquivos externos que o bloco usa: ${nomes.join(", ")}`);
+  }
+
+  log(`Comportamentos: ${comportamentos.length}`);
+  for (const c of comportamentos) {
+    const linhas = c.linhaInicio ? `L${c.linhaInicio}-L${c.linhaFim}` : "?";
+    const chamada = c.linhaChamada && c.linhaChamada !== c.linhaInicio ? `, registrado na L${c.linhaChamada}` : "";
+    log(`  - ${c.elemento} (L${c.linhaElemento}) [${c.evento}] handler ${linhas} (${c.origem}, ${c.tipo}${chamada})`);
+    log(`      altera: ${c.altera.join("; ") || "nada no DOM"}`);
+    const consulta = [
+      ...(c.consultaDentro.length ? [`${c.consultaDentro.join(", ")} (dentro do bloco)`] : []),
+      ...(c.consultaFora.length ? [`${c.consultaFora.join(", ")} (fora do bloco)`] : []),
+      ...(c.consultaSemElemento.length ? [`${c.consultaSemElemento.join(", ")} (sem elemento no arquivo)`] : []),
+    ];
+    log(`      consulta: ${consulta.join("; ") || "nenhum elemento"}`);
+    log(`      APIs: ${c.apis.join(", ") || "nenhuma"}`);
+    if (c.linhaInicio) {
+      log("      código:");
+      for (let n = c.linhaInicio; n <= c.linhaFim; n++) log(`        L${n} | ${linhasHtml[n - 1]}`);
+    } else {
+      log(`      código: ${c.codigo}`);
+    }
+  }
+
+  log(`Pendências: ${pendencias.length}`);
+  for (const p of pendencias) log(`  - ${p.texto}`);
+  log("=== Fim do contrato ===");
+  return saida;
+}
+
 /**
  * Restringe um resultado de {@link processarHtml} a um elemento e seus descendentes.
  * Scripts e `<style>` continuam vindo do arquivo inteiro (um handler escrito fora do
@@ -2627,7 +3139,7 @@ function analisarFoco(resultado, seletor) {
     }
   }
 
-  return {
+  const foco = {
     seletor,
     elemento,
     totalCasados: casados.length,
@@ -2656,6 +3168,8 @@ function analisarFoco(resultado, seletor) {
       .map(([indice, total]) => ({ ...css.regras[indice], totalNoFoco: total })),
     classes: [...classes.values()],
   };
+  foco.contrato = montarContrato(resultado, foco, arvore);
+  return foco;
 }
 
 /** Nome de arquivo seguro a partir de um seletor: `main .card` → `main-card`. */
@@ -2671,11 +3185,12 @@ function slugSeletor(seletor) {
  * Com `foco`, imprime o bloco escolhido e restringe a análise a ele e aos seus
  * descendentes (ver {@link analisarFoco}); a saída vai para `output/<arquivo>.foco-<seletor>.txt`.
  * @param {string} [arquivo="code.html"] - Nome do arquivo HTML a ser processado.
- * @param {{ foco?: string }} [opcoes] - `foco`: seletor CSS do elemento a analisar.
+ * @param {{ foco?: string, pastaOutput?: string }} [opcoes] - `foco`: seletor CSS do elemento a analisar;
+ *   `pastaOutput`: onde gravar `.txt` e `.json` (padrão `output/`; os testes usam uma pasta temporária).
  * @async
  * @returns {Promise<Tag[]>} A lista de tags extraídas do HTML.
  */
-async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
+async function mapearTags(arquivo = "code.html", { foco = null, pastaOutput = "output" } = {}) {
   const caminhoHtml = path.isAbsolute(arquivo)
     ? arquivo
     : path.join(__dirname, arquivo);
@@ -2686,7 +3201,7 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
     linhas.push(texto);
   };
 
-  const processado = await processarHtml(caminhoHtml, { salvarJson: true });
+  const processado = await processarHtml(caminhoHtml, { salvarJson: true, pastaOutput });
   const { html, tags, elementos, validacao, css, relatorio, resultado } = processado;
 
   const nomeArquivo = path.basename(caminhoHtml);
@@ -2735,6 +3250,7 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
       comEventos: f.comEventos,
       rotuloEventos: "Elementos com eventos no foco",
       interativosSemEventos: f.interativosSemEventos,
+      contrato: f.contrato,
     };
   } else {
     const header = buscarElementoPorNome(elementos, "header");
@@ -2771,6 +3287,7 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
       comEventos: relatorio.comEventos,
       rotuloEventos: "Elementos com eventos mapeados",
       interativosSemEventos: null,
+      contrato: null,
     };
   }
 
@@ -2881,13 +3398,19 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
     }
   }
 
+  // No foco, a saída fecha com o contrato do componente (também gravado em JSON próprio)
+  if (escopo.contrato) {
+    log("");
+    for (const linha of descreverContrato(escopo.contrato, html)) log(linha);
+  }
+
   // Salva também output/resultado.json como espelho padrão
-  await salvarResultadoJson("resultado.json", resultado);
+  await salvarResultadoJson("resultado.json", resultado, pastaOutput);
 
   // Também processa e salva index.html na pasta output se existir
   const caminhoIndex = path.join(__dirname, "index.html");
   try {
-    await processarHtml(caminhoIndex, { salvarJson: true });
+    await processarHtml(caminhoIndex, { salvarJson: true, pastaOutput });
   } catch {
     // Silencioso se index.html não existir
   }
@@ -2898,9 +3421,15 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
 
   const nomeBase = path.basename(caminhoHtml, path.extname(caminhoHtml));
   const sufixo = foco ? `.foco-${slugSeletor(foco)}` : "";
-  const caminhoTxt = path.join(__dirname, "output", `${nomeBase}${sufixo}.txt`);
+  const pastaTxt = path.isAbsolute(pastaOutput) ? pastaOutput : path.join(__dirname, pastaOutput);
+  const caminhoTxt = path.join(pastaTxt, `${nomeBase}${sufixo}.txt`);
   await writeFile(caminhoTxt, linhas.join("\n") + "\n", "utf8");
   console.log(`[TXT Exportado] ${caminhoTxt}`);
+
+  if (escopo.contrato) {
+    const caminhoContrato = await salvarResultadoJson(`${nomeBase}${sufixo}.contrato.json`, escopo.contrato, pastaOutput);
+    console.log(`[Contrato Exportado] ${caminhoContrato}`);
+  }
 
   return tags;
 }
@@ -2977,5 +3506,9 @@ module.exports = {
   percorrerHtml,
   mapearTags,
   analisarFoco,
+  montarContrato,
+  descreverContrato,
+  removerComentariosJs,
+  extrairRecursosExternos,
   lerArgumentos,
 };

@@ -22,7 +22,7 @@ node --test fixtures.test.js   # só a bateria de fixtures (F-xx)
 
 Motor: `node:test` + `node:assert/strict`, nativos do Node (sem dependências).
 
-Estado atual: **65 testes, 58 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
+Estado atual: **72 testes, 65 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
 
 Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece com ⚠ no relatório, mas não quebra a suíte. Quando a limitação for resolvida, ele passa a passar e o `todo` deve ser removido.
 
@@ -40,6 +40,7 @@ Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece c
 | `limitacoes.html` | casos de limitação | não | não | não | sim | não |
 | `limitacao-aspa-solta.html` | caso de limitação | não | não | não | não | não |
 | `arquivos-externos.html` | não | classes sem CSS no arquivo | não | sim (com `@import`) | só externos (`<script src>`) e um `onclick` | sim |
+| `contrato.html` | não | CSS puro e uma classe Tailwind | só o CDN | sim (ancestrais e classes do JS) | sim (handler que altera classes, handler por referência) | sim (no `<main>`) |
 
 Os testes calculam as linhas esperadas procurando o trecho no próprio arquivo (`linhaDe(html, "trecho")`), então editar uma fixture não exige recontar linhas na mão.
 
@@ -120,6 +121,21 @@ Simula páginas como as do Claude Design, que ligam CSS e JS pelo `<head>` em ve
 | F-39 | Sem externos, sem aviso | `css-puro.html` não tem nenhum; o Tailwind CDN de `tailwind-puro.html` é `tailwind-cdn` e não é apontado como fonte de eventos |
 | F-40 | Saída do console | linha `Arquivos externos`, `classe container (<div> L19) [LER ARQUIVO DE ESTILO ...] [FONTE: ...]` e `Interativos sem evento no arquivo: 2 [LER SCRIPT EXTERNO ...] [FONTE: ...]` |
 
+### contrato.html (contrato do componente no modo foco)
+
+Foco em `#cartao`. O contrato diz qual bloco é o alvo, o que ele usa e quais comportamentos estão ligados a ele, e lista como pendência o que o script não resolve.
+
+| Código | O que verifica | Esperado |
+|---|---|---|
+| F-41 | Alvo e CSS do bloco | `<section id="cartao">`, linhas de início e fim, 6 elementos; regras `.cartao`, `.botao`, `.titulo` |
+| F-42 | Classes aplicadas pelo JS | `ativo` (add, remove em `#incrementar`) com a regra `.ativo` e a linha; `vazio` (toggle em `#cartao`) sem CSS; a classe dentro de comentário `//` não conta |
+| F-43 | CSS herdado | do mais próximo para o mais distante, só propriedades que herdam: `letter-spacing` (style inline do `<main>`), `line-height` (`<style> main`), `font-family` e `color` (`<style> body`); `display`, `padding` e `margin` ficam de fora |
+| F-44 | Comportamentos | handler de `#incrementar` com linhas de início e fim, código inteiro, o que altera (na ordem do código), `#incrementar` e `#valor` consultados dentro do bloco, `#status` fora, APIs `localStorage` e `setTimeout`; handler por referência `zerar` traz o corpo da função e a linha onde ela foi escrita |
+| F-45 | Pendências | `p-4` (escala padrão do Tailwind), `vazio` (aplicada pelo JS e sem CSS), `#status` fora do bloco, `<a id="ajuda">` sem evento |
+| F-46 | Saída do console e JSON | `=== Contrato do componente: <section id="cartao"> ===`, `Pendências: 4`, código do handler com as linhas originais numeradas e `contrato.foco-cartao.contrato.json` |
+
+Os testes que chamam `mapearTags` (F-40 e F-46) gravam numa pasta temporária, para não sobrescrever `output/`.
+
 ### Limitações conhecidas (`todo`)
 
 | Código | Fixture | Limitação | Comportamento hoje |
@@ -161,6 +177,7 @@ Simula páginas como as do Claude Design, que ligam CSS e JS pelo `<head>` em ve
 | T-23 | `extrairDeclaracoes` | `;` dentro de parênteses |
 | T-24 | `mapearTags` (saída do console / `code.txt`) | a amostra diz qual elemento foi recortado (`<header>`, linhas e offsets) e a análise diz que o escopo é o arquivo inteiro |
 | T-25 | `mapearTags` com `foco` | rótulos do bloco e do escopo, `.txt` próprio (`code.foco-header.txt`) e a saída padrão `code.txt` intacta |
+| T-26 | `analisarFoco` (contrato) em `code.html` | `#copy-link-btn`: a classe `text-primary` aplicada pelo JS é resolvida pelo token `primary` do `tailwind.config`; APIs `navigator.clipboard`, `window.location`, `setTimeout` |
 
 ## Observações da bateria
 
