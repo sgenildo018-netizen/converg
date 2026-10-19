@@ -150,6 +150,7 @@ Saídas na pasta `output/`:
 
 ## Próximos experimentos
 
+- **Primeira prova manual, já feita (2026-10-19):** o contrato do `--foco header` foi entregue a um agente LLM num projeto Astro, que reconstruiu o `<header>` com layout quase 100% fiel lendo só o contrato, não o arquivo inteiro. Faltaram os eventos, e o que faltou de fidelidade são os recursos externos que o contrato já listava como pendência. Detalhes em [TESTES.md](TESTES.md#histórico-da-bateria).
 - **Astro como validador do contrato** (planejado, ainda não feito): gerar a partir do contrato de um `--foco` um `Componente.astro` (markup exato, CSS do contrato e handlers em `<script is:inline>`), montar com o Astro e comparar com o original num navegador sem tela (Playwright): estilos calculados de cada elemento e o efeito de cada evento contra o "altera" do contrato. Se a reconstrução se comporta igual, o contrato estava completo; cada diferença aponta o que faltou. Ficaria em `experimentos/`, sem afetar o `script.js`. Cuidados já vistos: compilar o `.md` só prova que o Markdown é válido; no MDX o HTML vira JSX, então `style="..."` em texto e `onclick="..."` quebram (por isso o bloco iria num `.astro`, que aceita HTML como está); o VitePress compila o Markdown como template Vue e interpretaria chaves duplas e diretivas no HTML.
 - **Contrato em `.mdx`**: o `.md` já põe tags do texto corrido entre crases, o que o MDX também exige; chaves soltas no texto ainda precisariam de tratamento.
 
