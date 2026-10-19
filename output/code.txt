@@ -1,0 +1,80 @@
+Primeiro <header> (intervalo 27332-31324):
+<header
+                class="fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 z-40 px-space-md flex items-center justify-between gap-space-md"
+            >
+                <div class="flex items-center gap-space-sm flex-1 max-w-xl">
+                    <button
+                        class="w-full flex items-center justify-between px-space-sm py-1.5 bg-surface-container-low hover:bg-surface-container rounded-lg border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all"
+                        type="button"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="material-symbols-outlined text-[16px] text-outline"
+                                >search</span
+                            ><span class="font-body-sm text-body-sm"
+                                >Buscar notas, tags ou snippets...</span
+                            >
+                        </div>
+                        <kbd
+                            class="px-1.5 py-0.5 text-label-kbd font-label-kbd bg-surface-container-high border border-outline-variant/40 rounded text-outline shadow-sm"
+                            >⌘K</kbd
+                        >
+                    </button>
+                </div>
+                <div class="flex items-center gap-space-sm">
+                    <button
+                        class="flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >download</span
+                        ><span class="hidden xl:inline"
+                            >Exportar Markdown</span
+                        ></button
+                    ><button
+                        class="flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >center_focus_strong</span
+                        ><span class="hidden xl:inline">Modo Foco</span></button
+                    ><button
+                        class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors relative"
+                        title="Notificações"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[18px]"
+                            >notifications</span
+                        ><span
+                            class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-primary"
+                        ></span></button
+                    ><button
+                        class="flex items-center gap-1.5 bg-primary-container text-on-primary-container px-space-sm py-1 rounded-lg font-medium text-body-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-95 transition-all"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >add</span
+                        ><span>Novo Artigo</span>
+                    </button>
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
+                    >
+                        <span
+                            class="material-symbols-outlined text-on-primary text-[18px]"
+                            >person</span
+                        >
+                    </div>
+                </div>
+            </header>
+
+--- Análise e Mapeamento Completo de Eventos ---
+Tags: 1016 | Elementos: 513
+Estrutura válida: Sim (0 erros)
+Elementos com eventos mapeados: 5
+  - <button id="copy-link-btn"> (L742) -> [click] handler L1788 via addEventListenerVariavel (arrow_function): "() => { navigator.clipboard.writeText(window.locatio..."
+  - <button id="star-btn"> (L764) -> [click] handler L1768 via addEventListenerVariavel (arrow_function): "() => { isStarred = !isStarred; if (isStarred) { sta..."
+  - <button> (L902) -> [click] handler L902 via inline (inline): "navigator.clipboard.writeText( document.getElementBy..."
+  - <button> (L1053) -> [click] handler L1053 via inline (inline): "navigator.clipboard.writeText( document.getElementBy..."
+  - <button id="btn-run-test"> (L1153) -> [click] handler L1731 via addEventListenerVariavel (arrow_function): "() => { const val = inputEl.value.trim() || "/api/v1..."
+
+[JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json).

@@ -1284,6 +1284,7 @@ async function processarHtml(
   }
 
   return {
+    html,
     tags,
     elementos,
     validacao,
@@ -1341,32 +1342,42 @@ async function mapearTags(arquivo = "code.html") {
     ? arquivo
     : path.join(__dirname, arquivo);
 
-  const { tags, elementos, validacao, relatorio, resultado } =
+  const linhas = [];
+  const log = (texto = "") => {
+    console.log(texto);
+    linhas.push(texto);
+  };
+
+  const { html, tags, elementos, validacao, relatorio, resultado } =
     await processarHtml(caminhoHtml, { salvarJson: true });
 
   const header = buscarElementoPorNome(elementos, "header");
 
   if (!header) {
-    console.log("Nenhum elemento <header> completo foi encontrado.");
+    log("Nenhum elemento <header> completo foi encontrado.");
   } else {
-    console.log(`Primeiro <header> (intervalo ${header.inicio}-${header.fim}):`);
-    console.log(header.texto);
+    log(`Primeiro <header> (intervalo ${header.inicio}-${header.fim}):`);
+    log(header.texto);
   }
 
-  console.log("\n--- Análise e Mapeamento Completo de Eventos ---");
-  console.log(`Tags: ${tags.length} | Elementos: ${elementos.length}`);
-  console.log(
+  log("\n--- Análise e Mapeamento Completo de Eventos ---");
+  log(`Tags: ${tags.length} | Elementos: ${elementos.length}`);
+  log(
     `Estrutura válida: ${validacao.valido ? "Sim (0 erros)" : `Não (${validacao.totalErros} erros)`}`,
   );
-  console.log(`Elementos com eventos mapeados: ${relatorio.comEventos.length}`);
+  log(`Elementos com eventos mapeados: ${relatorio.comEventos.length}`);
 
   for (const item of relatorio.comEventos) {
     for (const ev of item.eventos) {
       const codigoLimpo = ev.codigo.replace(/\s+/g, " ");
       const resumoCodigo =
         codigoLimpo.length > 55 ? `${codigoLimpo.slice(0, 52)}...` : codigoLimpo;
-      console.log(
-        `  - <${item.tag}${item.id ? ` id="${item.id}"` : ""}> (L${item.linha}) -> [${ev.evento}] via ${ev.origem} (${ev.tipoManipulador}): "${resumoCodigo}"`,
+      const linhaHandler =
+        ev.posicao && ev.posicao.scriptInicio !== undefined
+          ? calcularLinhaColuna(html, ev.posicao.scriptInicio).linha
+          : item.linha;
+      log(
+        `  - <${item.tag}${item.id ? ` id="${item.id}"` : ""}> (L${item.linha}) -> [${ev.evento}] handler L${linhaHandler} via ${ev.origem} (${ev.tipoManipulador}): "${resumoCodigo}"`,
       );
     }
   }
@@ -1382,9 +1393,14 @@ async function mapearTags(arquivo = "code.html") {
     // Silencioso se index.html não existir
   }
 
-  console.log(
+  log(
     `\n[JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json).`,
   );
+
+  const nomeBase = path.basename(caminhoHtml, path.extname(caminhoHtml));
+  const caminhoTxt = path.join(__dirname, "output", `${nomeBase}.txt`);
+  await writeFile(caminhoTxt, linhas.join("\n") + "\n", "utf8");
+  console.log(`[TXT Exportado] ${caminhoTxt}`);
 
   return tags;
 }
