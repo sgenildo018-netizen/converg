@@ -44,7 +44,7 @@ Cada linha mostra: elemento → linha do elemento → evento → **linha do hand
 
 ```bash
 node script.js         # analisa code.html (e index.html)
-node --test test.js    # 17 testes
+node --test test.js    # 23 testes
 ```
 
 Saídas na pasta `output/`:
@@ -65,7 +65,9 @@ Saídas na pasta `output/`:
 
 ## Limitações conhecidas
 
-- **CSS ainda é parcial.** O mapa lista as classes de cada elemento, mas não resolve tokens do `tailwind.config` (ex.: `bg-surface-container-lowest` → `#0a0e14`) nem liga regras de `<style>` ao elemento.
+- **CSS do Tailwind só vem do `tailwind.config`.** Classes com token do config (`bg-surface-container-lowest` → `background-color: #0a0e14`) e valores arbitrários (`w-[42%]`) são resolvidas com a linha do token. Classes da escala padrão do Tailwind (`flex`, `p-4`, `font-semibold`) aparecem como "sem token no config": o experimento não reproduz o Tailwind inteiro.
+- **O `tailwind.config` é avaliado com `node:vm`** num contexto vazio. Não é um sandbox de segurança; use só com arquivos confiáveis.
+- **Regras de `<style>`:** combinadores (` `, `>`, `+`, `~`), atributos e pseudo-classes estruturais (`:first-child`, `:nth-child`, `:not`, `:is`) são avaliados. Estados dinâmicos (`:hover`, `:focus`) casam e ficam anotados como estado. CSS de `<link rel="stylesheet">` externo não é lido.
 - **Seletores simples apenas.** `#id`, `.classe` e `tag` são resolvidos. Seletores compostos e IDs montados em runtime (`"btn-" + id`) não.
 - **Casos de HTML que o tokenizer ainda erra:** aspas soltas em valor sem aspas (`title=it's`), `<textarea>`/`<title>` com tags dentro, tags de fechamento opcionais (`<li>`, `<p>`) acusadas como erro, listeners dentro de comentários JS contados como ativos.
 - **Código de handler:** `elemento.onclick = function () {…}` com várias linhas é cortado na primeira, e entidades em `onclick` (`&quot;`) não são decodificadas.

@@ -70,11 +70,57 @@ Primeiro <header> (intervalo 27332-31324):
 --- Análise e Mapeamento Completo de Eventos ---
 Tags: 1016 | Elementos: 513
 Estrutura válida: Sim (0 erros)
+tailwind.config: L43 | colors 47 · borderRadius 4 · spacing 9 · fontFamily 10 · fontSize 10
+Blocos <style>: 1 (L20) | regras: 5
+  - html, body (L22, @layer base) -> 2 elementos: margin: 0; padding: 0
+  - body (L27, @layer base) -> 1 elemento: overscroll-behavior: none
+  - main > :first-child (L30, @layer base) -> 1 elemento: margin-top: 0 !important
+  - main > :last-child (L33, @layer base) -> 1 elemento: margin-bottom: 0 !important
+  - ::-webkit-scrollbar (L37) -> todos os elementos: display: none
+Classes distintas: 244 | do tailwind.config: 89 | arbitrárias: 20 | sem token no config: 135
 Elementos com eventos mapeados: 5
   - <button id="copy-link-btn"> (L742) -> [click] handler L1788 via addEventListenerVariavel (arrow_function): "() => { navigator.clipboard.writeText(window.locatio..."
+      CSS: 6 classes (4 do tailwind.config, 0 arbitrárias, 2 sem token no config)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        hover:bg-surface-container-high -> background-color: #262a31 [hover] (colors "surface-container-high", L88)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        sem token no config: p-1.5 transition-colors
   - <button id="star-btn"> (L764) -> [click] handler L1768 via addEventListenerVariavel (arrow_function): "() => { isStarred = !isStarred; if (isStarred) { sta..."
+      CSS: 6 classes (4 do tailwind.config, 0 arbitrárias, 2 sem token no config)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        hover:bg-surface-container-high -> background-color: #262a31 [hover] (colors "surface-container-high", L88)
+        text-outline -> color: #8c909f (colors "outline", L91)
+        hover:text-secondary -> color: #4edea3 [hover] (colors "secondary", L74)
+        sem token no config: p-1.5 transition-colors
   - <button> (L902) -> [click] handler L902 via inline (inline): "navigator.clipboard.writeText( document.getElementBy..."
+      CSS: 13 classes (7 do tailwind.config, 0 arbitrárias, 6 sem token no config)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        bg-surface-container -> background-color: #1c2026 (colors "surface-container", L65)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        hover:bg-surface-container-high -> background-color: #262a31 [hover] (colors "surface-container-high", L88)
+        font-label-badge -> font-family: "JetBrains Mono" (fontFamily "label-badge", L118)
+        text-label-badge -> font-size: 11px; line-height: 16px; letter-spacing: 0.04em; font-weight: 500 (fontSize "label-badge", L158)
+        sem token no config: flex items-center gap-1 px-2 py-1 transition-all
   - <button> (L1053) -> [click] handler L1053 via inline (inline): "navigator.clipboard.writeText( document.getElementBy..."
+      CSS: 13 classes (7 do tailwind.config, 0 arbitrárias, 6 sem token no config)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        bg-surface-container -> background-color: #1c2026 (colors "surface-container", L65)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        hover:bg-surface-container-high -> background-color: #262a31 [hover] (colors "surface-container-high", L88)
+        font-label-badge -> font-family: "JetBrains Mono" (fontFamily "label-badge", L118)
+        text-label-badge -> font-size: 11px; line-height: 16px; letter-spacing: 0.04em; font-weight: 500 (fontSize "label-badge", L158)
+        sem token no config: flex items-center gap-1 px-2 py-1 transition-all
   - <button id="btn-run-test"> (L1153) -> [click] handler L1731 via addEventListenerVariavel (arrow_function): "() => { const val = inputEl.value.trim() || "/api/v1..."
+      CSS: 15 classes (6 do tailwind.config, 0 arbitrárias, 9 sem token no config)
+        px-space-md -> padding-left: 0.75rem; padding-right: 0.75rem (spacing "space-md", L107)
+        bg-primary -> background-color: #adc6ff (colors "primary", L81)
+        text-on-primary -> color: #002e6a (colors "on-primary", L87)
+        font-body-md -> font-family: Geist (fontFamily "body-md", L120)
+        text-body-md -> font-size: 13px; line-height: 20px; letter-spacing: -0.005em; font-weight: 400 (fontSize "body-md", L174)
+        rounded-lg -> border-radius: 0.25rem (borderRadius "lg", L98)
+        sem token no config: flex items-center justify-center gap-2 py-2 font-semibold hover:opacity-95 transition-all shadow-sm
 
 [JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json).

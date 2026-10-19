@@ -1,5 +1,6 @@
 const { readFile, writeFile, mkdir } = require("node:fs/promises");
 const path = require("node:path");
+const vm = require("node:vm");
 
 // --- Constantes
 
@@ -1173,6 +1174,7 @@ function gerarRelatorioInteratividade(
       coluna: el.coluna,
       totalEventos: el.eventos.length,
       eventos: el.eventos,
+      css: el.css,
     })),
     interativosSemEventos: interativosSemEventos.map((el) => ({
       tag: el.nome,
@@ -1183,6 +1185,1079 @@ function gerarRelatorioInteratividade(
     vinculosRealizados: associacao.vinculos,
     seletoresNaoEncontrados: associacao.seletoresNaoEncontrados,
   };
+}
+
+// --- Mapeamento de CSS (tailwind.config, blocos <style> e style inline)
+
+/**
+ * Encontra o fechamento correspondente a `{`, `[` ou `(` na posição informada,
+ * respeitando strings e (no modo JS) comentários.
+ * @param {string} codigo - Texto onde procurar.
+ * @param {number} posAbertura - Posição do caractere de abertura.
+ * @param {{ js?: boolean }} [opcoes] - `js: true` também pula comentários `//` e `/* *\/`.
+ * @returns {number} Posição do fechamento, ou -1 se não houver.
+ */
+function encontrarFechamento(codigo, posAbertura, { js = true } = {}) {
+  const abre = codigo[posAbertura];
+  const fecha = { "{": "}", "[": "]", "(": ")" }[abre];
+  let profundidade = 0;
+  let aspas = null;
+
+  for (let i = posAbertura; i < codigo.length; i++) {
+    const c = codigo[i];
+    if (aspas) {
+      if (c === "\\") i++;
+      else if (c === aspas) aspas = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || (js && c === "`")) {
+      aspas = c;
+      continue;
+    }
+    if (js && c === "/" && codigo[i + 1] === "/") {
+      const nl = codigo.indexOf("\n", i);
+      if (nl < 0) return -1;
+      i = nl;
+      continue;
+    }
+    if (js && c === "/" && codigo[i + 1] === "*") {
+      const f = codigo.indexOf("*/", i + 2);
+      if (f < 0) return -1;
+      i = f + 1;
+      continue;
+    }
+    if (c === abre) profundidade += 1;
+    else if (c === fecha) {
+      profundidade -= 1;
+      if (profundidade === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\// --- Exportação e Persistência em JSON");
+}
+
+/**
+ * Achata objetos aninhados de tokens (ex.: `primary: { DEFAULT, 500 }`)
+ * em nomes de classe (`primary`, `primary-500`).
+ */
+function achatarTokens(objeto, prefixo = "") {
+  const saida = [];
+  for (const [chave, valor] of Object.entries(objeto)) {
+    const nome =
+      chave === "DEFAULT" ? prefixo || "DEFAULT" : prefixo ? `${prefixo}-${chave}` : chave;
+    if (valor && typeof valor === "object" && !Array.isArray(valor)) {
+      saida.push(...achatarTokens(valor, nome));
+    } else {
+      saida.push({ nome, chaveFonte: chave, valor });
+    }
+  }
+  return saida;
+}
+
+/**
+ * Localiza `tailwind.config = {...}` dentro dos `<script>` e extrai os tokens
+ * do tema (`theme` e `theme.extend`), cada um com a linha onde foi escrito.
+ *
+ * O objeto é avaliado com `node:vm` num contexto vazio (sem `require`, `process`
+ * etc.). Isso não é um sandbox de segurança: use apenas com arquivos confiáveis.
+ * @param {Elemento[]} elementos - Elementos mapeados do HTML.
+ * @param {string} html - HTML completo (para calcular linhas).
+ * @returns {Object} `{ encontrado, linha, secoes: { colors: { nome: { valor, linha, origem } } }, totais }`.
+ */
+function extrairTailwindConfig(elementos, html) {
+  for (const el of elementos) {
+    if (el.nome !== "script" || el.vazio) continue;
+
+    const match = /tailwind\.config\s*=\s*\{/.exec(el.conteudo);
+    if (!match) continue;
+
+    const posAbre = match.index + match[0].length - 1;
+    const posFecha = encontrarFechamento(el.conteudo, posAbre);
+    if (posFecha < 0) continue;
+
+    const textoObjeto = el.conteudo.slice(posAbre, posFecha + 1);
+    const offsetBase = el.inicioConteudo + posAbre;
+    const linha = calcularLinhaColuna(html, el.inicioConteudo + match.index).linha;
+
+    let config;
+    try {
+      config = vm.runInNewContext(`(${textoObjeto})`, Object.create(null), {
+        timeout: 100,
+      });
+    } catch (erro) {
+      return { encontrado: true, linha, erro: erro.message, secoes: {}, totais: {} };
+    }
+
+    const tema = (config && config.theme) || {};
+    const extensao = tema.extend || {};
+    const secoes = {};
+
+    const registrarSecao = (nomeSecao, objeto, origem) => {
+      if (!objeto || typeof objeto !== "object" || Array.isArray(objeto)) return;
+
+      // Delimita a busca de linhas ao bloco da seção no texto do config
+      const regexSecao = new RegExp(
+        `(?<![\\w-])(["']?)${escaparRegex(nomeSecao)}\\1\\s*:\\s*\\{`,
+        "g",
+      );
+      let inicioBusca = 0;
+      let fimBusca = textoObjeto.length;
+      const posExtend = textoObjeto.search(/(?<![\w-])["']?extend["']?\s*:/);
+      if (origem === "extend" && posExtend >= 0) regexSecao.lastIndex = posExtend;
+      const matchSecao = regexSecao.exec(textoObjeto);
+      if (matchSecao) {
+        inicioBusca = matchSecao.index;
+        const posChave = matchSecao.index + matchSecao[0].length - 1;
+        const fimSecao = encontrarFechamento(textoObjeto, posChave);
+        if (fimSecao > 0) fimBusca = fimSecao;
+      }
+      const trechoSecao = textoObjeto.slice(inicioBusca, fimBusca);
+
+      secoes[nomeSecao] = secoes[nomeSecao] || {};
+      for (const token of achatarTokens(objeto)) {
+        const regexChave = new RegExp(
+          `(?<![\\w-])(["']?)${escaparRegex(token.chaveFonte)}\\1\\s*:`,
+        );
+        const pos = trechoSecao.search(regexChave);
+        secoes[nomeSecao][token.nome] = {
+          valor: token.valor,
+          linha:
+            pos >= 0
+              ? calcularLinhaColuna(html, offsetBase + inicioBusca + pos).linha
+              : null,
+          origem,
+        };
+      }
+    };
+
+    for (const [nomeSecao, objeto] of Object.entries(tema)) {
+      if (nomeSecao !== "extend") registrarSecao(nomeSecao, objeto, "theme");
+    }
+    for (const [nomeSecao, objeto] of Object.entries(extensao)) {
+      registrarSecao(nomeSecao, objeto, "extend");
+    }
+
+    const totais = {};
+    for (const [nomeSecao, tokens] of Object.entries(secoes)) {
+      totais[nomeSecao] = Object.keys(tokens).length;
+    }
+
+    return { encontrado: true, linha, secoes, totais };
+  }
+
+  return { encontrado: false, linha: null, secoes: {}, totais: {} };
+}
+
+/**
+ * Famílias de utilitários do Tailwind que leem tokens do tema.
+ * Cada entrada: [prefixo, seção do tema, propriedades CSS geradas, observação].
+ */
+const UTILIDADES_TAILWIND = [
+  // Cores
+  ["bg", "colors", ["background-color"]],
+  ["text", "colors", ["color"]],
+  ["border", "colors", ["border-color"]],
+  ["border-x", "colors", ["border-left-color", "border-right-color"]],
+  ["border-y", "colors", ["border-top-color", "border-bottom-color"]],
+  ["border-t", "colors", ["border-top-color"]],
+  ["border-r", "colors", ["border-right-color"]],
+  ["border-b", "colors", ["border-bottom-color"]],
+  ["border-l", "colors", ["border-left-color"]],
+  ["divide", "colors", ["border-color"], "entre filhos"],
+  ["outline", "colors", ["outline-color"]],
+  ["ring", "colors", ["--tw-ring-color"]],
+  ["ring-offset", "colors", ["--tw-ring-offset-color"]],
+  ["fill", "colors", ["fill"]],
+  ["stroke", "colors", ["stroke"]],
+  ["from", "colors", ["--tw-gradient-from"]],
+  ["via", "colors", ["--tw-gradient-via"]],
+  ["to", "colors", ["--tw-gradient-to"]],
+  ["placeholder", "colors", ["color"], "::placeholder"],
+  ["caret", "colors", ["caret-color"]],
+  ["accent", "colors", ["accent-color"]],
+  ["decoration", "colors", ["text-decoration-color"]],
+  ["shadow", "colors", ["--tw-shadow-color"]],
+  // Tipografia
+  ["text", "fontSize", ["font-size"]],
+  ["font", "fontFamily", ["font-family"]],
+  ["font", "fontWeight", ["font-weight"]],
+  ["leading", "lineHeight", ["line-height"]],
+  ["tracking", "letterSpacing", ["letter-spacing"]],
+  // Bordas e sombras
+  ["border", "borderWidth", ["border-width"]],
+  ["rounded", "borderRadius", ["border-radius"]],
+  ["rounded-t", "borderRadius", ["border-top-left-radius", "border-top-right-radius"]],
+  ["rounded-r", "borderRadius", ["border-top-right-radius", "border-bottom-right-radius"]],
+  ["rounded-b", "borderRadius", ["border-bottom-right-radius", "border-bottom-left-radius"]],
+  ["rounded-l", "borderRadius", ["border-top-left-radius", "border-bottom-left-radius"]],
+  ["rounded-tl", "borderRadius", ["border-top-left-radius"]],
+  ["rounded-tr", "borderRadius", ["border-top-right-radius"]],
+  ["rounded-br", "borderRadius", ["border-bottom-right-radius"]],
+  ["rounded-bl", "borderRadius", ["border-bottom-left-radius"]],
+  ["shadow", "boxShadow", ["box-shadow"]],
+  ["outline", "outlineWidth", ["outline-width"]],
+  ["ring", "ringWidth", ["--tw-ring-width"]],
+  ["opacity", "opacity", ["opacity"]],
+  ["z", "zIndex", ["z-index"]],
+  // Espaçamento e dimensões
+  ["p", "spacing", ["padding"]],
+  ["px", "spacing", ["padding-left", "padding-right"]],
+  ["py", "spacing", ["padding-top", "padding-bottom"]],
+  ["pt", "spacing", ["padding-top"]],
+  ["pr", "spacing", ["padding-right"]],
+  ["pb", "spacing", ["padding-bottom"]],
+  ["pl", "spacing", ["padding-left"]],
+  ["m", "spacing", ["margin"]],
+  ["mx", "spacing", ["margin-left", "margin-right"]],
+  ["my", "spacing", ["margin-top", "margin-bottom"]],
+  ["mt", "spacing", ["margin-top"]],
+  ["mr", "spacing", ["margin-right"]],
+  ["mb", "spacing", ["margin-bottom"]],
+  ["ml", "spacing", ["margin-left"]],
+  ["gap", "spacing", ["gap"]],
+  ["gap-x", "spacing", ["column-gap"]],
+  ["gap-y", "spacing", ["row-gap"]],
+  ["space-x", "spacing", ["margin-left"], "entre filhos"],
+  ["space-y", "spacing", ["margin-top"], "entre filhos"],
+  ["w", "spacing", ["width"]],
+  ["h", "spacing", ["height"]],
+  ["size", "spacing", ["width", "height"]],
+  ["min-w", "spacing", ["min-width"]],
+  ["min-h", "spacing", ["min-height"]],
+  ["max-w", "spacing", ["max-width"]],
+  ["max-h", "spacing", ["max-height"]],
+  ["inset", "spacing", ["inset"]],
+  ["inset-x", "spacing", ["left", "right"]],
+  ["inset-y", "spacing", ["top", "bottom"]],
+  ["top", "spacing", ["top"]],
+  ["right", "spacing", ["right"]],
+  ["bottom", "spacing", ["bottom"]],
+  ["left", "spacing", ["left"]],
+  ["translate-x", "spacing", ["--tw-translate-x"]],
+  ["translate-y", "spacing", ["--tw-translate-y"]],
+  ["scroll-m", "spacing", ["scroll-margin"]],
+  ["scroll-mt", "spacing", ["scroll-margin-top"]],
+  ["scroll-mb", "spacing", ["scroll-margin-bottom"]],
+  ["scroll-p", "spacing", ["scroll-padding"]],
+  ["scroll-pt", "spacing", ["scroll-padding-top"]],
+  ["scroll-pb", "spacing", ["scroll-padding-bottom"]],
+]
+  .map(([prefixo, secao, propriedades, observacao = null]) => ({
+    prefixo,
+    secao,
+    propriedades,
+    observacao,
+  }))
+  // Prefixos mais longos primeiro: `border-t-x` deve testar `border-t` antes de `border`
+  .sort((a, b) => b.prefixo.length - a.prefixo.length);
+
+const PREFIXOS_COM_COR = new Set(
+  UTILIDADES_TAILWIND.filter((u) => u.secao === "colors").map((u) => u.prefixo),
+);
+
+/**
+ * Separa variantes (`hover:`, `md:`, `group-hover:`) do utilitário,
+ * ignorando `:` dentro de valores arbitrários (`[...]`).
+ * @param {string} classe - Classe completa (ex.: `md:hover:bg-primary/20`).
+ * @returns {{ variantes: string[], utilitario: string }}
+ */
+function separarVariantes(classe) {
+  const partes = [];
+  let atual = "";
+  let colchetes = 0;
+  for (const c of classe) {
+    if (c === "[") colchetes += 1;
+    else if (c === "]") colchetes -= 1;
+    if (c === ":" && colchetes === 0) {
+      partes.push(atual);
+      atual = "";
+    } else {
+      atual += c;
+    }
+  }
+  partes.push(atual);
+  return { variantes: partes.slice(0, -1), utilitario: partes[partes.length - 1] };
+}
+
+function aplicarOpacidade(cor, opacidade) {
+  const alfa = opacidade.startsWith("[")
+    ? Number.parseFloat(opacidade.slice(1, -1))
+    : Number.parseInt(opacidade, 10) / 100;
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(cor));
+  if (!hex || Number.isNaN(alfa)) return `${cor} / ${opacidade}`;
+  const h = hex[1].length === 3 ? [...hex[1]].map((c) => c + c).join("") : hex[1];
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt(h.slice(i, i + 2), 16));
+  return `rgba(${r}, ${g}, ${b}, ${Number(alfa.toFixed(3))})`;
+}
+
+function paraKebab(nome) {
+  return nome.replace(/[A-Z]/g, (l) => `-${l.toLowerCase()}`);
+}
+
+function formatarFamiliaFonte(valor) {
+  const lista = Array.isArray(valor) ? valor : String(valor).split(",");
+  return lista
+    .map((f) => String(f).trim())
+    .map((f) => (/\s/.test(f) && !/^["']/.test(f) ? `"${f}"` : f))
+    .join(", ");
+}
+
+/**
+ * Resolve uma classe Tailwind para as declarações CSS que ela gera,
+ * quando o valor vem do `tailwind.config` ou é um valor arbitrário (`w-[42%]`).
+ * Classes sem token no config ficam com `origem: "padrao"` (escala padrão do Tailwind,
+ * que este experimento não reproduz).
+ * @param {string} classe - Classe como escrita no HTML.
+ * @param {Object} config - Resultado de {@link extrairTailwindConfig}.
+ * @returns {Object} Classe resolvida com `origem`, `declaracoes`, `secao`, `token` e `linhaToken`.
+ */
+function resolverClasseTailwind(classe, config) {
+  const { variantes, utilitario: bruto } = separarVariantes(classe);
+  let utilitario = bruto;
+  let importante = false;
+  let negativo = false;
+
+  if (utilitario.startsWith("!")) {
+    importante = true;
+    utilitario = utilitario.slice(1);
+  }
+  if (utilitario.startsWith("-")) {
+    negativo = true;
+    utilitario = utilitario.slice(1);
+  }
+
+  const base = { classe, variantes, utilitario, importante, negativo };
+  const secoes = (config && config.secoes) || {};
+
+  for (const util of UTILIDADES_TAILWIND) {
+    let resto;
+    if (utilitario === util.prefixo) resto = "DEFAULT";
+    else if (utilitario.startsWith(`${util.prefixo}-`)) {
+      resto = utilitario.slice(util.prefixo.length + 1);
+    } else continue;
+
+    let valor;
+    let opacidade = null;
+    let origem;
+    let token = null;
+    let linhaToken = null;
+    let extras = [];
+
+    // Separa opacidade de cor: bg-primary/20, bg-primary/[.35]
+    let chave = resto;
+    if (util.secao === "colors") {
+      const m = /^(.+)\/(\d{1,3}|\[[^\]]+\])$/.exec(resto);
+      if (m) {
+        chave = m[1];
+        opacidade = m[2];
+      }
+    }
+
+    if (chave.startsWith("[") && chave.endsWith("]")) {
+      valor = chave.slice(1, -1).replace(/_/g, " ");
+      const ehCor = /^(#|rgba?\(|hsla?\(|color:)/i.test(valor);
+      if (PREFIXOS_COM_COR.has(util.prefixo) && (util.secao === "colors") !== ehCor) {
+        continue;
+      }
+      valor = valor.replace(/^color:/i, "");
+      origem = "arbitrario";
+    } else {
+      const encontrado = secoes[util.secao] && secoes[util.secao][chave];
+      if (!encontrado) continue;
+      valor = encontrado.valor;
+      origem = "tailwind.config";
+      token = chave;
+      linhaToken = encontrado.linha;
+    }
+
+    if (util.secao === "fontSize" && Array.isArray(valor)) {
+      const [tamanho, complemento] = valor;
+      if (typeof complemento === "string") {
+        extras.push({ propriedade: "line-height", valor: complemento });
+      } else if (complemento && typeof complemento === "object") {
+        extras = Object.entries(complemento).map(([p, v]) => ({
+          propriedade: paraKebab(p),
+          valor: String(v),
+        }));
+      }
+      valor = tamanho;
+    } else if (util.secao === "fontFamily") {
+      valor = formatarFamiliaFonte(valor);
+    } else if (Array.isArray(valor)) {
+      valor = valor.join(", ");
+    }
+
+    valor = String(valor);
+    if (opacidade) valor = aplicarOpacidade(valor, opacidade);
+    if (negativo) valor = valor.startsWith("-") ? valor.slice(1) : `-${valor}`;
+    const sufixo = importante ? " !important" : "";
+
+    return {
+      ...base,
+      origem,
+      secao: util.secao,
+      token,
+      linhaToken,
+      opacidade,
+      observacao: util.observacao,
+      declaracoes: [
+        ...util.propriedades.map((propriedade) => ({ propriedade, valor: valor + sufixo })),
+        ...extras.map((e) => ({ ...e, valor: e.valor + sufixo })),
+      ],
+    };
+  }
+
+  return {
+    ...base,
+    origem: "padrao",
+    secao: null,
+    token: null,
+    linhaToken: null,
+    opacidade: null,
+    observacao: null,
+    declaracoes: [],
+  };
+}
+
+/**
+ * Divide um texto por um separador, ignorando ocorrências dentro de
+ * parênteses, colchetes e strings.
+ */
+function dividirNoNivelSuperior(texto, separador) {
+  const partes = [];
+  let atual = "";
+  let profundidade = 0;
+  let aspas = null;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (aspas) {
+      atual += c;
+      if (c === "\\") {
+        atual += texto[i + 1] || "";
+        i++;
+      } else if (c === aspas) aspas = null;
+      continue;
+    }
+    if (c === '"' || c === "'") aspas = c;
+    else if (c === "(" || c === "[") profundidade += 1;
+    else if (c === ")" || c === "]") profundidade -= 1;
+    if (c === separador && profundidade === 0) {
+      partes.push(atual);
+      atual = "";
+    } else {
+      atual += c;
+    }
+  }
+  partes.push(atual);
+  return partes;
+}
+
+/**
+ * Converte o corpo de uma regra (ou um atributo `style`) em declarações.
+ * @param {string} corpo - Ex.: `margin: 0; color: red !important`.
+ * @returns {{ propriedade: string, valor: string, importante: boolean }[]}
+ */
+function extrairDeclaracoes(corpo) {
+  const declaracoes = [];
+  for (const parte of dividirNoNivelSuperior(corpo, ";")) {
+    const idx = parte.indexOf(":");
+    if (idx < 0) continue;
+    const propriedade = parte.slice(0, idx).trim().toLowerCase();
+    let valor = parte.slice(idx + 1).trim().replace(/\s+/g, " ");
+    if (!propriedade || !valor) continue;
+    const importante = /!\s*important$/i.test(valor);
+    if (importante) valor = valor.replace(/\s*!\s*important$/i, "");
+    declaracoes.push({ propriedade, valor, importante });
+  }
+  return declaracoes;
+}
+
+const AT_RULES_AGRUPADORAS = new Set(["media", "layer", "supports", "container", "document"]);
+
+/**
+ * Extrai as regras de um texto CSS com a linha de cada uma.
+ * Regras dentro de `@media`, `@layer`, `@supports` e `@container` entram com o
+ * contexto (ex.: `["@layer base"]`). Outras at-rules (`@keyframes`, `@font-face`)
+ * são listadas com `tipo: "at-rule"` e não são casadas com elementos.
+ * @param {string} css - Conteúdo CSS.
+ * @param {{ offsetBase?: number, html?: string }} [opcoes] - Offset do CSS dentro do HTML, para calcular linhas no arquivo original.
+ * @returns {Object[]} Regras `{ tipo, seletor, seletores, linha, inicio, contexto, declaracoes }`.
+ */
+function extrairRegrasCss(css, { offsetBase = 0, html = null } = {}) {
+  // Troca comentários por espaços para manter os offsets
+  const texto = css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "));
+  const regras = [];
+
+  const linhaDe = (pos) =>
+    html
+      ? calcularLinhaColuna(html, offsetBase + pos).linha
+      : calcularLinhaColuna(texto, pos).linha;
+
+  const percorrer = (inicio, fim, contexto) => {
+    let i = inicio;
+    while (i < fim) {
+      while (i < fim && /\s/.test(texto[i])) i++;
+      if (i >= fim) break;
+
+      let j = i;
+      let aspas = null;
+      let parenteses = 0;
+      while (j < fim) {
+        const c = texto[j];
+        if (aspas) {
+          if (c === "\\") j++;
+          else if (c === aspas) aspas = null;
+        } else if (c === '"' || c === "'") aspas = c;
+        else if (c === "(") parenteses += 1;
+        else if (c === ")") parenteses -= 1;
+        else if (parenteses === 0 && (c === "{" || c === ";" || c === "}")) break;
+        j++;
+      }
+      if (j >= fim) break;
+
+      const preludio = texto.slice(i, j).trim().replace(/\s+/g, " ");
+      if (texto[j] !== "{") {
+        i = j + 1; // @import/@charset ou sobra solta
+        continue;
+      }
+
+      const fechamento = encontrarFechamento(texto, j, { js: false });
+      const fimBloco = fechamento < 0 ? fim : fechamento;
+
+      if (preludio.startsWith("@")) {
+        const nomeAt = (/^@([\w-]+)/.exec(preludio) || [, ""])[1].toLowerCase();
+        if (AT_RULES_AGRUPADORAS.has(nomeAt)) {
+          percorrer(j + 1, fimBloco, [...contexto, preludio]);
+        } else {
+          regras.push({
+            tipo: "at-rule",
+            seletor: preludio,
+            seletores: [],
+            linha: linhaDe(i),
+            inicio: offsetBase + i,
+            contexto,
+            declaracoes: nomeAt === "font-face" ? extrairDeclaracoes(texto.slice(j + 1, fimBloco)) : [],
+          });
+        }
+      } else {
+        regras.push({
+          tipo: "regra",
+          seletor: preludio,
+          seletores: dividirNoNivelSuperior(preludio, ",").map((s) => s.trim()).filter(Boolean),
+          linha: linhaDe(i),
+          inicio: offsetBase + i,
+          contexto,
+          declaracoes: extrairDeclaracoes(texto.slice(j + 1, fimBloco)),
+        });
+      }
+
+      i = fimBloco + 1;
+    }
+  };
+
+  percorrer(0, texto.length, []);
+  return regras;
+}
+
+const PSEUDO_ELEMENTOS_LEGADOS = new Set(["before", "after", "first-line", "first-letter"]);
+const PSEUDO_ESTADOS = new Set([
+  "hover", "focus", "focus-within", "focus-visible", "active", "visited", "target",
+  "checked", "invalid", "valid", "placeholder-shown", "autofill", "indeterminate",
+]);
+
+/**
+ * Analisa um seletor composto simples (sem combinadores), ex.: `a.btn#x[href]:hover::before`.
+ */
+function analisarComposto(texto) {
+  const composto = {
+    tag: null,
+    ids: [],
+    classes: [],
+    atributos: [],
+    pseudoClasses: [],
+    pseudoElemento: null,
+  };
+  const desescapar = (s) => s.replace(/\\(.)/g, "$1");
+  let i = 0;
+
+  while (i < texto.length) {
+    const resto = texto.slice(i);
+    let m;
+    if ((m = /^(\*|[a-zA-Z][\w-]*)/.exec(resto)) && i === 0) {
+      composto.tag = m[1].toLowerCase();
+    } else if ((m = /^#((?:[\w-]|\\.)+)/.exec(resto))) {
+      composto.ids.push(desescapar(m[1]));
+    } else if ((m = /^\.((?:[\w-]|\\.)+)/.exec(resto))) {
+      composto.classes.push(desescapar(m[1]));
+    } else if (
+      (m = /^\[\s*([\w:-]+)\s*(?:([~|^$*]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\]\s]+))\s*([iIsS])?)?\s*\]/.exec(resto))
+    ) {
+      composto.atributos.push({
+        nome: m[1].toLowerCase(),
+        operador: m[2] || null,
+        valor: m[3] ?? m[4] ?? m[5] ?? null,
+        semCaixa: (m[6] || "").toLowerCase() === "i",
+      });
+    } else if ((m = /^::?([\w-]+)/.exec(resto))) {
+      const duploDoisPontos = resto.startsWith("::");
+      const nome = m[1].toLowerCase();
+      let comprimento = m[0].length;
+      let argumento = null;
+      if (texto[i + comprimento] === "(") {
+        const fecha = encontrarFechamento(texto, i + comprimento, { js: false });
+        const fim = fecha < 0 ? texto.length - 1 : fecha;
+        argumento = texto.slice(i + comprimento + 1, fim);
+        comprimento = fim - i + 1;
+      }
+      if (duploDoisPontos || PSEUDO_ELEMENTOS_LEGADOS.has(nome)) {
+        composto.pseudoElemento = nome;
+      } else {
+        composto.pseudoClasses.push({ nome, argumento });
+      }
+      i += comprimento;
+      continue;
+    } else {
+      i += 1; // caractere não reconhecido
+      continue;
+    }
+    i += m[0].length;
+  }
+
+  return composto;
+}
+
+/**
+ * Analisa um seletor completo em partes compostas ligadas por combinadores
+ * (` `, `>`, `+`, `~`). O combinador de cada parte é o que a liga à anterior.
+ * @param {string} seletor - Ex.: `main > :first-child`.
+ * @returns {{ combinador: string | null, composto: Object }[]}
+ */
+function analisarSeletor(seletor) {
+  const s = seletor.trim();
+  const partes = [];
+  let combinadorPendente = null;
+  let i = 0;
+
+  while (i < s.length) {
+    if (/[\s>+~]/.test(s[i])) {
+      let combinador = " ";
+      while (i < s.length && /[\s>+~]/.test(s[i])) {
+        if (!/\s/.test(s[i])) combinador = s[i];
+        i++;
+      }
+      if (partes.length) combinadorPendente = combinador;
+      continue;
+    }
+
+    let j = i;
+    let profundidade = 0;
+    while (j < s.length) {
+      const c = s[j];
+      if (c === "[" || c === "(") profundidade += 1;
+      else if (c === "]" || c === ")") profundidade -= 1;
+      else if (c === "\\") j++;
+      else if (profundidade === 0 && /[\s>+~]/.test(c)) break;
+      j++;
+    }
+
+    partes.push({ combinador: combinadorPendente, composto: analisarComposto(s.slice(i, j)) });
+    combinadorPendente = null;
+    i = j;
+  }
+
+  return partes;
+}
+
+/**
+ * Calcula a especificidade `[ids, classes/atributos/pseudo-classes, tags/pseudo-elementos]`.
+ */
+function calcularEspecificidade(partes) {
+  const total = [0, 0, 0];
+  for (const { composto } of partes) {
+    total[0] += composto.ids.length;
+    total[1] += composto.classes.length + composto.atributos.length;
+    if (composto.tag && composto.tag !== "*") total[2] += 1;
+    if (composto.pseudoElemento) total[2] += 1;
+    for (const pc of composto.pseudoClasses) {
+      if (pc.nome === "where") continue;
+      if (["not", "is", "matches", "has"].includes(pc.nome) && pc.argumento) {
+        const maior = dividirNoNivelSuperior(pc.argumento, ",")
+          .map((s) => calcularEspecificidade(analisarSeletor(s)))
+          .sort((a, b) => b[0] - a[0] || b[1] - a[1] || b[2] - a[2])[0];
+        if (maior) maior.forEach((v, k) => (total[k] += v));
+        continue;
+      }
+      total[1] += 1;
+    }
+  }
+  return total;
+}
+
+/**
+ * Monta a árvore (pai e filhos) a partir dos intervalos dos elementos.
+ * @param {Elemento[]} elementos - Elementos ordenados por posição.
+ * @returns {{ pai: (el) => Elemento | null, filhos: (el) => Elemento[], irmaos: (el) => Elemento[] }}
+ */
+function construirArvore(elementos) {
+  const pais = new Map();
+  const filhos = new Map();
+  const raizes = [];
+  const pilha = [];
+
+  for (const el of elementos) {
+    while (pilha.length && pilha[pilha.length - 1].fim <= el.inicio) pilha.pop();
+    const pai = pilha.length ? pilha[pilha.length - 1] : null;
+    pais.set(el, pai);
+    if (pai) {
+      if (!filhos.has(pai)) filhos.set(pai, []);
+      filhos.get(pai).push(el);
+    } else {
+      raizes.push(el);
+    }
+    if (!el.vazio) pilha.push(el);
+  }
+
+  return {
+    pai: (el) => pais.get(el) || null,
+    filhos: (el) => filhos.get(el) || [],
+    irmaos: (el) => {
+      const pai = pais.get(el);
+      return pai ? filhos.get(pai) || [] : raizes;
+    },
+  };
+}
+
+function casarAnB(expressao, posicao) {
+  const e = expressao.trim().toLowerCase().replace(/\s+/g, "");
+  if (e === "odd") return posicao % 2 === 1;
+  if (e === "even") return posicao % 2 === 0;
+  const m = /^([+-]?\d*)n([+-]\d+)?$/.exec(e);
+  if (!m) return Number.parseInt(e, 10) === posicao;
+  const a = m[1] === "" || m[1] === "+" ? 1 : m[1] === "-" ? -1 : Number.parseInt(m[1], 10);
+  const b = m[2] ? Number.parseInt(m[2], 10) : 0;
+  if (a === 0) return posicao === b;
+  const n = (posicao - b) / a;
+  return Number.isInteger(n) && n >= 0;
+}
+
+function casarAtributo(filtro, el) {
+  const atributos = el.atributos || {};
+  if (!(filtro.nome in atributos)) return false;
+  if (!filtro.operador) return true;
+  let atual = atributos[filtro.nome] === true ? "" : String(atributos[filtro.nome]);
+  let esperado = filtro.valor ?? "";
+  if (filtro.semCaixa) {
+    atual = atual.toLowerCase();
+    esperado = esperado.toLowerCase();
+  }
+  switch (filtro.operador) {
+    case "=": return atual === esperado;
+    case "~=": return atual.split(/\s+/).includes(esperado);
+    case "|=": return atual === esperado || atual.startsWith(`${esperado}-`);
+    case "^=": return esperado !== "" && atual.startsWith(esperado);
+    case "$=": return esperado !== "" && atual.endsWith(esperado);
+    case "*=": return esperado !== "" && atual.includes(esperado);
+    default: return false;
+  }
+}
+
+/**
+ * Testa um seletor composto contra um elemento.
+ * Estados dinâmicos (`:hover`, `:focus`...) não podem ser avaliados num arquivo
+ * estático: o elemento casa e o estado é anotado.
+ * @returns {{ estados: string[], naoAvaliados: string[], pseudoElemento: string | null } | null}
+ */
+function casarComposto(composto, el, arvore) {
+  if (composto.tag && composto.tag !== "*" && composto.tag !== el.nome) return null;
+  for (const id of composto.ids) if (el.id !== id) return null;
+  for (const classe of composto.classes) if (!(el.classes || []).includes(classe)) return null;
+  for (const filtro of composto.atributos) if (!casarAtributo(filtro, el)) return null;
+
+  const estados = [];
+  const naoAvaliados = [];
+
+  for (const { nome, argumento } of composto.pseudoClasses) {
+    const irmaos = () => arvore.irmaos(el);
+    const doMesmoTipo = () => irmaos().filter((x) => x.nome === el.nome);
+    let ok = true;
+
+    switch (nome) {
+      case "first-child": ok = irmaos()[0] === el; break;
+      case "last-child": ok = irmaos()[irmaos().length - 1] === el; break;
+      case "only-child": ok = irmaos().length === 1; break;
+      case "first-of-type": ok = doMesmoTipo()[0] === el; break;
+      case "last-of-type": ok = doMesmoTipo()[doMesmoTipo().length - 1] === el; break;
+      case "only-of-type": ok = doMesmoTipo().length === 1; break;
+      case "nth-child": ok = casarAnB(argumento || "", irmaos().indexOf(el) + 1); break;
+      case "nth-last-child": ok = casarAnB(argumento || "", irmaos().length - irmaos().indexOf(el)); break;
+      case "nth-of-type": ok = casarAnB(argumento || "", doMesmoTipo().indexOf(el) + 1); break;
+      case "nth-last-of-type": ok = casarAnB(argumento || "", doMesmoTipo().length - doMesmoTipo().indexOf(el)); break;
+      case "root": ok = el.nome === "html"; break;
+      case "empty": ok = el.vazio || (el.conteudo || "").length === 0; break;
+      case "disabled": ok = "disabled" in (el.atributos || {}); break;
+      case "not":
+        ok = !dividirNoNivelSuperior(argumento || "", ",").some((s) =>
+          casarSeletor(analisarSeletor(s), el, arvore),
+        );
+        break;
+      case "is":
+      case "where":
+      case "matches":
+        ok = dividirNoNivelSuperior(argumento || "", ",").some((s) =>
+          casarSeletor(analisarSeletor(s), el, arvore),
+        );
+        break;
+      default:
+        if (PSEUDO_ESTADOS.has(nome)) estados.push(nome);
+        else naoAvaliados.push(`:${nome}${argumento !== null ? `(${argumento})` : ""}`);
+    }
+    if (!ok) return null;
+  }
+
+  return { estados, naoAvaliados, pseudoElemento: composto.pseudoElemento };
+}
+
+/**
+ * Testa um seletor (já analisado por {@link analisarSeletor}) contra um elemento,
+ * da direita para a esquerda, como o navegador faz.
+ * @returns {{ estados: string[], naoAvaliados: string[], pseudoElemento: string | null } | null}
+ */
+function casarSeletor(partes, el, arvore, indice = partes.length - 1) {
+  if (!partes.length) return null;
+  const { composto, combinador } = partes[indice];
+  const atual = casarComposto(composto, el, arvore);
+  if (!atual) return null;
+  if (indice === 0) return atual;
+
+  const juntar = (anterior) =>
+    anterior && {
+      estados: [...anterior.estados, ...atual.estados],
+      naoAvaliados: [...anterior.naoAvaliados, ...atual.naoAvaliados],
+      pseudoElemento: atual.pseudoElemento,
+    };
+
+  if (combinador === ">") {
+    const pai = arvore.pai(el);
+    return pai ? juntar(casarSeletor(partes, pai, arvore, indice - 1)) : null;
+  }
+  if (combinador === " ") {
+    for (let anc = arvore.pai(el); anc; anc = arvore.pai(anc)) {
+      const r = casarSeletor(partes, anc, arvore, indice - 1);
+      if (r) return juntar(r);
+    }
+    return null;
+  }
+
+  const irmaos = arvore.irmaos(el);
+  const pos = irmaos.indexOf(el);
+  if (combinador === "+") {
+    return pos > 0 ? juntar(casarSeletor(partes, irmaos[pos - 1], arvore, indice - 1)) : null;
+  }
+  if (combinador === "~") {
+    for (let k = pos - 1; k >= 0; k--) {
+      const r = casarSeletor(partes, irmaos[k], arvore, indice - 1);
+      if (r) return juntar(r);
+    }
+  }
+  return null;
+}
+
+/** Seletor que vale para qualquer elemento (ex.: `*`, `::-webkit-scrollbar`). */
+function ehSeletorGlobal(partes) {
+  if (partes.length !== 1) return false;
+  const c = partes[0].composto;
+  return (
+    (!c.tag || c.tag === "*") &&
+    !c.ids.length &&
+    !c.classes.length &&
+    !c.atributos.length &&
+    !c.pseudoClasses.length
+  );
+}
+
+function compararEspecificidade(a, b) {
+  return a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+}
+
+/**
+ * Mapeia o CSS de cada elemento: classes Tailwind resolvidas pelo `tailwind.config`,
+ * regras dos blocos `<style>` cujo seletor casa com o elemento e o atributo `style`.
+ * Grava o resultado em `el.css` de cada elemento.
+ * @param {Elemento[]} elementos - Elementos mapeados.
+ * @param {string} html - HTML completo.
+ * @returns {Object} Resumo: config do Tailwind, regras com contagem de elementos e estatísticas de classes.
+ */
+function mapearCss(elementos, html) {
+  const tailwind = extrairTailwindConfig(elementos, html);
+  const arvore = construirArvore(elementos);
+
+  const blocosStyle = elementos.filter((el) => el.nome === "style" && !el.vazio);
+  const regras = [];
+  for (const bloco of blocosStyle) {
+    regras.push(
+      ...extrairRegrasCss(bloco.conteudo, { offsetBase: bloco.inicioConteudo, html }).map(
+        (r) => ({ ...r, linhaBloco: bloco.linha }),
+      ),
+    );
+  }
+
+  const analisadas = regras
+    .map((regra, indice) => ({ regra, indice }))
+    .filter(({ regra }) => regra.tipo === "regra")
+    .map(({ regra, indice }) => ({
+      regra,
+      indice,
+      seletores: regra.seletores.map((texto) => {
+        const partes = analisarSeletor(texto);
+        return {
+          texto,
+          partes,
+          especificidade: calcularEspecificidade(partes),
+          global: ehSeletorGlobal(partes),
+        };
+      }),
+    }));
+
+  const contagemPorRegra = new Array(regras.length).fill(0);
+  const cacheClasses = new Map();
+
+  for (const el of elementos) {
+    const classes = (el.classes || []).map((classe) => {
+      if (!cacheClasses.has(classe)) {
+        cacheClasses.set(classe, resolverClasseTailwind(classe, tailwind));
+      }
+      return cacheClasses.get(classe);
+    });
+
+    const regrasDoElemento = [];
+    for (const { regra, indice, seletores } of analisadas) {
+      let melhor = null;
+      for (const sel of seletores) {
+        const r = casarSeletor(sel.partes, el, arvore);
+        if (!r) continue;
+        if (!melhor || compararEspecificidade(sel.especificidade, melhor.sel.especificidade) > 0) {
+          melhor = { sel, r };
+        }
+      }
+      if (!melhor) continue;
+      contagemPorRegra[indice] += 1;
+      regrasDoElemento.push({
+        indiceRegra: indice,
+        seletor: melhor.sel.texto,
+        regra: regra.seletor,
+        linha: regra.linha,
+        contexto: regra.contexto,
+        especificidade: melhor.sel.especificidade,
+        global: melhor.sel.global,
+        estados: melhor.r.estados,
+        pseudoElemento: melhor.r.pseudoElemento,
+        naoAvaliados: melhor.r.naoAvaliados,
+        declaracoes: regra.declaracoes,
+      });
+    }
+
+    const estiloInline =
+      el.atributos && typeof el.atributos.style === "string"
+        ? extrairDeclaracoes(el.atributos.style)
+        : [];
+
+    el.css = { classes, regras: regrasDoElemento, inline: estiloInline };
+  }
+
+  const distintas = [...cacheClasses.values()];
+  const contarOrigem = (origem) => distintas.filter((c) => c.origem === origem).length;
+
+  return {
+    tailwindConfig: {
+      encontrado: tailwind.encontrado,
+      linha: tailwind.linha,
+      erro: tailwind.erro || null,
+      totais: tailwind.totais,
+      secoes: tailwind.secoes,
+    },
+    blocosStyle: blocosStyle.map((b) => ({
+      linha: b.linha,
+      totalRegras: regras.filter((r) => r.linhaBloco === b.linha).length,
+    })),
+    regras: regras.map((r, i) => ({ ...r, totalElementos: contagemPorRegra[i] })),
+    classes: {
+      distintas: distintas.length,
+      tailwindConfig: contarOrigem("tailwind.config"),
+      arbitrarias: contarOrigem("arbitrario"),
+      padrao: contarOrigem("padrao"),
+    },
+    classesResolvidas: Object.fromEntries(
+      distintas
+        .filter((c) => c.origem !== "padrao")
+        .map(({ classe, ...resto }) => [classe, resto]),
+    ),
+    elementosComStyleInline: elementos.filter((el) => el.css.inline.length).length,
+  };
+}
+
+/**
+ * Formata as declarações para leitura no console: `margin: 0; padding: 0`.
+ */
+function formatarDeclaracoes(declaracoes) {
+  return declaracoes
+    .map((d) => `${d.propriedade}: ${d.valor}${d.importante ? " !important" : ""}`)
+    .join("; ");
+}
+
+/**
+ * Gera as linhas de console que descrevem o CSS de um elemento.
+ * @param {Object} css - `el.css` produzido por {@link mapearCss}.
+ * @param {string} [recuo] - Recuo de cada linha.
+ * @returns {string[]} Linhas prontas para imprimir.
+ */
+function descreverCssElemento(css, recuo = "      ") {
+  if (!css) return [];
+  const linhas = [];
+  const doConfig = css.classes.filter((c) => c.origem === "tailwind.config");
+  const arbitrarias = css.classes.filter((c) => c.origem === "arbitrario");
+  const padrao = css.classes.filter((c) => c.origem === "padrao");
+  const regras = css.regras.filter((r) => !r.global);
+
+  if (!css.classes.length && !regras.length && !css.inline.length) {
+    return [`${recuo}CSS: nenhuma classe, regra de <style> ou style inline`];
+  }
+
+  linhas.push(
+    `${recuo}CSS: ${css.classes.length} classes (${doConfig.length} do tailwind.config, ${arbitrarias.length} arbitrárias, ${padrao.length} sem token no config)`,
+  );
+
+  for (const c of [...doConfig, ...arbitrarias]) {
+    const estado = c.variantes.length ? ` [${c.variantes.join(":")}]` : "";
+    const nota = c.observacao ? ` (${c.observacao})` : "";
+    const fonte =
+      c.origem === "tailwind.config"
+        ? `${c.secao} "${c.token}", L${c.linhaToken ?? "?"}`
+        : "valor arbitrário";
+    linhas.push(`${recuo}  ${c.classe} -> ${formatarDeclaracoes(c.declaracoes)}${nota}${estado} (${fonte})`);
+  }
+
+  if (padrao.length) {
+    linhas.push(`${recuo}  sem token no config: ${padrao.map((c) => c.classe).join(" ")}`);
+  }
+
+  for (const r of regras) {
+    const extras = [
+      `L${r.linha}`,
+      ...r.contexto,
+      ...(r.estados.length ? [`estado :${r.estados.join(", :")}`] : []),
+      ...(r.pseudoElemento ? [`::${r.pseudoElemento}`] : []),
+    ].join(", ");
+    linhas.push(`${recuo}  <style> ${r.seletor} (${extras}) -> ${formatarDeclaracoes(r.declaracoes)}`);
+  }
+
+  if (css.inline.length) {
+    linhas.push(`${recuo}  style="" -> ${formatarDeclaracoes(css.inline)}`);
+  }
+
+  return linhas;
 }
 
 // --- Exportação e Persistência em JSON
@@ -1231,6 +2306,7 @@ async function processarHtml(
   const elementos = mapearElementos(tags, html);
   const analiseScripts = analisarScripts(elementos);
   const associacao = associarEventos(elementos, analiseScripts);
+  const css = mapearCss(elementos, html);
   const relatorio = gerarRelatorioInteratividade(
     elementos,
     analiseScripts,
@@ -1262,6 +2338,14 @@ async function processarHtml(
       seletoresNaoEncontrados: relatorio.seletoresNaoEncontrados,
       interativosSemEventos: relatorio.interativosSemEventos,
     },
+    css: {
+      tailwindConfig: css.tailwindConfig,
+      blocosStyle: css.blocosStyle,
+      regras: css.regras,
+      classes: css.classes,
+      classesResolvidas: css.classesResolvidas,
+      elementosComStyleInline: css.elementosComStyleInline,
+    },
     elementosComEventos: relatorio.comEventos,
     elementos: elementos.map((el) => ({
       nome: el.nome,
@@ -1274,6 +2358,18 @@ async function processarHtml(
       vazio: el.vazio,
       atributos: el.atributos,
       eventos: el.eventos,
+      // Versão enxuta: as classes resolvidas ficam uma vez só em css.classesResolvidas
+      css: {
+        regras: el.css.regras.map((r) => ({
+          indiceRegra: r.indiceRegra,
+          seletor: r.seletor,
+          linha: r.linha,
+          global: r.global,
+          estados: r.estados,
+          pseudoElemento: r.pseudoElemento,
+        })),
+        inline: el.css.inline,
+      },
       texto: el.texto,
     })),
   };
@@ -1290,6 +2386,7 @@ async function processarHtml(
     validacao,
     analiseScripts,
     associacao,
+    css,
     relatorio,
     resultado,
   };
@@ -1348,7 +2445,7 @@ async function mapearTags(arquivo = "code.html") {
     linhas.push(texto);
   };
 
-  const { html, tags, elementos, validacao, relatorio, resultado } =
+  const { html, tags, elementos, validacao, css, relatorio, resultado } =
     await processarHtml(caminhoHtml, { salvarJson: true });
 
   const header = buscarElementoPorNome(elementos, "header");
@@ -1365,6 +2462,36 @@ async function mapearTags(arquivo = "code.html") {
   log(
     `Estrutura válida: ${validacao.valido ? "Sim (0 erros)" : `Não (${validacao.totalErros} erros)`}`,
   );
+
+  const tw = css.tailwindConfig;
+  if (tw.encontrado && !tw.erro) {
+    const secoes = Object.entries(tw.totais)
+      .map(([nome, total]) => `${nome} ${total}`)
+      .join(" · ");
+    log(`tailwind.config: L${tw.linha} | ${secoes}`);
+  } else if (tw.erro) {
+    log(`tailwind.config: L${tw.linha} (não foi possível ler: ${tw.erro})`);
+  } else {
+    log("tailwind.config: não encontrado");
+  }
+  const regrasStyle = css.regras.filter((r) => r.tipo === "regra");
+  log(
+    `Blocos <style>: ${css.blocosStyle.length}${css.blocosStyle.length ? ` (${css.blocosStyle.map((b) => `L${b.linha}`).join(", ")})` : ""} | regras: ${regrasStyle.length}`,
+  );
+  for (const r of regrasStyle) {
+    const ctx = r.contexto.length ? `, ${r.contexto.join(", ")}` : "";
+    const alcance = r.seletores.every((sel) => ehSeletorGlobal(analisarSeletor(sel)))
+      ? "todos os elementos"
+      : `${r.totalElementos} elemento${r.totalElementos === 1 ? "" : "s"}`;
+    log(`  - ${r.seletor} (L${r.linha}${ctx}) -> ${alcance}: ${formatarDeclaracoes(r.declaracoes)}`);
+  }
+  log(
+    `Classes distintas: ${css.classes.distintas} | do tailwind.config: ${css.classes.tailwindConfig} | arbitrárias: ${css.classes.arbitrarias} | sem token no config: ${css.classes.padrao}`,
+  );
+  if (css.elementosComStyleInline) {
+    log(`Elementos com style inline: ${css.elementosComStyleInline}`);
+  }
+
   log(`Elementos com eventos mapeados: ${relatorio.comEventos.length}`);
 
   for (const item of relatorio.comEventos) {
@@ -1380,6 +2507,7 @@ async function mapearTags(arquivo = "code.html") {
         `  - <${item.tag}${item.id ? ` id="${item.id}"` : ""}> (L${item.linha}) -> [${ev.evento}] handler L${linhaHandler} via ${ev.origem} (${ev.tipoManipulador}): "${resumoCodigo}"`,
       );
     }
+    for (const linha of descreverCssElemento(item.css)) log(linha);
   }
 
   // Salva também output/resultado.json como espelho padrão
@@ -1437,6 +2565,17 @@ module.exports = {
   analisarScripts,
   associarEventos,
   gerarRelatorioInteratividade,
+  extrairTailwindConfig,
+  separarVariantes,
+  resolverClasseTailwind,
+  extrairDeclaracoes,
+  extrairRegrasCss,
+  analisarSeletor,
+  calcularEspecificidade,
+  construirArvore,
+  casarSeletor,
+  mapearCss,
+  descreverCssElemento,
   salvarResultadoJson,
   processarHtml,
   lerHtml,

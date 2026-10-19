@@ -1,7 +1,7 @@
 {
   "arquivo": "index.html",
   "caminhoOrigem": "C:\\Users\\genil\\Documents\\projetos\\converg\\index.html",
-  "geradoEm": "2026-10-19T20:42:55.153Z",
+  "geradoEm": "2026-10-19T21:09:10.364Z",
   "estatisticas": {
     "tamanhoBytes": 5253,
     "totalTags": 131,
@@ -490,6 +490,25 @@
       }
     ]
   },
+  "css": {
+    "tailwindConfig": {
+      "encontrado": false,
+      "linha": null,
+      "erro": null,
+      "totais": {},
+      "secoes": {}
+    },
+    "blocosStyle": [],
+    "regras": [],
+    "classes": {
+      "distintas": 0,
+      "tailwindConfig": 0,
+      "arbitrarias": 0,
+      "padrao": 0
+    },
+    "classesResolvidas": {},
+    "elementosComStyleInline": 27
+  },
   "elementosComEventos": [
     {
       "tag": "button",
@@ -514,7 +533,43 @@
             "scriptInicio": 5041
           }
         }
-      ]
+      ],
+      "css": {
+        "classes": [],
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px 16px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "8px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "#1d4ed8",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "cursor",
+            "valor": "pointer",
+            "importante": false
+          }
+        ]
+      }
     }
   ],
   "elementos": [
@@ -531,6 +586,10 @@
         "lang": "pt-BR"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<html lang=\"pt-BR\">\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Página de demonstração</title>\n    </head>\n    <body style=\"margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;\">\n        <header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>\n\n        <main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>\n\n        <footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>\n\n        <script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>\n    </body>\n</html>"
     },
     {
@@ -544,6 +603,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Página de demonstração</title>\n    </head>"
     },
     {
@@ -559,6 +622,10 @@
         "charset": "UTF-8"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<meta charset=\"UTF-8\" />"
     },
     {
@@ -575,6 +642,10 @@
         "content": "width=device-width, initial-scale=1.0"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
     },
     {
@@ -588,6 +659,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<title>Página de demonstração</title>"
     },
     {
@@ -603,6 +678,41 @@
         "style": "margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "32px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "#f1f5f9",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "#1e293b",
+            "importante": false
+          },
+          {
+            "propriedade": "font-family",
+            "valor": "Arial, sans-serif",
+            "importante": false
+          },
+          {
+            "propriedade": "line-height",
+            "valor": "1.6",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<body style=\"margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;\">\n        <header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>\n\n        <main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>\n\n        <footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>\n\n        <script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>\n    </body>"
     },
     {
@@ -618,6 +728,41 @@
         "style": "max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "max-width",
+            "valor": "800px",
+            "importante": false
+          },
+          {
+            "propriedade": "margin",
+            "valor": "0 auto 24px",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "24px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "#1d4ed8",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "12px",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>"
     },
     {
@@ -633,6 +778,31 @@
         "style": "margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "font-size",
+            "valor": "14px",
+            "importante": false
+          },
+          {
+            "propriedade": "letter-spacing",
+            "valor": "0.08em",
+            "importante": false
+          },
+          {
+            "propriedade": "text-transform",
+            "valor": "uppercase",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>"
     },
     {
@@ -648,6 +818,16 @@
         "style": "margin: 8px 0;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin",
+            "valor": "8px 0",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>"
     },
     {
@@ -663,6 +843,16 @@
         "style": "margin: 0;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin",
+            "valor": "0",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>"
     },
     {
@@ -678,6 +868,21 @@
         "style": "max-width: 800px; margin: 0 auto;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "max-width",
+            "valor": "800px",
+            "importante": false
+          },
+          {
+            "propriedade": "margin",
+            "valor": "0 auto",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>"
     },
     {
@@ -693,6 +898,36 @@
         "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-bottom",
+            "valor": "20px",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "24px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "12px",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>"
     },
     {
@@ -708,6 +943,21 @@
         "style": "margin-top: 0; color: #1d4ed8;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-top",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "#1d4ed8",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>"
     },
     {
@@ -721,6 +971,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<p>Este parágrafo contém</p>"
     },
     {
@@ -734,6 +988,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<strong>em</strong>"
     },
     {
@@ -747,6 +1005,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<em></em>"
     },
     {
@@ -762,6 +1024,26 @@
         "style": "padding: 2px 6px; background: #e2e8f0; border-radius: 4px;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "2px 6px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "#e2e8f0",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "4px",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>"
     },
     {
@@ -775,6 +1057,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<p></p>"
     },
     {
@@ -791,6 +1077,16 @@
         "style": "color: #1d4ed8;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "color",
+            "valor": "#1d4ed8",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>"
     },
     {
@@ -806,6 +1102,31 @@
         "style": "margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin",
+            "valor": "16px 0",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "12px 16px",
+            "importante": false
+          },
+          {
+            "propriedade": "border-left",
+            "valor": "4px solid #3b82f6",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "#eff6ff",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>"
     },
     {
@@ -821,6 +1142,36 @@
         "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-bottom",
+            "valor": "20px",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "24px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "12px",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>"
     },
     {
@@ -836,6 +1187,21 @@
         "style": "margin-top: 0; color: #1d4ed8;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-top",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "#1d4ed8",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>"
     },
     {
@@ -849,6 +1215,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<h3>Uma</h3>"
     },
     {
@@ -862,6 +1232,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<ul>\n</ul>"
     },
     {
@@ -875,6 +1249,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<li></li>"
     },
     {
@@ -888,6 +1266,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<li></li>"
     },
     {
@@ -901,6 +1283,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<li>Ter</li>"
     },
     {
@@ -914,6 +1300,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<h3></h3>"
     },
     {
@@ -927,6 +1317,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<ol></ol>"
     },
     {
@@ -940,6 +1334,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<li>Ler o arquivo HTML</li>"
     },
     {
@@ -953,6 +1351,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<li></li>"
     },
     {
@@ -966,6 +1368,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<li></li>"
     },
     {
@@ -981,6 +1387,36 @@
         "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-bottom",
+            "valor": "20px",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "24px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "12px",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>"
     },
     {
@@ -996,6 +1432,21 @@
         "style": "margin-top: 0; color: #1d4ed8;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-top",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "#1d4ed8",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>"
     },
     {
@@ -1011,6 +1462,26 @@
         "style": "width: 100%; border-collapse: collapse; text-align: left;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "width",
+            "valor": "100%",
+            "importante": false
+          },
+          {
+            "propriedade": "border-collapse",
+            "valor": "collapse",
+            "importante": false
+          },
+          {
+            "propriedade": "text-align",
+            "valor": "left",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>"
     },
     {
@@ -1024,6 +1495,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<thead></thead>"
     },
     {
@@ -1039,6 +1514,16 @@
         "style": "background: #e2e8f0;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "background",
+            "valor": "#e2e8f0",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>"
     },
     {
@@ -1054,6 +1539,21 @@
         "style": "padding: 10px; border: 1px solid #cbd5e1;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>"
     },
     {
@@ -1069,6 +1569,21 @@
         "style": "padding: 10px; border: 1px solid #cbd5e1;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>"
     },
     {
@@ -1082,6 +1597,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<tbody></tbody>"
     },
     {
@@ -1095,6 +1614,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<tr></tr>"
     },
     {
@@ -1110,6 +1633,21 @@
         "style": "padding: 10px; border: 1px solid #cbd5e1;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>"
     },
     {
@@ -1125,6 +1663,21 @@
         "style": "padding: 10px; border: 1px solid #cbd5e1;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>"
     },
     {
@@ -1138,6 +1691,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<tr></tr>"
     },
     {
@@ -1153,6 +1710,21 @@
         "style": "padding: 10px; border: 1px solid #cbd5e1;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>"
     },
     {
@@ -1168,6 +1740,21 @@
         "style": "padding: 10px; border: 1px solid #cbd5e1;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>"
     },
     {
@@ -1183,6 +1770,36 @@
         "style": "margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-bottom",
+            "valor": "20px",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "24px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "1px solid #cbd5e1",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "12px",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>"
     },
     {
@@ -1198,6 +1815,21 @@
         "style": "margin-top: 0; color: #1d4ed8;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "margin-top",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "#1d4ed8",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>"
     },
     {
@@ -1211,6 +1843,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<p>Clique no botão para atualizar o contador:</p>"
     },
     {
@@ -1244,6 +1880,41 @@
           }
         }
       ],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "padding",
+            "valor": "10px 16px",
+            "importante": false
+          },
+          {
+            "propriedade": "border",
+            "valor": "0",
+            "importante": false
+          },
+          {
+            "propriedade": "border-radius",
+            "valor": "8px",
+            "importante": false
+          },
+          {
+            "propriedade": "background",
+            "valor": "#1d4ed8",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "white",
+            "importante": false
+          },
+          {
+            "propriedade": "cursor",
+            "valor": "pointer",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>"
     },
     {
@@ -1260,6 +1931,10 @@
         "aria-live": "polite"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>"
     },
     {
@@ -1273,6 +1948,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<details>\n                    <</details>"
     },
     {
@@ -1286,6 +1965,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<p></p>"
     },
     {
@@ -1301,6 +1984,36 @@
         "style": "max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;"
       },
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": [
+          {
+            "propriedade": "max-width",
+            "valor": "800px",
+            "importante": false
+          },
+          {
+            "propriedade": "margin",
+            "valor": "0 auto",
+            "importante": false
+          },
+          {
+            "propriedade": "padding",
+            "valor": "16px",
+            "importante": false
+          },
+          {
+            "propriedade": "color",
+            "valor": "#64748b",
+            "importante": false
+          },
+          {
+            "propriedade": "text-align",
+            "valor": "center",
+            "importante": false
+          }
+        ]
+      },
       "texto": "<footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>"
     },
     {
@@ -1314,6 +2027,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<small></small>"
     },
     {
@@ -1327,6 +2044,10 @@
       "vazio": false,
       "atributos": {},
       "eventos": [],
+      "css": {
+        "regras": [],
+        "inline": []
+      },
       "texto": "<script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>"
     }
   ]

@@ -259,7 +259,7 @@ Imprime o primeiro bloco `<header>` de `code.html`, o resumo com código de cada
 ```bash
 node --test test.js
 ```
-Executa os 17 testes cobrindo tokenização, validação estrutural, preservação de formatação, detalhamento de manipuladores, parâmetros formais, opções de listeners e geração do JSON na pasta `output/`.
+Executa os 23 testes cobrindo tokenização, validação estrutural, preservação de formatação, detalhamento de manipuladores, parâmetros formais, opções de listeners e geração do JSON na pasta `output/`.
 
 ---
 
