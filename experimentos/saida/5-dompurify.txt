@@ -1,0 +1,20 @@
+=== Experimento 5: DOMPurify em trechos recortados ===
+
+--- code.html header (L506-L572, 3992 chars)
+  texto idêntico ao original depois do sanitize: NÃO (2843 chars)
+  removido: nada
+  primeira diferença no char 7:
+    original: "<header\n                class=\"fixed top-0 left"
+    sanitize: "<header class=\"fixed top-0 left-64 right-0 h-14"
+--- code.html #copy-link-btn (L742-L752, 707 chars)
+  texto idêntico ao original depois do sanitize: NÃO (348 chars)
+  removido: nada
+  primeira diferença no char 7:
+    original: "<button\n                                       "
+    sanitize: "<button class=\"p-1.5 rounded hover:bg-surface-c"
+--- fixtures/com-scripts.html body (L7-L44, 1384 chars)
+  texto idêntico ao original depois do sanitize: NÃO (297 chars)
+  removido: atributo onclick de <button> x1, atributo onmouseover de <a> x1, elemento <script> x1
+  primeira diferença no char 0:
+    original: "<body>\r\n        <button id=\"salvar\">Salv"
+    sanitize: "\n        <button id=\"salvar\">Salvar</but"

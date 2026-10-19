@@ -154,3 +154,5 @@ Coisas que a bateria mostrou e que não são erro de teste, mas valem anotar:
 
 - **Seção nunca fechada** (F-01): o validador acusa como `fechamento_cruzado` no `</body>`, não como `tag_nao_fechada`. A informação está lá (`tagPendente` com a linha da `<section>`), só o tipo é outro.
 - **Classes de CSS puro** (`css-puro.html`): `card`, `btn` e `intro` aparecem na saída como "sem token no config", porque o rótulo foi pensado para Tailwind. O CSS delas vem das regras de `<style>`, que aparecem logo abaixo.
+- **`querySelector` liga a todos** (F-15): `document.querySelector(".item").onmouseover` liga aos dois `.item`, mas no navegador `querySelector` devolve só o primeiro. O teste afirma o comportamento atual do script. Visto no experimento com acorn ([experimentos/LIBS.md](experimentos/LIBS.md)).
+- **`<p>` sem fechamento antes de `</div>`** (F-32): pela especificação do HTML o `</div>` fecha o `<p>` implicitamente, então o `foco.html` é válido; o parse5 e o html-validate concordam. O F-32 usa o fato de o validador próprio acusar esse `<p>`.

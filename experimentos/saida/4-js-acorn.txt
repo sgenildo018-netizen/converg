@@ -1,0 +1,38 @@
+=== Experimento 4: acorn (AST) x regex de analisarScripts do script.js ===
+
+--- fixtures\com-scripts.html
+  vínculos elemento+evento (sem inline): script.js 5 | acorn 4 | em comum 4
+    só no script.js: <div> L12 [mouseover]
+  - <button#salvar> L8 -> [click] handler L22 (chamada L22) addEventListener arrow_function, 3 linhas de código
+  - <button#cancelar> L9 -> [click] handler L28 (chamada L26) addEventListener funcao_nomeada, 3 linhas de código
+  - <input#busca> L10 -> [input] handler L17 (chamada L35) addEventListener referencia, 3 linhas de código
+  - <div> L11 -> [mouseover] handler L38 (chamada L38) propriedadeOn funcao_anonima, 1 linhas de código
+  - não ligado (window) -> [load] handler L40 (chamada L40) addEventListener arrow_function, 1 linhas de código
+  - não ligado (getElementById("nao-existe")) -> [click] handler L42 (chamada L42) addEventListener arrow_function, 1 linhas de código
+--- fixtures\foco.html
+  vínculos elemento+evento (sem inline): script.js 2 | acorn 2 | em comum 2
+  - <button#menu> L18 -> [click] handler L32 (chamada L32) addEventListener arrow_function, 3 linhas de código
+  - <button#comprar> L24 -> [click] handler L37 (chamada L37) addEventListener arrow_function, 1 linhas de código
+--- fixtures\limitacoes.html
+  vínculos elemento+evento (sem inline): script.js 2 | acorn 2 | em comum 1
+    só no script.js: <button#comentado> L24 [click]
+    só no acorn:     <form#formulario> L23 [submit]
+  - <button#multilinha> L22 -> [click] handler L29 (chamada L29) propriedadeOn funcao_anonima, 4 linhas de código
+  - <form#formulario> L23 -> [submit] handler L35 (chamada L35) addEventListener arrow_function, 1 linhas de código
+--- index.html
+  vínculos elemento+evento (sem inline): script.js 1 | acorn 1 | em comum 1
+  - <button#botao-contador> L66 -> [click] handler L84 (chamada L84) addEventListener arrow_function, 4 linhas de código
+--- code.html
+  vínculos elemento+evento (sem inline): script.js 3 | acorn 3 | em comum 3
+  - <button#btn-run-test> L1153 -> [click] handler L1731 (chamada L1731) addEventListener arrow_function, 30 linhas de código
+  - <button#star-btn> L764 -> [click] handler L1768 (chamada L1768) addEventListener arrow_function, 14 linhas de código
+  - <button#copy-link-btn> L742 -> [click] handler L1788 (chamada L1788) addEventListener arrow_function, 11 linhas de código
+  - inline <button> L902 [click] usa #code-snippet-1, #copy-status-1
+  - inline <button> L1053 [click] usa #code-snippet-2
+
+--- Limitações conhecidas (todo) com acorn
+  F-25 onclick decodificado: sim (alert("oi"))
+  F-26 #multilinha traz o corpo inteiro: sim
+  F-27 querySelector("form") liga ao <form>: sim
+  F-28 listener comentado não conta: sim
+  extra: querySelector(".item").onmouseover liga só ao 1º .item (como o navegador): sim (script.js liga aos 2)

@@ -1,0 +1,84 @@
+=== Experimento 1: parser HTML (parse5, htmlparser2) x tokenizer do script.js ===
+
+--- fixtures\com-scripts.html (1558 chars, L1-L46)
+  script.js:   13 elementos
+  parse5:      13 elementos | mesmo início 13 | mesmo recorte 13 | só no parse5 0 | erros de parse 0
+  htmlparser2: 13 elementos | mesmo início 13 | mesmo recorte 13 | só no htmlparser2 0
+--- fixtures\css-puro.html (1703 chars, L1-L61)
+  script.js:   18 elementos
+  parse5:      18 elementos | mesmo início 18 | mesmo recorte 18 | só no parse5 0 | erros de parse 0
+  htmlparser2: 18 elementos | mesmo início 18 | mesmo recorte 18 | só no htmlparser2 0
+--- fixtures\erros-estruturais.html (850 chars, L1-L25)
+  script.js:   13 elementos
+  parse5:      14 elementos | mesmo início 13 | mesmo recorte 12 | só no parse5 1 | erros de parse 0
+  htmlparser2: 15 elementos | mesmo início 13 | mesmo recorte 12 | só no htmlparser2 2
+    parse5 diverge: <i> L16: script termina em 578, lib em 570
+    só no parse5: <section> L9
+    só no htmlparser2: <section> L9
+    só no htmlparser2: <br> L19
+    parse5, fechados implicitamente: <section> L9, <i> L16
+--- fixtures\foco.html (1195 chars, L1-L41)
+  script.js:   16 elementos
+  parse5:      17 elementos | mesmo início 16 | mesmo recorte 16 | só no parse5 1 | erros de parse 0
+  htmlparser2: 17 elementos | mesmo início 16 | mesmo recorte 16 | só no htmlparser2 1
+    só no parse5: <p> L27
+    só no htmlparser2: <p> L27
+    parse5, fechados implicitamente: <p> L27
+--- fixtures\limitacao-aspa-solta.html (468 chars, L1-L14)
+  script.js:   3 elementos
+  parse5:      8 elementos | mesmo início 3 | mesmo recorte 3 | só no parse5 5 | erros de parse 1
+  htmlparser2: 8 elementos | mesmo início 3 | mesmo recorte 3 | só no htmlparser2 5
+    só no parse5: <html> L2
+    só no parse5: <body> L7
+    só no parse5: <span> L9
+    só no htmlparser2: <html> L2
+    só no htmlparser2: <body> L7
+    só no htmlparser2: <span> L9
+--- fixtures\limitacoes.html (1616 chars, L1-L43)
+  script.js:   15 elementos
+  parse5:      17 elementos | mesmo início 14 | mesmo recorte 14 | só no parse5 3 | erros de parse 0
+  htmlparser2: 17 elementos | mesmo início 14 | mesmo recorte 14 | só no htmlparser2 3
+    só no parse5: <li> L10
+    só no parse5: <li> L11
+    só no parse5: <p> L13
+    só no htmlparser2: <li> L10
+    só no htmlparser2: <li> L11
+    só no htmlparser2: <p> L13
+    parse5, fechados implicitamente: <li> L10, <li> L11, <p> L13
+--- fixtures\sem-scripts.html (696 chars, L1-L27)
+  script.js:   19 elementos
+  parse5:      19 elementos | mesmo início 19 | mesmo recorte 19 | só no parse5 0 | erros de parse 0
+  htmlparser2: 19 elementos | mesmo início 19 | mesmo recorte 19 | só no htmlparser2 0
+--- fixtures\style-inline.html (615 chars, L1-L15)
+  script.js:   10 elementos
+  parse5:      10 elementos | mesmo início 10 | mesmo recorte 10 | só no parse5 0 | erros de parse 0
+  htmlparser2: 10 elementos | mesmo início 10 | mesmo recorte 10 | só no htmlparser2 0
+--- fixtures\tailwind-puro.html (1672 chars, L1-L45)
+  script.js:   12 elementos
+  parse5:      12 elementos | mesmo início 12 | mesmo recorte 12 | só no parse5 0 | erros de parse 0
+  htmlparser2: 12 elementos | mesmo início 12 | mesmo recorte 12 | só no htmlparser2 0
+--- index.html (5228 chars, L1-L91)
+  script.js:   56 elementos
+  parse5:      56 elementos | mesmo início 56 | mesmo recorte 56 | só no parse5 0 | erros de parse 1
+  htmlparser2: 59 elementos | mesmo início 56 | mesmo recorte 56 | só no htmlparser2 3
+    só no htmlparser2: <p> L18
+    só no htmlparser2: <p> L19
+    só no htmlparser2: <p> L70
+--- code.html (112632 chars, L1-L1805)
+  script.js:   513 elementos
+  parse5:      513 elementos | mesmo início 513 | mesmo recorte 513 | só no parse5 0 | erros de parse 0
+  htmlparser2: 513 elementos | mesmo início 483 | mesmo recorte 364 | só no htmlparser2 30
+    só no htmlparser2: <span> L230
+    só no htmlparser2: <span> L262
+    só no htmlparser2: <a> L265
+
+--- Limitações conhecidas (todo) com cada parser
+  F-24 <b> dentro de <textarea> não vira elemento: parse5 sim | htmlparser2 sim
+  F-25 onclick com &quot; decodificado para alert("oi"): parse5 sim | htmlparser2 sim
+  F-29 title=it's não engole o resto (acha #depois e #botao): parse5 sim | htmlparser2 sim
+  F-29 title=it's vale "it's": parse5 sim | htmlparser2 sim
+
+--- Tempo em code.html (média de 5)
+  script.js localizarTags+mapearElementos: 72.7 ms
+  parse5:      4.8 ms
+  htmlparser2: 1.9 ms

@@ -85,6 +85,7 @@ Saídas na pasta `output/`:
 - `TESTES.md`: **cada teste** descrito, com o que verifica e o esperado. Antes de implementar algo novo, a bateria de testes vem primeiro (o fluxo está lá).
 - `code.html`: página real (~112 KB, Tailwind), caso de uso principal.
 - `index.html`: página pequena com erros estruturais propositais, para testar a validação.
+- `experimentos/`: comparação do script com libs prontas (parse5, html-validate, postcss, css-select, acorn, DOMPurify), com `package.json` próprio. O `script.js` continua sem dependências. Resultado em [experimentos/LIBS.md](experimentos/LIBS.md).
 - `MAPEAMENTO_HTML.md`: **como** o script funciona por dentro (arquitetura e formato do JSON). Este README cobre o **porquê**.
 
 ## Limitações conhecidas

@@ -1,0 +1,114 @@
+=== Experimento 2: html-validate x validarEstrutura do script.js ===
+
+--- fixtures\com-scripts.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 5 mensagens: no-implicit-button-type 3, void-style 2
+--- fixtures\css-puro.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 3 mensagens: void-style 3
+--- fixtures\erros-estruturais.html
+  script.js:     inválido (4 erros, 1 avisos)
+    L13 fechamento_orfa <span>
+    L16 fechamento_cruzado <b>
+    L16 fechamento_orfa <i>
+    L23 fechamento_cruzado <body>
+  html-validate: inválido (9 erros, 1 avisos) com regras estruturais
+    L9 close-order (erro): Unclosed element '<section>'
+    L13 close-order (erro): Stray end tag '</span>'
+    L16 close-order (erro): Unclosed element '<i>'
+    L16 close-order (erro): End tag '</b>' seen but there were open elements
+    L16 close-order (erro): End tag '</p>' seen but there were open elements
+    L19 element-permitted-content (erro): <div> element is not permitted as content under <b>
+    L19 void-content (aviso): End tag for <br> must be omitted
+    L22 element-permitted-content (erro): <footer> element is not permitted as content under <b>
+    L23 close-order (erro): End tag '</body>' seen but there were open elements
+    L24 close-order (erro): End tag '</html>' seen but there were open elements
+  html-validate recommended: 14 mensagens: close-order 7, no-implicit-close 3, element-permitted-content 2, void-style 1, void-content 1
+--- fixtures\foco.html
+  script.js:     inválido (1 erros, 0 avisos)
+    L28 fechamento_cruzado <div>
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 5 mensagens: no-implicit-button-type 3, void-style 1, no-implicit-close 1
+--- fixtures\limitacao-aspa-solta.html
+  script.js:     inválido (3 erros, 0 avisos)
+    L9 tag_nao_fechada <span>
+    L7 tag_nao_fechada <body>
+    L2 tag_nao_fechada <html>
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 4 mensagens: void-style 1, attr-quotes 1, no-raw-characters 1, no-implicit-button-type 1
+--- fixtures\limitacoes.html
+  script.js:     inválido (3 erros, 0 avisos)
+    L12 fechamento_cruzado <ul>
+    L12 fechamento_cruzado <ul>
+    L41 fechamento_cruzado <body>
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 9 mensagens: no-implicit-close 3, no-implicit-button-type 3, no-raw-characters 2, void-style 1
+--- fixtures\sem-scripts.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 2 mensagens: void-style 2
+--- fixtures\style-inline.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 7 mensagens: no-inline-style 5, void-style 1, attr-quotes 1
+--- fixtures\tailwind-puro.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 1 mensagens: void-style 1
+--- index.html
+  script.js:     inválido (21 erros, 0 avisos)
+    L18 fechamento_orfa <strong>
+    L18 fechamento_orfa <em>
+    L18 fechamento_orfa <p>
+    L19 fechamento_orfa <p>
+    L27 fechamento_orfa <h3>
+    L29 fechamento_orfa <li>
+    L30 fechamento_orfa <li>
+    L31 fechamento_orfa <li>
+    L32 fechamento_orfa <ul>
+    L33 fechamento_orfa <h3>
+    L36 fechamento_orfa <li>
+    L37 fechamento_orfa <li>
+    L38 fechamento_orfa <ol>
+    L49 fechamento_orfa <thead>
+    L54 fechamento_orfa <tr>
+    L58 fechamento_orfa <tr>
+    L59 fechamento_orfa <tbody>
+    L69 fechamento_orfa <summary>
+    L70 fechamento_orfa <p>
+    L71 fechamento_orfa <details>
+    L76 fechamento_orfa <small>
+  html-validate: inválido (18 erros, 0 avisos) com regras estruturais
+    L18 close-order (erro): Stray end tag '</strong>'
+    L18 close-order (erro): Stray end tag '</em>'
+    L18 close-order (erro): Stray end tag '</p>'
+    L19 close-order (erro): Stray end tag '</p>'
+    L27 close-order (erro): Stray end tag '</h3>'
+    L29 close-order (erro): Stray end tag '</li>'
+    L30 close-order (erro): Stray end tag '</li>'
+    L31 close-order (erro): Stray end tag '</li>'
+    L32 close-order (erro): Stray end tag '</ul>'
+    L33 close-order (erro): Stray end tag '</h3>'
+    L36 close-order (erro): Stray end tag '</li>'
+    L37 close-order (erro): Stray end tag '</li>'
+    L38 close-order (erro): Stray end tag '</ol>'
+    L49 close-order (erro): Stray end tag '</thead>'
+    L54 close-order (erro): Stray end tag '</tr>'
+    L58 close-order (erro): Stray end tag '</tr>'
+    L59 close-order (erro): Stray end tag '</tbody>'
+    L69 parser-error (erro): failed to tokenize "<</details...", state TEXT failed to consume data or change state.
+  html-validate recommended: 49 mensagens: no-inline-style 26, close-order 17, void-style 2, wcag/h63 2, doctype-style 1, parser-error 1
+--- code.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: inválido (1 erros, 0 avisos) com regras estruturais
+    L514 element-permitted-content (erro): <div> element is not permitted as content under <button>
+  html-validate recommended: 30 mensagens: void-style 10, no-raw-characters 9, unique-landmark 6, wcag/h37 2, doctype-style 1, element-required-content 1, element-permitted-content 1
+
+--- Limitação F-23 com html-validate (regras estruturais)
+  limitacoes.html válido (li/p sem fechamento são permitidos): sim
+
+--- Tempo em code.html (média de 5)
+  script.js validarEstrutura: 69.7 ms (inclui localizarTags)
+  html-validate estrutural:   15.2 ms

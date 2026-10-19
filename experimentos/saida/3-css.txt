@@ -1,0 +1,29 @@
+=== Experimento 3: postcss + css-select x extrairRegrasCss/casarSeletor do script.js ===
+
+--- fixtures\css-puro.html
+  regras: script.js 9 | postcss 9 | mesmo seletor e linha 9
+  casamento seletor -> elementos: igual em 9 de 9 regras
+--- fixtures\foco.html
+  regras: script.js 2 | postcss 2 | mesmo seletor e linha 2
+  casamento seletor -> elementos: igual em 2 de 2 regras
+--- code.html
+  regras: script.js 5 | postcss 5 | mesmo seletor e linha 5
+  casamento seletor -> elementos: igual em 5 de 5 regras
+
+--- Seletores mais difíceis (css-select x script.js) num HTML de teste
+  li:nth-child(odd)    css-select 2 | script.js 2
+  li:last-child        css-select 1 | script.js 1
+  li:nth-of-type(2)    css-select 1 | script.js 1
+  ul:has(> .a)         css-select 1 | script.js 1
+  p:lang(pt)           css-select 1 | script.js 2
+  li:only-child        css-select 0 | script.js 0
+  :is(ul, p) > li.a    css-select 2 | script.js 2
+  li.a ~ li            css-select 2 | script.js 2
+
+--- CSS difícil: regras lidas (seletor @ linha)
+  script.js: .a::after@1 | .b@2 | .c@3 | .d@5 | .f@6
+  postcss:   .a::after@1 | .b@2 | .c@3 | .d@5 | & .e@5 | .f@6
+
+--- Tempo no <style> de code.html (média de 5)
+  script.js extrairRegrasCss: 0.05 ms
+  postcss:                    0.17 ms
