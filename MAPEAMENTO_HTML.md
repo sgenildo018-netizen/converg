@@ -1,6 +1,6 @@
 # Experimento: mapear HTML sem dependências
 
-Este documento descreve a arquitetura e os experimentos implementados em `script.js`: ler um arquivo HTML como texto, localizar tags com precisão posicional, calcular seus intervalos `[inicio, fim)`, validar a integridade estrutural, interpretar atributos, **mapear detalhadamente os eventos** (tipo de evento, manipulador, parâmetros, código-fonte e opções) e **exportar o resultado estruturado em arquivos JSON na pasta `output/`**, sem utilizar qualquer biblioteca externa ou parser pesado.
+Este documento descreve a arquitetura e os experimentos implementados em `script.js`: ler um arquivo HTML como texto, localizar tags com precisão posicional, calcular seus intervalos `[inicio, fim)`, validar a integridade estrutural, interpretar atributos, **mapear detalhadamente os eventos** (tipo de evento, manipulador, parâmetros, código-fonte e opções), **ligar a cada elemento o CSS que ele usa** (classes do `tailwind.config`, regras de `<style>` e style inline) e **exportar o resultado estruturado em arquivos JSON na pasta `output/`**, sem utilizar qualquer biblioteca externa ou parser pesado.
 
 ## Objetivo
 
@@ -42,7 +42,13 @@ Além da extração textual, o objetivo é correlacionar o DOM estático com as 
     - Audita seletores não encontrados no documento
                             │
                             ▼
- 6. Exportação em JSON (salvarResultadoJson / processarHtml)
+ 6. Mapeamento de CSS (mapearCss)
+    - Resolve classes Tailwind pelos tokens do tailwind.config (com a linha do token)
+    - Casa regras dos blocos <style> com os elementos (combinadores e pseudo-classes)
+    - Lê o atributo style de cada elemento
+                            │
+                            ▼
+ 7. Exportação em JSON (salvarResultadoJson / processarHtml)
     - Gera arquivos estruturados na pasta output/ (code.json, index.json, resultado.json)
 ```
 
@@ -160,7 +166,35 @@ Em vez de registrar apenas o nome do evento (como `"click"`), o analisador disse
 
 ---
 
-### 7. Exportação Estruturada em JSON (`salvarResultadoJson` e `processarHtml`)
+### 7. Mapeamento de CSS (`mapearCss`)
+
+Depois dos eventos, o pipeline liga a cada elemento o CSS que ele usa, vindo de três fontes. O resultado fica em `el.css = { classes, regras, inline }`.
+
+**a) Classes Tailwind resolvidas pelo `tailwind.config`** (`extrairTailwindConfig` e `resolverClasseTailwind`)
+
+* Procura `tailwind.config = {...}` nos `<script>`, recorta o objeto com contagem de chaves e o avalia com `node:vm` num contexto vazio (não é sandbox de segurança).
+* Lê `theme` e `theme.extend`. Cada token guarda `valor`, `linha` (onde a chave foi escrita no HTML) e `origem` (`"theme"` ou `"extend"`). Cores aninhadas viram nomes de classe: `brand: { DEFAULT, 500 }` → `brand`, `brand-500`.
+* Cada classe é separada em variantes (`md:hover:`), `!` (important), `-` (negativo) e utilitário. O prefixo do utilitário (`bg`, `text`, `px`, `rounded-t`...) indica a seção do tema e as propriedades CSS geradas. Prefixos mais longos são testados primeiro.
+* Opacidade de cor (`bg-primary/20`) vira `rgba(...)`. Valores arbitrários (`w-[42%]`, `text-[16px]`, `shadow-[...]`) são resolvidos pelo próprio texto; em prefixos ambíguos (`text-[...]`), valor com cara de cor vira `color`, o resto vira `font-size`.
+* `origem` de cada classe: `"tailwind.config"`, `"arbitrario"` ou `"padrao"` (sem token no config; a escala padrão do Tailwind não é reproduzida).
+
+**b) Regras dos blocos `<style>`** (`extrairRegrasCss`, `analisarSeletor`, `casarSeletor`)
+
+* Parser de CSS próprio: troca comentários por espaços (mantém offsets), lê regras com a linha no HTML original e entra em `@media`, `@layer`, `@supports` e `@container` guardando o contexto. `@keyframes` e `@font-face` são listados como `tipo: "at-rule"`.
+* Cada seletor é dividido em partes compostas e combinadores (` `, `>`, `+`, `~`) e testado da direita para a esquerda sobre a árvore montada por `construirArvore` (pai, filhos e irmãos a partir dos intervalos).
+* Suporta tag, `*`, `#id`, `.classe`, `[atributo]` com `=`, `~=`, `|=`, `^=`, `$=`, `*=`, pseudo-classes estruturais (`:first-child`, `:last-child`, `:nth-child(an+b)`, `:*-of-type`, `:not`, `:is`, `:where`, `:root`, `:empty`).
+* Estados dinâmicos (`:hover`, `:focus`, `:active`...) não dá para avaliar num arquivo estático: o elemento casa e o estado fica anotado em `estados`. Pseudo-elementos ficam em `pseudoElemento`. Seletores que valem para qualquer elemento (`*`, `::-webkit-scrollbar`) são marcados `global`.
+* Cada regra casada traz `especificidade` `[ids, classes, tags]`.
+
+**c) Atributo `style`** (`extrairDeclaracoes`)
+
+* Divide as declarações por `;` no nível superior (respeita `url(a;b)`), normaliza o nome da propriedade em minúsculas e separa `!important`.
+
+**Saída no console:** um resumo do CSS (config, regras e contagem de classes) e, embaixo de cada elemento com evento, as classes resolvidas com a linha do token, as regras de `<style>` que casam e o style inline (`descreverCssElemento`).
+
+---
+
+### 8. Exportação Estruturada em JSON (`salvarResultadoJson` e `processarHtml`)
 
 O pipeline exporta os resultados da análise diretamente em arquivos JSON formatados com indentação na pasta `output/`:
 
@@ -196,6 +230,14 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
     "seletoresNaoEncontrados": [],
     "interativosSemEventos": [ ... ]
   },
+  "css": {
+    "tailwindConfig": { "encontrado": true, "linha": 43, "totais": { "colors": 47, ... }, "secoes": { ... } },
+    "blocosStyle": [ { "linha": 20, "totalRegras": 5 } ],
+    "regras": [ { "tipo": "regra", "seletor": "body", "linha": 27, "contexto": ["@layer base"], "declaracoes": [ ... ], "totalElementos": 1 } ],
+    "classes": { "distintas": 244, "tailwindConfig": 89, "arbitrarias": 20, "padrao": 135 },
+    "classesResolvidas": { "bg-primary": { "origem": "tailwind.config", "secao": "colors", "token": "primary", "linhaToken": 81, "declaracoes": [ ... ] } },
+    "elementosComStyleInline": 0
+  },
   "elementosComEventos": [
     {
       "tag": "button",
@@ -203,16 +245,19 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
       "linha": 1153,
       "coluna": 37,
       "totalEventos": 1,
-      "eventos": [ ... ]
+      "eventos": [ ... ],
+      "css": { "classes": [ ... ], "regras": [ ... ], "inline": [ ... ] }
     }
   ],
   "elementos": [ ... ]
 }
 ```
 
+Em `elementos`, o `css` de cada um é a versão enxuta (`regras` e `inline`); as classes resolvidas ficam uma vez só em `css.classesResolvidas`. Em `elementosComEventos`, o `css` vem completo.
+
 ---
 
-### 8. Funções de Consulta Disponíveis
+### 9. Funções de Consulta Disponíveis
 
 * `buscarElementoPorNome(elementos, nome)`: primeira ocorrência completa do elemento;
 * `buscarTodosPorNome(elementos, nome)`: todos os elementos daquela tag;
@@ -220,7 +265,10 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
 * `buscarPorClasse(elementos, classe)`: localiza elementos que possuam a classe especificada;
 * `buscarPorAtributo(elementos, nomeAtributo, valorEsperado?)`: localiza elementos por chave e valor de atributo;
 * `processarHtml(caminho, opcoes)`: executa todo o pipeline e gera o JSON na pasta `output/`;
-* `salvarResultadoJson(nomeArquivo, dados, pasta)`: utilitário de persistência em disco.
+* `salvarResultadoJson(nomeArquivo, dados, pasta)`: utilitário de persistência em disco;
+* `mapearCss(elementos, html)`: preenche `el.css` e devolve o resumo de CSS;
+* `resolverClasseTailwind(classe, config)`: resolve uma classe isolada;
+* `extrairRegrasCss(css, opcoes)`, `analisarSeletor(seletor)`, `casarSeletor(partes, el, arvore)`, `construirArvore(elementos)`: parser e casamento de CSS, reutilizáveis.
 
 ---
 
@@ -237,6 +285,7 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
   * `<button>` (linha 902) -> `click` inline (`navigator.clipboard.writeText(...)` com remoção de classe hidden e `setTimeout`);
   * `<button>` (linha 1053) -> `click` inline (`navigator.clipboard.writeText(...)`).
 * **Seletores Órfãos**: 0.
+* **CSS**: `tailwind.config` na linha 43 (47 cores, 9 espaçamentos, 4 raios, 10 famílias e 10 tamanhos de fonte); 1 bloco `<style>` com 5 regras; 244 classes distintas, 89 resolvidas pelo config e 20 arbitrárias.
 
 ### `index.html` (Página de Testes com Falhas Sintáticas Deliberadas)
 * **Tags**: 131 tags.
@@ -244,6 +293,10 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
 * **Validação Estrutural**: **21 erros estruturais detectados** com precisão de linha e coluna.
 * **Eventos Mapeados**:
   * `<button id="botao-contador">` (linha 66) -> `click` via `botao` (`arrow_function` incrementando o contador e atualizando `#resultado`).
+* **CSS**: sem Tailwind e sem `<style>`; 27 elementos com style inline.
+
+### Fixtures (`fixtures/`)
+Oito HTMLs pequenos, cada um isolando um caso: erros estruturais, CSS puro, só Tailwind, com scripts, sem scripts, só style inline e as limitações conhecidas. O resultado esperado de cada um está em [TESTES.md](TESTES.md).
 
 ---
 
@@ -257,14 +310,16 @@ Imprime o primeiro bloco `<header>` de `code.html`, o resumo com código de cada
 
 ### 2. Executar a suíte de testes automatizados
 ```bash
-node --test test.js
+node --test
 ```
-Executa os 23 testes cobrindo tokenização, validação estrutural, preservação de formatação, detalhamento de manipuladores, parâmetros formais, opções de listeners e geração do JSON na pasta `output/`.
+Roda os 52 testes: os unitários de `test.js` (T-01 a T-23) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-29), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
 
 ---
 
 ## Limitações Atuais e Próximas Evoluções
 
-* **Seletores CSS descendentes complexos**: expressões encadeadas (ex.: `div.card > ul li:first-child`) são categorizadas como `complexo` e não possuem resolução completa de árvore descendente;
+* **Seletores complexos nos scripts**: no CSS dos blocos `<style>` os seletores encadeados (ex.: `div.card > ul li:first-child`) já são resolvidos, mas nos `querySelector` dos scripts continuam categorizados como `complexo` e não são ligados a elementos;
+* **Limitações cobertas por testes `todo`**: fechamento opcional de `<li>`/`<p>`, tags dentro de `<textarea>`, entidades em `onclick`, `el.onclick = function` em várias linhas, `querySelector("form").addEventListener`, listener dentro de comentário JS e aspa solta em atributo sem aspas (F-23 a F-29 em [TESTES.md](TESTES.md));
+* **CSS externo**: `<link rel="stylesheet">` não é lido; da escala padrão do Tailwind só valores do `tailwind.config` e arbitrários são resolvidos;
 * **JavaScript dinâmico em tempo de execução**: referências montadas via interpolação de strings dinâmicas (ex.: `document.getElementById("btn-" + id)`) exigem interpretação dinâmica de runtime, fora do escopo de análise estática de texto;
 * **SVG com namespaces**: atributos XML/SVG com namespaces (como `xlink:href`) são preservados textualmente, mas normalizados em minúsculas nos atributos.

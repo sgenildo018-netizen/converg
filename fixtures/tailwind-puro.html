@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: apenas Tailwind, sem style e sem eventos</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    fontFamily: {
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    extend: {
+                        colors: {
+                            brand: {
+                                DEFAULT: "#1d4ed8",
+                                500: "#3b82f6",
+                            },
+                            "fundo-escuro": "#0a0e14",
+                        },
+                        spacing: {
+                            gutter: "1rem",
+                        },
+                        borderRadius: {
+                            card: "12px",
+                        },
+                        fontSize: {
+                            titulo: ["28px", { lineHeight: "36px", fontWeight: "600" }],
+                            nota: ["11px", "14px"],
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body class="bg-fundo-escuro">
+        <main class="p-gutter">
+            <h1 class="text-titulo text-brand">Título</h1>
+            <p class="text-nota text-brand-500/50">Nota com opacidade</p>
+            <div class="md:rounded-card hover:bg-brand -mt-gutter w-[42%]">Card</div>
+            <span class="font-mono flex p-4">Classes padrão do Tailwind</span>
+        </main>
+    </body>
+</html>

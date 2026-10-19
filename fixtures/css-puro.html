@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: CSS puro, sem Tailwind e sem scripts</title>
+        <style>
+            /* Regras simples */
+            .card {
+                padding: 16px;
+                border: 1px solid #ccc;
+            }
+            #titulo {
+                font-size: 32px;
+            }
+            nav a {
+                color: navy;
+            }
+            ul > li:first-child {
+                font-weight: bold;
+            }
+            h1 + p {
+                margin-top: 0;
+            }
+            .btn:hover {
+                background: #eee;
+            }
+            input[type="text"] {
+                border-radius: 4px;
+            }
+            .card.destaque {
+                border-color: gold !important;
+            }
+            @media (max-width: 600px) {
+                .card {
+                    padding: 8px;
+                }
+            }
+            @keyframes pulsar {
+                from { opacity: 1; }
+                to { opacity: 0.5; }
+            }
+        </style>
+    </head>
+    <body>
+        <h1 id="titulo">Título</h1>
+        <p class="intro">Primeiro parágrafo depois do título.</p>
+        <nav>
+            <a href="#um">Um</a>
+            <a href="#dois" class="btn">Dois</a>
+        </nav>
+        <ul>
+            <li>Primeiro item</li>
+            <li>Segundo item</li>
+        </ul>
+        <div class="card">Card simples</div>
+        <div class="card destaque">Card em destaque</div>
+        <input type="text" name="busca" />
+        <input type="checkbox" name="aceite" />
+    </body>
+</html>

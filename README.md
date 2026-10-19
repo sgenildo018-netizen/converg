@@ -30,21 +30,31 @@ Na prática, o que mais ajuda é a **saída do console**, que resume em poucas l
 --- Análise e Mapeamento Completo de Eventos ---
 Tags: 1016 | Elementos: 513
 Estrutura válida: Sim (0 erros)
+tailwind.config: L43 | colors 47 · borderRadius 4 · spacing 9 · fontFamily 10 · fontSize 10
+Blocos <style>: 1 (L20) | regras: 5
+  - html, body (L22, @layer base) -> 2 elementos: margin: 0; padding: 0
+  - main > :first-child (L30, @layer base) -> 1 elemento: margin-top: 0 !important
+  - ::-webkit-scrollbar (L37) -> todos os elementos: display: none
+Classes distintas: 244 | do tailwind.config: 89 | arbitrárias: 20 | sem token no config: 135
 Elementos com eventos mapeados: 5
   - <button id="copy-link-btn"> (L742) -> [click] handler L1788 via addEventListenerVariavel (arrow_function): "() => { navigator.clipboard.writeText(window.locatio..."
-  - <button id="star-btn"> (L764) -> [click] handler L1768 via addEventListenerVariavel (arrow_function): "() => { isStarred = !isStarred; if (isStarred) { sta..."
-  - <button> (L902) -> [click] handler L902 via inline (inline): "navigator.clipboard.writeText( document.getElementBy..."
-  - <button> (L1053) -> [click] handler L1053 via inline (inline): "navigator.clipboard.writeText( document.getElementBy..."
+      CSS: 6 classes (4 do tailwind.config, 0 arbitrárias, 2 sem token no config)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        hover:bg-surface-container-high -> background-color: #262a31 [hover] (colors "surface-container-high", L88)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        sem token no config: p-1.5 transition-colors
   - <button id="btn-run-test"> (L1153) -> [click] handler L1731 via addEventListenerVariavel (arrow_function): "() => { const val = inputEl.value.trim() || "/api/v1..."
+      ...
 ```
 
-Cada linha mostra: elemento → linha do elemento → evento → **linha do handler** → como foi registrado → tipo do handler → início do código.
+Cada linha de evento mostra: elemento → linha do elemento → evento → **linha do handler** → como foi registrado → tipo do handler → início do código. Embaixo vem o CSS do elemento: cada classe com as declarações que gera e a **linha do token** no `tailwind.config`, as regras de `<style>` que casam e o style inline.
 
 ## Como rodar
 
 ```bash
 node script.js         # analisa code.html (e index.html)
-node --test test.js    # 23 testes
+node --test            # 52 testes (45 passam, 7 todo de limitações conhecidas)
 ```
 
 Saídas na pasta `output/`:
@@ -58,7 +68,9 @@ Saídas na pasta `output/`:
 ## Arquivos
 
 - `script.js`: o mapeador (tokenizer, validação estrutural, elementos, análise de scripts, vínculo de eventos).
-- `test.js`: testes com `node:test`.
+- `test.js`: testes unitários com `node:test` (T-01 a T-23).
+- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-29): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, e as limitações conhecidas.
+- `TESTES.md`: **cada teste** descrito, com o que verifica e o esperado. Antes de implementar algo novo, a bateria de testes vem primeiro (o fluxo está lá).
 - `code.html`: página real (~112 KB, Tailwind), caso de uso principal.
 - `index.html`: página pequena com erros estruturais propositais, para testar a validação.
 - `MAPEAMENTO_HTML.md`: **como** o script funciona por dentro (arquitetura e formato do JSON). Este README cobre o **porquê**.
@@ -69,6 +81,6 @@ Saídas na pasta `output/`:
 - **O `tailwind.config` é avaliado com `node:vm`** num contexto vazio. Não é um sandbox de segurança; use só com arquivos confiáveis.
 - **Regras de `<style>`:** combinadores (` `, `>`, `+`, `~`), atributos e pseudo-classes estruturais (`:first-child`, `:nth-child`, `:not`, `:is`) são avaliados. Estados dinâmicos (`:hover`, `:focus`) casam e ficam anotados como estado. CSS de `<link rel="stylesheet">` externo não é lido.
 - **Seletores simples apenas.** `#id`, `.classe` e `tag` são resolvidos. Seletores compostos e IDs montados em runtime (`"btn-" + id`) não.
-- **Casos de HTML que o tokenizer ainda erra:** aspas soltas em valor sem aspas (`title=it's`), `<textarea>`/`<title>` com tags dentro, tags de fechamento opcionais (`<li>`, `<p>`) acusadas como erro, listeners dentro de comentários JS contados como ativos.
+- **Casos de HTML que o tokenizer ainda erra** (cada um tem um teste `todo` em [TESTES.md](TESTES.md), F-23 a F-29): aspas soltas em valor sem aspas (`title=it's`), `<textarea>`/`<title>` com tags dentro, tags de fechamento opcionais (`<li>`, `<p>`) acusadas como erro, listeners dentro de comentários JS contados como ativos.
 - **Código de handler:** `elemento.onclick = function () {…}` com várias linhas é cortado na primeira, e entidades em `onclick` (`&quot;`) não são decodificadas.
-- **JSON grande:** cada elemento guarda o texto de todos os descendentes (`code.json` fica ~11× maior que o HTML).
+- **JSON grande:** cada elemento guarda o texto de todos os descendentes (`code.json` fica ~14× maior que o HTML).

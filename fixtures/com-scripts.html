@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: eventos JS de todos os tipos</title>
+    </head>
+    <body>
+        <button id="salvar">Salvar</button>
+        <button id="cancelar">Cancelar</button>
+        <input id="busca" type="search" />
+        <div class="item">Item A</div>
+        <div class="item">Item B</div>
+        <button onclick="alert('inline')">Inline</button>
+        <a href="#" id="link" onmouseover="this.style.color = 'red'">Link</a>
+
+        <script>
+            function filtrar(evento) {
+                console.log(evento.target.value);
+            }
+
+            const btnSalvar = document.getElementById("salvar");
+            btnSalvar.addEventListener("click", () => {
+                console.log("salvou");
+            });
+
+            document.getElementById("cancelar").addEventListener(
+                "click",
+                function cancelar(e) {
+                    console.log("cancelou", e);
+                },
+                { once: true },
+            );
+
+            const campo = document.querySelector("#busca");
+            campo.addEventListener("input", filtrar);
+
+            const itens = document.querySelector(".item");
+            itens.onmouseover = function () { itens.classList.add("ativo"); };
+
+            window.addEventListener("load", () => console.log("carregou"));
+
+            document.getElementById("nao-existe").addEventListener("click", () => {});
+        </script>
+    </body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: erros estruturais</title>
+    </head>
+    <body>
+        <!-- Erro 1: <section> aberta e nunca fechada -->
+        <section id="sem-fechamento">
+            <p>Parágrafo bem formado dentro de uma seção sem fechamento.</p>
+
+        <!-- Erro 2: fechamento órfão (não existe <span> aberto) -->
+        <div id="orfa">texto</span></div>
+
+        <!-- Erro 3: fechamento cruzado (<i> fecha depois de </b>) -->
+        <p id="cruzado"><b>negrito <i>itálico</b></i></p>
+
+        <!-- Aviso: elemento vazio com fechamento explícito -->
+        <div id="vazio">linha<br></br>quebrada</div>
+
+        <!-- Tags dentro de comentário não contam: <div><span> -->
+        <footer id="rodape">Rodapé correto</footer>
+    </body>
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: aspa simples solta em atributo sem aspas</title>
+    </head>
+    <body>
+        <!-- Válido em HTML: title vale "it's". O tokenizer abre uma string na aspa e engole o resto do arquivo. -->
+        <span id="aspa-solta" title=it's>Texto</span>
+        <div id="depois">Depois da aspa</div>
+        <button id="botao">Botão</button>
+    </body>
+</html>

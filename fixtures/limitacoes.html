@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: limitações conhecidas</title>
+    </head>
+    <body>
+        <!-- L1: <li> e <p> com fechamento opcional são HTML válido -->
+        <ul id="lista-opcional">
+            <li>Um
+            <li>Dois
+        </ul>
+        <p id="paragrafo-opcional">Parágrafo sem fechamento
+        <div id="depois-do-p">Div depois do parágrafo</div>
+
+        <!-- L2: <textarea> é texto puro, as tags dentro não são elementos -->
+        <textarea id="editor"><b>não é tag</b></textarea>
+
+        <!-- L3: entidades no onclick não são decodificadas -->
+        <button id="entidade" onclick="alert(&quot;oi&quot;)">Entidade</button>
+
+        <button id="multilinha">Multilinha</button>
+        <form id="formulario"><button type="submit">Enviar</button></form>
+        <button id="comentado">Comentado</button>
+
+        <script>
+            // L4: onclick com função em várias linhas
+            const multi = document.getElementById("multilinha");
+            multi.onclick = function () {
+                console.log("linha 1");
+                console.log("linha 2");
+            };
+
+            // L5: listener direto com seletor de tag
+            document.querySelector("form").addEventListener("submit", (e) => e.preventDefault());
+
+            // L6: listener comentado não deveria contar
+            const comentado = document.getElementById("comentado");
+            // comentado.addEventListener("click", () => console.log("desativado"));
+        </script>
+    </body>
+</html>

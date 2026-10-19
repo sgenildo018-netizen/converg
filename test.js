@@ -31,7 +31,7 @@ const {
   casarSeletor,
 } = require("./script.js");
 
-test("extrairAtributos deve extrair id, classes, booleanos e eventos inline com parâmetros", () => {
+test("T-01 extrairAtributos deve extrair id, classes, booleanos e eventos inline com parâmetros", () => {
   const tag =
     '<button id="meu-btn" class="btn btn-primary lg" disabled onclick="alert(\'ok > 1\')">';
   const attr = extrairAtributos(tag);
@@ -46,7 +46,7 @@ test("extrairAtributos deve extrair id, classes, booleanos e eventos inline com 
   assert.deepEqual(attr.eventosInline[0].parametros, ["event"]);
 });
 
-test("extrairAtributos deve lidar com atributos sem aspas e aspas simples", () => {
+test("T-02 extrairAtributos deve lidar com atributos sem aspas e aspas simples", () => {
   const tag = "<input type=text data-tipo='simples' required>";
   const attr = extrairAtributos(tag);
 
@@ -55,7 +55,7 @@ test("extrairAtributos deve lidar com atributos sem aspas e aspas simples", () =
   assert.equal(attr.todos.required, true);
 });
 
-test("localizarTags deve ignorar tags dentro de comentários HTML", () => {
+test("T-03 localizarTags deve ignorar tags dentro de comentários HTML", () => {
   const html =
     "<div><!-- <button id='oculto'>Ignorar</button> --><span>Visível</span></div>";
   const tags = localizarTags(html);
@@ -65,7 +65,7 @@ test("localizarTags deve ignorar tags dentro de comentários HTML", () => {
   assert.ok(!tags.some((t) => t.nome === "button"));
 });
 
-test("localizarTags não deve quebrar com > dentro de aspas em atributos", () => {
+test("T-04 localizarTags não deve quebrar com > dentro de aspas em atributos", () => {
   const html = '<div title="a > b and c < d"><span>OK</span></div>';
   const tags = localizarTags(html);
 
@@ -74,7 +74,7 @@ test("localizarTags não deve quebrar com > dentro de aspas em atributos", () =>
   assert.equal(tags[0].atributos.todos.title, "a > b and c < d");
 });
 
-test("localizarTags deve tratar conteúdo de script como texto bruto e não tokenizar tags internas", () => {
+test("T-05 localizarTags deve tratar conteúdo de script como texto bruto e não tokenizar tags internas", () => {
   const html = `
     <script>
       const template = "<span>não é elemento DOM real</span>";
@@ -88,7 +88,7 @@ test("localizarTags deve tratar conteúdo de script como texto bruto e não toke
   assert.deepEqual(nomes, ["script", "script", "p", "p"]);
 });
 
-test("calcularLinhaColuna deve computar linha e coluna 1-based corretamente", () => {
+test("T-06 calcularLinhaColuna deve computar linha e coluna 1-based corretamente", () => {
   const html = "linha1\nlinha2\nlinha3";
   const posL3 = html.indexOf("linha3");
   const pos = calcularLinhaColuna(html, posL3);
@@ -97,7 +97,7 @@ test("calcularLinhaColuna deve computar linha e coluna 1-based corretamente", ()
   assert.equal(pos.coluna, 1);
 });
 
-test("validarEstrutura deve aprovar HTML bem balanceado", () => {
+test("T-07 validarEstrutura deve aprovar HTML bem balanceado", () => {
   const html = "<main><header><h1>Título</h1></header><p>Texto</p></main>";
   const tags = localizarTags(html);
   const relatorio = validarEstrutura(tags);
@@ -106,7 +106,7 @@ test("validarEstrutura deve aprovar HTML bem balanceado", () => {
   assert.equal(relatorio.totalErros, 0);
 });
 
-test("validarEstrutura deve detectar tags não fechadas", () => {
+test("T-08 validarEstrutura deve detectar tags não fechadas", () => {
   const html = "<div><section><p>Sem fechar div nem section";
   const tags = localizarTags(html);
   const relatorio = validarEstrutura(tags);
@@ -116,7 +116,7 @@ test("validarEstrutura deve detectar tags não fechadas", () => {
   assert.ok(tipos.includes("tag_nao_fechada"));
 });
 
-test("validarEstrutura deve detectar tags de fechamento órfãs", () => {
+test("T-09 validarEstrutura deve detectar tags de fechamento órfãs", () => {
   const html = "<div><p>Texto</p></div></span>";
   const tags = localizarTags(html);
   const relatorio = validarEstrutura(tags);
@@ -127,7 +127,7 @@ test("validarEstrutura deve detectar tags de fechamento órfãs", () => {
   assert.equal(orfa.tag.nome, "span");
 });
 
-test("validarEstrutura deve detectar fechamentos cruzados (aninhamento incorreto)", () => {
+test("T-10 validarEstrutura deve detectar fechamentos cruzados (aninhamento incorreto)", () => {
   const html = "<p><b><i>texto</b></i></p>";
   const tags = localizarTags(html);
   const relatorio = validarEstrutura(tags);
@@ -137,7 +137,7 @@ test("validarEstrutura deve detectar fechamentos cruzados (aninhamento incorreto
   assert.ok(cruzado);
 });
 
-test("mapearElementos deve preservar fatias exatas e indentação original", () => {
+test("T-11 mapearElementos deve preservar fatias exatas e indentação original", () => {
   const trecho = `\n  <header class="meu-topo">\n    <h1>Título com espaços</h1>\n  </header>\n`;
   const tags = localizarTags(trecho);
   const elementos = mapearElementos(tags, trecho);
@@ -152,7 +152,7 @@ test("mapearElementos deve preservar fatias exatas e indentação original", () 
   assert.equal(header.classes[0], "meu-topo");
 });
 
-test("buscas por id, classe e atributos devem funcionar", () => {
+test("T-12 buscas por id, classe e atributos devem funcionar", () => {
   const html = `
     <button id="salvar" class="btn btn-primary" data-action="save">Salvar</button>
     <button id="cancelar" class="btn btn-secondary" data-action="cancel">Cancelar</button>
@@ -172,7 +172,7 @@ test("buscas por id, classe e atributos devem funcionar", () => {
   assert.equal(cancelBtn[0].id, "cancelar");
 });
 
-test("extrairArgumentosChamada e detalharManipulador devem extrair código, parâmetros e opções", () => {
+test("T-13 extrairArgumentosChamada e detalharManipulador devem extrair código, parâmetros e opções", () => {
   const js = `
     btn.addEventListener("click", (evt, elem) => {
       console.log("disparado", evt);
@@ -192,7 +192,7 @@ test("extrairArgumentosChamada e detalharManipulador devem extrair código, par�
   assert.equal(args[2], "{ once: true, passive: false }");
 });
 
-test("detalharManipulador deve suportar funções nomeadas e referências", () => {
+test("T-14 detalharManipulador deve suportar funções nomeadas e referências", () => {
   const fNomeada = detalharManipulador("function aoClicar(e) { e.preventDefault(); }");
   assert.equal(fNomeada.tipoManipulador, "funcao_nomeada");
   assert.equal(fNomeada.nomeFuncao, "aoClicar");
@@ -203,7 +203,7 @@ test("detalharManipulador deve suportar funções nomeadas e referências", () =
   assert.equal(ref.nomeFuncao, "meuControlador.aoEnviar");
 });
 
-test("analisarScripts e associarEventos deve vincular listeners JS e IDs em index.html com mapeamento completo", () => {
+test("T-15 analisarScripts e associarEventos deve vincular listeners JS e IDs em index.html com mapeamento completo", () => {
   const caminhoIndex = path.join(__dirname, "index.html");
   const html = fs.readFileSync(caminhoIndex, "utf8");
 
@@ -241,7 +241,7 @@ test("analisarScripts e associarEventos deve vincular listeners JS e IDs em inde
   );
 });
 
-test("validação estrutural de code.html deve ser 100% válida e associar eventos com código completo", () => {
+test("T-16 validação estrutural de code.html deve ser 100% válida e associar eventos com código completo", () => {
   const caminhoCode = path.join(__dirname, "code.html");
   const html = fs.readFileSync(caminhoCode, "utf8");
 
@@ -291,7 +291,7 @@ test("validação estrutural de code.html deve ser 100% válida e associar event
   assert.equal(relatorioInteratividade.comEventos.length, 5);
 });
 
-test("processarHtml e salvarResultadoJson devem gerar arquivos JSON válidos na pasta output", async () => {
+test("T-17 processarHtml e salvarResultadoJson devem gerar arquivos JSON válidos na pasta output", async () => {
   const caminhoCode = path.join(__dirname, "code.html");
   const pastaOutput = path.join(__dirname, "output");
 
@@ -324,7 +324,7 @@ test("processarHtml e salvarResultadoJson devem gerar arquivos JSON válidos na 
   assert.equal(vinculoBtnRun.tipoManipulador, "arrow_function");
 });
 
-test("extrairTailwindConfig deve ler os tokens do code.html com a linha de cada um", () => {
+test("T-18 extrairTailwindConfig deve ler os tokens do code.html com a linha de cada um", () => {
   const html = fs.readFileSync(path.join(__dirname, "code.html"), "utf8");
   const elementos = mapearElementos(localizarTags(html), html);
   const config = extrairTailwindConfig(elementos, html);
@@ -337,7 +337,7 @@ test("extrairTailwindConfig deve ler os tokens do code.html com a linha de cada 
   assert.equal(config.totais.colors, 47);
 });
 
-test("resolverClasseTailwind deve resolver variantes, opacidade, valores arbitrários e negativos", () => {
+test("T-19 resolverClasseTailwind deve resolver variantes, opacidade, valores arbitrários e negativos", () => {
   const config = {
     secoes: {
       colors: { primary: { valor: "#adc6ff", linha: 10 }, "brand-500": { valor: "#123", linha: 11 } },
@@ -382,7 +382,7 @@ test("resolverClasseTailwind deve resolver variantes, opacidade, valores arbitr�
   assert.equal(resolverClasseTailwind("p-4", config).origem, "padrao");
 });
 
-test("extrairRegrasCss deve ler regras, @layer, comentários e linhas", () => {
+test("T-20 extrairRegrasCss deve ler regras, @layer, comentários e linhas", () => {
   const css = [
     "/* comentário { com chave } */",
     "@layer base {",
@@ -404,7 +404,7 @@ test("extrairRegrasCss deve ler regras, @layer, comentários e linhas", () => {
   assert.equal(regras[3].declaracoes[0].valor, "url(data:image/png;base64,AA==)");
 });
 
-test("casarSeletor deve avaliar combinadores, pseudo-classes, atributos e estados", () => {
+test("T-21 casarSeletor deve avaliar combinadores, pseudo-classes, atributos e estados", () => {
   const html = [
     "<main>",
     '  <div class="card" id="a"><p>1</p><span data-x="ok">2</span></div>',
@@ -433,7 +433,7 @@ test("casarSeletor deve avaliar combinadores, pseudo-classes, atributos e estado
   assert.deepEqual(calcularEspecificidade(analisarSeletor(":where(#a) p")), [0, 0, 1]);
 });
 
-test("mapearCss deve ligar classes, regras de <style> e style inline aos elementos", async () => {
+test("T-22 mapearCss deve ligar classes, regras de <style> e style inline aos elementos", async () => {
   const { elementos, css } = await processarHtml("code.html", { salvarJson: false });
 
   const copiar = buscarPorId(elementos, "copy-link-btn");
@@ -463,7 +463,7 @@ test("mapearCss deve ligar classes, regras de <style> e style inline aos element
   assert.equal(index.css.tailwindConfig.encontrado, false);
 });
 
-test("extrairDeclaracoes deve respeitar ponto e vírgula dentro de parênteses", () => {
+test("T-23 extrairDeclaracoes deve respeitar ponto e vírgula dentro de parênteses", () => {
   assert.deepEqual(extrairDeclaracoes("color: red; background: url(a;b) !important;"), [
     { propriedade: "color", valor: "red", importante: false },
     { propriedade: "background", valor: "url(a;b)", importante: true },
