@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: CSS e JS em arquivos externos</title>
+        <link rel="stylesheet" href="css/estilo.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+        <link rel="icon" href="favicon.ico" />
+        <link rel="preload" href="css/pesado.css" as="style" />
+        <style>
+            @import url("css/tema.css");
+            .destaque { color: red; }
+        </style>
+        <script src="js/app.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="titulo destaque">Título</h1>
+            <button id="enviar" class="btn">Enviar</button>
+            <a href="#" class="destaque">Link</a>
+            <span class="material-symbols-outlined">home</span>
+            <button id="com-evento" onclick="alert('oi')">Com evento</button>
+            <p style="margin: 0">Sem classe</p>
+        </div>
+        <script src="js/rodape.js"></script>
+    </body>
+</html>

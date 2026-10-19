@@ -22,7 +22,7 @@ node --test fixtures.test.js   # só a bateria de fixtures (F-xx)
 
 Motor: `node:test` + `node:assert/strict`, nativos do Node (sem dependências).
 
-Estado atual: **59 testes, 52 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
+Estado atual: **65 testes, 58 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
 
 Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece com ⚠ no relatório, mas não quebra a suíte. Quando a limitação for resolvida, ele passa a passar e o `todo` deve ser removido.
 
@@ -39,6 +39,7 @@ Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece c
 | `foco.html` | um `<p>` sem fechamento fora do `<header>` | uma classe | não | sim | sim (handler fora do bloco) | não |
 | `limitacoes.html` | casos de limitação | não | não | não | sim | não |
 | `limitacao-aspa-solta.html` | caso de limitação | não | não | não | não | não |
+| `arquivos-externos.html` | não | classes sem CSS no arquivo | não | sim (com `@import`) | só externos (`<script src>`) e um `onclick` | sim |
 
 Os testes calculam as linhas esperadas procurando o trecho no próprio arquivo (`linhaDe(html, "trecho")`), então editar uma fixture não exige recontar linhas na mão.
 
@@ -105,6 +106,19 @@ Os testes calculam as linhas esperadas procurando o trecho no próprio arquivo (
 | F-32 | Validação só do bloco | o arquivo é inválido (`<p>` sem fechamento no `<main>`), mas o foco `header` é válido e o foco `main` não |
 | F-33 | Tipos de seletor | `#topo` funciona; `main .card` casa 2, usa o 1º e informa o total; seletor sem resultado dá erro claro |
 | F-34 | CSS e interativos no foco | `header button` atinge 2 elementos do foco; `.card` não aparece; classes só do bloco; o `<a>` aparece como interativo sem evento |
+
+### arquivos-externos.html (CSS e JS em arquivos que o script não lê)
+
+Simula páginas como as do Claude Design, que ligam CSS e JS pelo `<head>` em vez de deixar tudo no HTML. O script não lê esses arquivos; ele avisa onde procurar.
+
+| Código | O que verifica | Esperado |
+|---|---|---|
+| F-35 | Arquivos externos com linha e lugar | `<link rel="stylesheet">` (tipo `estilo`, `fonte` ou `icones` para Google Fonts), `@import` dentro de `<style>`, `<script src>` no `<head>` e no `<body>`; `rel="icon"` e `rel="preload"` ficam de fora; `remoto` para URLs |
+| F-36 | Aviso por classe | `container`, `titulo` e `btn` apontam `css/estilo.css` e `css/tema.css`; `destaque` tem regra no `<style>` e não gera aviso |
+| F-37 | Classe de ícones | `material-symbols-outlined` aponta só o `<link>` do Google Fonts que a define |
+| F-38 | Aviso de eventos | `#enviar` e o `<a>` (interativos sem evento) apontam `js/app.js` e `js/rodape.js`; o script remoto não entra; o botão com `onclick` não recebe aviso |
+| F-39 | Sem externos, sem aviso | `css-puro.html` não tem nenhum; o Tailwind CDN de `tailwind-puro.html` é `tailwind-cdn` e não é apontado como fonte de eventos |
+| F-40 | Saída do console | linha `Arquivos externos`, `classe container (<div> L19) [LER ARQUIVO DE ESTILO ...] [FONTE: ...]` e `Interativos sem evento no arquivo: 2 [LER SCRIPT EXTERNO ...] [FONTE: ...]` |
 
 ### Limitações conhecidas (`todo`)
 

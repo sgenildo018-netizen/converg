@@ -1182,6 +1182,7 @@ function gerarRelatorioInteratividade(
       id: el.id,
       linha: el.linha,
       coluna: el.coluna,
+      scriptsExternos: (el.avisoScripts || []).map((s) => s.src),
     })),
     vinculosRealizados: associacao.vinculos,
     seletoresNaoEncontrados: associacao.seletoresNaoEncontrados,
@@ -2083,15 +2084,132 @@ function compararEspecificidade(a, b) {
   return a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 }
 
+// --- Arquivos externos (<link rel="stylesheet">, @import e <script src>)
+
+const REGEX_REMOTO = /^(?:[a-z][\w+.-]*:)?\/\//i;
+
+/**
+ * Classes que um CSS de ícones do Google Fonts define, a partir do `family=`
+ * do link (ex.: `Material Symbols Outlined` → `material-symbols-outlined`).
+ * @param {string} href - URL do `<link>`.
+ * @returns {string[] | null} As classes, ou `null` se não for um CSS do Google Fonts.
+ */
+function classesDoGoogleFonts(href) {
+  if (!/^(?:https?:)?\/\/fonts\.googleapis\.com\//i.test(href)) return null;
+  const query = href.includes("?") ? href.slice(href.indexOf("?") + 1) : "";
+  const familias = new URLSearchParams(query.replace(/&amp;/g, "&")).getAll("family");
+  const classes = [];
+  for (const familia of familias) {
+    const nome = familia.split(":")[0].trim();
+    let m;
+    if ((m = /^Material Symbols (Outlined|Rounded|Sharp)$/i.exec(nome))) {
+      classes.push(`material-symbols-${m[1].toLowerCase()}`);
+    } else if ((m = /^Material Icons(?: (Outlined|Round|Sharp|Two Tone))?$/i.exec(nome))) {
+      classes.push(m[1] ? `material-icons-${m[1].toLowerCase().replace(" ", "-")}` : "material-icons");
+    }
+  }
+  return classes;
+}
+
+/**
+ * Lista os arquivos de CSS e JS que a página carrega de fora e que o script não lê:
+ * `<link rel="stylesheet">`, `@import` dentro de `<style>` e `<script src>`.
+ * @param {Elemento[]} elementos - Elementos mapeados.
+ * @param {string} html - HTML completo (para as linhas do `@import`).
+ * @returns {{ estilos: Object[], scripts: Object[] }}
+ */
+function extrairRecursosExternos(elementos, html) {
+  const head = elementos.find((el) => el.nome === "head");
+  const lugar = (el) => (head && el.inicio >= head.inicio && el.fim <= head.fim ? "head" : "body");
+
+  const estilos = [];
+  for (const el of elementos) {
+    if (el.nome === "link") {
+      const rel = String(el.atributos.rel || "").toLowerCase().split(/\s+/);
+      const href = typeof el.atributos.href === "string" ? el.atributos.href.trim() : "";
+      if (!rel.includes("stylesheet") || !href) continue;
+      const classesIcones = classesDoGoogleFonts(href);
+      estilos.push({
+        href,
+        tipo: classesIcones === null ? "estilo" : classesIcones.length ? "icones" : "fonte",
+        origem: "link",
+        local: lugar(el),
+        remoto: REGEX_REMOTO.test(href),
+        linha: el.linha,
+        posicao: el.inicio,
+        classes: classesIcones || [],
+      });
+    } else if (el.nome === "style" && !el.vazio) {
+      const regexImport = /@import\s+(?:url\(\s*)?(["']?)([^"')\s;]+)\1\s*\)?/g;
+      let m;
+      while ((m = regexImport.exec(el.conteudo)) !== null) {
+        const posicao = el.inicioConteudo + m.index;
+        estilos.push({
+          href: m[2],
+          tipo: "estilo",
+          origem: "@import",
+          local: "style",
+          remoto: REGEX_REMOTO.test(m[2]),
+          linha: calcularLinhaColuna(html, posicao).linha,
+          posicao,
+          classes: [],
+        });
+      }
+    }
+  }
+
+  const scripts = elementos
+    .filter((el) => el.nome === "script" && typeof el.atributos.src === "string" && el.atributos.src.trim())
+    .map((el) => {
+      const src = el.atributos.src.trim();
+      return {
+        src,
+        tipo: /cdn\.tailwindcss\.com/i.test(src) ? "tailwind-cdn" : "script",
+        local: lugar(el),
+        remoto: REGEX_REMOTO.test(src),
+        linha: el.linha,
+        posicao: el.inicio,
+      };
+    });
+
+  return { estilos: estilos.sort((a, b) => a.posicao - b.posicao), scripts };
+}
+
+/** Scripts externos que podem ligar eventos aos elementos: locais e que não são o Tailwind CDN. */
+function scriptsCandidatos(externos) {
+  return externos.scripts.filter((s) => s.tipo === "script" && !s.remoto);
+}
+
+/** `<link> no <head> L6`, `@import no <style> L12`, `<script src> no <body> L27` */
+function descreverFonteExterna(recurso) {
+  const tag = recurso.src !== undefined ? "<script src>" : recurso.origem === "@import" ? "@import" : "<link>";
+  return `${tag} no <${recurso.local}> L${recurso.linha}`;
+}
+
+/** `[LER ARQUIVO DE ESTILO a.css, b.css] [FONTE: <link> no <head> L6; ...]` */
+function formatarAvisoExterno(rotulo, recursos) {
+  // URL do Google Fonts é longa: no aviso basta o nome da família (a URL inteira está na lista de externos)
+  const nome = (r) => {
+    if (r.src !== undefined) return r.src;
+    if (!classesDoGoogleFonts(r.href)) return r.href;
+    const query = r.href.includes("?") ? r.href.slice(r.href.indexOf("?") + 1) : "";
+    const familias = new URLSearchParams(query.replace(/&amp;/g, "&")).getAll("family").map((f) => f.split(":")[0]);
+    return `fonts.googleapis.com (${familias.join(", ")})`;
+  };
+  const nomes = [...new Set(recursos.map(nome))].join(", ");
+  return `[${rotulo} ${nomes}] [FONTE: ${recursos.map(descreverFonteExterna).join("; ")}]`;
+}
+
 /**
  * Mapeia o CSS de cada elemento: classes Tailwind resolvidas pelo `tailwind.config`,
  * regras dos blocos `<style>` cujo seletor casa com o elemento e o atributo `style`.
  * Grava o resultado em `el.css` de cada elemento.
  * @param {Elemento[]} elementos - Elementos mapeados.
  * @param {string} html - HTML completo.
+ * @param {{ estilos: Object[], scripts: Object[] }} [externos] - Arquivos externos ({@link extrairRecursosExternos}).
  * @returns {Object} Resumo: config do Tailwind, regras com contagem de elementos e estatísticas de classes.
  */
-function mapearCss(elementos, html) {
+function mapearCss(elementos, html, externos = extrairRecursosExternos(elementos, html)) {
   const tailwind = extrairTailwindConfig(elementos, html);
   const arvore = construirArvore(elementos);
 
@@ -2124,6 +2242,22 @@ function mapearCss(elementos, html) {
 
   const contagemPorRegra = new Array(regras.length).fill(0);
   const cacheClasses = new Map();
+
+  // Classes que algum seletor de <style> cita: elas têm CSS no próprio arquivo
+  const classesNoStyle = new Set();
+  for (const regra of regras) {
+    for (const sel of regra.seletores || []) {
+      for (const m of sel.matchAll(/\.((?:\\.|[\w-])+)/g)) classesNoStyle.add(m[1].replace(/\\(.)/g, "$1"));
+    }
+  }
+  const estilosCandidatos = externos.estilos.filter((e) => e.tipo === "estilo");
+  const usaTailwind = tailwind.encontrado || externos.scripts.some((s) => s.tipo === "tailwind-cdn");
+  const avisoDaClasse = (c) => {
+    const icones = externos.estilos.filter((e) => e.classes.includes(c.classe));
+    if (icones.length) return { classe: c.classe, motivo: "icones", arquivos: icones, tambemTailwind: false };
+    if (c.origem !== "padrao" || classesNoStyle.has(c.classe) || !estilosCandidatos.length) return null;
+    return { classe: c.classe, motivo: "sem-css-no-arquivo", arquivos: estilosCandidatos, tambemTailwind: usaTailwind };
+  };
 
   for (const el of elementos) {
     const classes = (el.classes || []).map((classe) => {
@@ -2165,7 +2299,9 @@ function mapearCss(elementos, html) {
         ? extrairDeclaracoes(el.atributos.style)
         : [];
 
-    el.css = { classes, regras: regrasDoElemento, inline: estiloInline };
+    const avisos = classes.map(avisoDaClasse).filter(Boolean);
+
+    el.css = { classes, regras: regrasDoElemento, inline: estiloInline, avisos };
   }
 
   const distintas = [...cacheClasses.values()];
@@ -2196,6 +2332,7 @@ function mapearCss(elementos, html) {
         .map(({ classe, ...resto }) => [classe, resto]),
     ),
     elementosComStyleInline: elementos.filter((el) => el.css.inline.length).length,
+    externos,
   };
 }
 
@@ -2206,6 +2343,12 @@ function formatarDeclaracoes(declaracoes) {
   return declaracoes
     .map((d) => `${d.propriedade}: ${d.valor}${d.importante ? " !important" : ""}`)
     .join("; ");
+}
+
+/** `[LER ARQUIVO DE ESTILO ...] [FONTE: ...]`, e se a classe também pode ser do Tailwind. */
+function formatarAvisoClasse(aviso) {
+  const tailwind = aviso.tambemTailwind ? " (ou escala padrão do Tailwind)" : "";
+  return `${formatarAvisoExterno("LER ARQUIVO DE ESTILO", aviso.arquivos)}${tailwind}`;
 }
 
 /**
@@ -2219,7 +2362,9 @@ function descreverCssElemento(css, recuo = "      ") {
   const linhas = [];
   const doConfig = css.classes.filter((c) => c.origem === "tailwind.config");
   const arbitrarias = css.classes.filter((c) => c.origem === "arbitrario");
-  const padrao = css.classes.filter((c) => c.origem === "padrao");
+  const avisos = css.avisos || [];
+  const comAviso = new Set(avisos.map((a) => a.classe));
+  const padrao = css.classes.filter((c) => c.origem === "padrao" && !comAviso.has(c.classe));
   const regras = css.regras.filter((r) => !r.global);
 
   if (!css.classes.length && !regras.length && !css.inline.length) {
@@ -2242,6 +2387,10 @@ function descreverCssElemento(css, recuo = "      ") {
 
   if (padrao.length) {
     linhas.push(`${recuo}  sem token no config: ${padrao.map((c) => c.classe).join(" ")}`);
+  }
+
+  for (const a of avisos) {
+    linhas.push(`${recuo}  classe ${a.classe} ${formatarAvisoClasse(a)}`);
   }
 
   for (const r of regras) {
@@ -2307,7 +2456,13 @@ async function processarHtml(
   const elementos = mapearElementos(tags, html);
   const analiseScripts = analisarScripts(elementos);
   const associacao = associarEventos(elementos, analiseScripts);
-  const css = mapearCss(elementos, html);
+  const externos = extrairRecursosExternos(elementos, html);
+  const css = mapearCss(elementos, html, externos);
+  const candidatos = scriptsCandidatos(externos);
+  for (const el of elementos) {
+    const semEvento = ELEMENTOS_INTERATIVOS.includes(el.nome) && el.eventos.length === 0;
+    el.avisoScripts = semEvento ? candidatos : [];
+  }
   const relatorio = gerarRelatorioInteratividade(
     elementos,
     analiseScripts,
@@ -2338,6 +2493,10 @@ async function processarHtml(
       vinculos: relatorio.vinculosRealizados,
       seletoresNaoEncontrados: relatorio.seletoresNaoEncontrados,
       interativosSemEventos: relatorio.interativosSemEventos,
+    },
+    externos: {
+      estilos: externos.estilos.map(({ posicao, ...e }) => e),
+      scripts: externos.scripts.map(({ posicao, ...e }) => e),
     },
     css: {
       tailwindConfig: css.tailwindConfig,
@@ -2370,7 +2529,9 @@ async function processarHtml(
           pseudoElemento: r.pseudoElemento,
         })),
         inline: el.css.inline,
+        avisos: el.css.avisos.map((a) => ({ classe: a.classe, motivo: a.motivo, arquivos: a.arquivos.map((x) => x.href) })),
       },
+      avisoScripts: el.avisoScripts.map((s) => s.src),
       texto: el.texto,
     })),
   };
@@ -2388,6 +2549,7 @@ async function processarHtml(
     analiseScripts,
     associacao,
     css,
+    externos,
     relatorio,
     resultado,
   };
@@ -2643,6 +2805,48 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
     log(`Elementos com style inline: ${escopo.comStyleInline}`);
   }
 
+  // Arquivos que a página carrega de fora: o script não os lê, só avisa onde procurar
+  const { externos } = processado;
+  const candidatos = scriptsCandidatos(externos);
+  if (externos.estilos.length || externos.scripts.length) {
+    log(
+      `Arquivos externos (não lidos pelo script): ${externos.estilos.length} de estilo, ${externos.scripts.length} script${externos.scripts.length === 1 ? "" : "s"}`,
+    );
+    const rotulos = { estilo: "estilo", fonte: "fonte", icones: "ícones", script: "script", "tailwind-cdn": "Tailwind CDN" };
+    for (const e of externos.estilos) {
+      const define = e.classes.length ? `: define ${e.classes.join(", ")}` : e.tipo === "fonte" ? ": só fontes" : "";
+      log(`  - ${rotulos[e.tipo]} ${e.href} (${descreverFonteExterna(e)})${define}`);
+    }
+    for (const s of externos.scripts) {
+      const nota =
+        s.tipo === "tailwind-cdn"
+          ? ": gera as classes do Tailwind"
+          : s.remoto
+            ? ": remoto, não é apontado como fonte de eventos"
+            : "";
+      log(`  - ${rotulos[s.tipo]} ${s.src} (${descreverFonteExterna(s)})${nota}`);
+    }
+  }
+
+  const avisosPorClasse = new Map();
+  for (const el of escopo.elementos) {
+    for (const aviso of el.css.avisos) {
+      if (!avisosPorClasse.has(aviso.classe)) avisosPorClasse.set(aviso.classe, { aviso, elementos: [] });
+      avisosPorClasse.get(aviso.classe).elementos.push(el);
+    }
+  }
+  if (avisosPorClasse.size) {
+    log(`Classes com CSS em arquivo externo${escopo.sufixoAlcance}: ${avisosPorClasse.size}`);
+    for (const [classe, { aviso, elementos: els }] of avisosPorClasse) {
+      const lista =
+        els
+          .slice(0, 3)
+          .map((el) => `<${el.nome}${el.id ? ` id="${el.id}"` : ""}> L${el.linha}`)
+          .join(", ") + (els.length > 3 ? ` +${els.length - 3}` : "");
+      log(`  - classe ${classe} (${lista}) ${formatarAvisoClasse(aviso)}`);
+    }
+  }
+
   log(`${escopo.rotuloEventos}: ${escopo.comEventos.length}`);
 
   for (const item of escopo.comEventos) {
@@ -2661,11 +2865,19 @@ async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
     for (const linha of descreverCssElemento(item.css)) log(linha);
   }
 
+  const avisoScripts = candidatos.length ? ` ${formatarAvisoExterno("LER SCRIPT EXTERNO", candidatos)}` : "";
   if (escopo.interativosSemEventos) {
-    log(`Elementos interativos sem evento no foco: ${escopo.interativosSemEventos.length}`);
+    log(`Elementos interativos sem evento no foco: ${escopo.interativosSemEventos.length}${avisoScripts}`);
     for (const el of escopo.interativosSemEventos) {
       log(`  - <${el.nome}${el.id ? ` id="${el.id}"` : ""}> (L${el.linha})`);
       for (const linha of descreverCssElemento(el.css)) log(linha);
+    }
+  } else if (candidatos.length) {
+    // No arquivo inteiro a lista só aparece quando há script externo onde os eventos podem estar
+    const semEvento = escopo.elementos.filter((el) => el.avisoScripts.length);
+    log(`Interativos sem evento no arquivo: ${semEvento.length}${avisoScripts}`);
+    for (const el of semEvento) {
+      log(`  - <${el.nome}${el.id ? ` id="${el.id}"` : ""}> (L${el.linha})`);
     }
   }
 

@@ -168,7 +168,7 @@ Em vez de registrar apenas o nome do evento (como `"click"`), o analisador disse
 
 ### 7. Mapeamento de CSS (`mapearCss`)
 
-Depois dos eventos, o pipeline liga a cada elemento o CSS que ele usa, vindo de três fontes. O resultado fica em `el.css = { classes, regras, inline }`.
+Depois dos eventos, o pipeline liga a cada elemento o CSS que ele usa, vindo de três fontes. O resultado fica em `el.css = { classes, regras, inline, avisos }`.
 
 **a) Classes Tailwind resolvidas pelo `tailwind.config`** (`extrairTailwindConfig` e `resolverClasseTailwind`)
 
@@ -189,6 +189,13 @@ Depois dos eventos, o pipeline liga a cada elemento o CSS que ele usa, vindo de 
 **c) Atributo `style`** (`extrairDeclaracoes`)
 
 * Divide as declarações por `;` no nível superior (respeita `url(a;b)`), normaliza o nome da propriedade em minúsculas e separa `!important`.
+
+**d) Arquivos externos** (`extrairRecursosExternos`)
+
+* Lista `<link rel="stylesheet">`, `@import` dentro de `<style>` e `<script src>`, cada um com `linha`, `local` (`head`, `body` ou `style`) e `remoto`. O conteúdo desses arquivos não é lido.
+* Tipos de estilo: `estilo`; `fonte` (Google Fonts só com fontes); `icones` (Google Fonts de `Material Symbols`/`Material Icons`, com a classe que definem em `classes`). Tipos de script: `script` e `tailwind-cdn`.
+* `el.css.avisos`: para cada classe sem CSS no arquivo (origem `padrao` e nenhum seletor de `<style>` a cita), aponta os arquivos de tipo `estilo` (`motivo: "sem-css-no-arquivo"`, com `tambemTailwind` se a página usa Tailwind). Classes de ícones apontam o link que as define (`motivo: "icones"`).
+* `el.avisoScripts`: elemento interativo sem evento mapeado recebe os scripts locais que não são o Tailwind CDN, onde o evento pode estar.
 
 **Saída no console:** um resumo do CSS (config, regras e contagem de classes) e, embaixo de cada elemento com evento, as classes resolvidas com a linha do token, as regras de `<style>` que casam e o style inline (`descreverCssElemento`).
 
@@ -242,6 +249,10 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
     "seletoresNaoEncontrados": [],
     "interativosSemEventos": [ ... ]
   },
+  "externos": {
+    "estilos": [ { "href": "https://fonts.googleapis.com/...", "tipo": "icones", "origem": "link", "local": "head", "remoto": true, "linha": 8, "classes": ["material-symbols-outlined"] } ],
+    "scripts": [ { "src": "https://cdn.tailwindcss.com", "tipo": "tailwind-cdn", "local": "head", "remoto": true, "linha": 41 } ]
+  },
   "css": {
     "tailwindConfig": { "encontrado": true, "linha": 43, "totais": { "colors": 47, ... }, "secoes": { ... } },
     "blocosStyle": [ { "linha": 20, "totalRegras": 5 } ],
@@ -265,7 +276,7 @@ O pipeline exporta os resultados da análise diretamente em arquivos JSON format
 }
 ```
 
-Em `elementos`, o `css` de cada um é a versão enxuta (`regras` e `inline`); as classes resolvidas ficam uma vez só em `css.classesResolvidas`. Em `elementosComEventos`, o `css` vem completo.
+Em `elementos`, o `css` de cada um é a versão enxuta (`regras`, `inline` e `avisos` com os arquivos a ler), e `avisoScripts` traz os scripts externos onde um evento pode estar; as classes resolvidas ficam uma vez só em `css.classesResolvidas`. Em `elementosComEventos`, o `css` vem completo.
 
 ---
 
@@ -332,7 +343,7 @@ Imprime o bloco escolhido com linhas e offsets e a análise restrita a ele; grav
 ```bash
 node --test
 ```
-Roda os 59 testes: os unitários de `test.js` (T-01 a T-25) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-34), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
+Roda os 65 testes: os unitários de `test.js` (T-01 a T-25) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-40), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco e arquivos externos. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
 
 ---
 
@@ -340,6 +351,6 @@ Roda os 59 testes: os unitários de `test.js` (T-01 a T-25) e a bateria sobre os
 
 * **Seletores complexos nos scripts**: no CSS dos blocos `<style>` os seletores encadeados (ex.: `div.card > ul li:first-child`) já são resolvidos, mas nos `querySelector` dos scripts continuam categorizados como `complexo` e não são ligados a elementos;
 * **Limitações cobertas por testes `todo`**: fechamento opcional de `<li>`/`<p>`, tags dentro de `<textarea>`, entidades em `onclick`, `el.onclick = function` em várias linhas, `querySelector("form").addEventListener`, listener dentro de comentário JS e aspa solta em atributo sem aspas (F-23 a F-29 em [TESTES.md](TESTES.md));
-* **CSS externo**: `<link rel="stylesheet">` não é lido; da escala padrão do Tailwind só valores do `tailwind.config` e arbitrários são resolvidos;
+* **CSS e JS externos**: `<link rel="stylesheet">`, `@import` e `<script src>` não são lidos, só listados com aviso de onde procurar; da escala padrão do Tailwind só valores do `tailwind.config` e arbitrários são resolvidos;
 * **JavaScript dinâmico em tempo de execução**: referências montadas via interpolação de strings dinâmicas (ex.: `document.getElementById("btn-" + id)`) exigem interpretação dinâmica de runtime, fora do escopo de análise estática de texto;
 * **SVG com namespaces**: atributos XML/SVG com namespaces (como `xlink:href`) são preservados textualmente, mas normalizados em minúsculas nos atributos.

@@ -1,7 +1,7 @@
 {
   "arquivo": "index.html",
   "caminhoOrigem": "C:\\Users\\genil\\Documents\\projetos\\converg\\index.html",
-  "geradoEm": "2026-10-19T21:39:46.656Z",
+  "geradoEm": "2026-10-19T22:39:48.202Z",
   "estatisticas": {
     "tamanhoBytes": 5253,
     "totalTags": 131,
@@ -486,9 +486,14 @@
         "tag": "a",
         "id": null,
         "linha": 19,
-        "coluna": 41
+        "coluna": 41,
+        "scriptsExternos": []
       }
     ]
+  },
+  "externos": {
+    "estilos": [],
+    "scripts": []
   },
   "css": {
     "tailwindConfig": {
@@ -568,7 +573,8 @@
             "valor": "pointer",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       }
     }
   ],
@@ -588,8 +594,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<html lang=\"pt-BR\">\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Página de demonstração</title>\n    </head>\n    <body style=\"margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;\">\n        <header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>\n\n        <main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>\n\n        <footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>\n\n        <script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>\n    </body>\n</html>"
     },
     {
@@ -605,8 +613,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>Página de demonstração</title>\n    </head>"
     },
     {
@@ -624,8 +634,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<meta charset=\"UTF-8\" />"
     },
     {
@@ -644,8 +656,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
     },
     {
@@ -661,8 +675,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<title>Página de demonstração</title>"
     },
     {
@@ -711,8 +727,10 @@
             "valor": "1.6",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<body style=\"margin: 0; padding: 32px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; line-height: 1.6;\">\n        <header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>\n\n        <main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>\n\n        <footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>\n\n        <script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>\n    </body>"
     },
     {
@@ -761,8 +779,10 @@
             "valor": "12px",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<header style=\"max-width: 800px; margin: 0 auto 24px; padding: 24px; background: #1d4ed8; color: white; border-radius: 12px;\">\n            <p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>\n            <h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>\n            <p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>\n        </header>"
     },
     {
@@ -801,8 +821,10 @@
             "valor": "uppercase",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p style=\"margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;\">Exemplo de HTML</p>"
     },
     {
@@ -826,8 +848,10 @@
             "valor": "8px 0",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h1 style=\"margin: 8px 0;\">Uma página para experimentar</h1>"
     },
     {
@@ -851,8 +875,10 @@
             "valor": "0",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p style=\"margin: 0;\">Elementos, estilos inline e JavaScript no mesmo arquivo.</p>"
     },
     {
@@ -881,8 +907,10 @@
             "valor": "0 auto",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<main style=\"max-width: 800px; margin: 0 auto;\">\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>\n\n            <section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>\n        </main>"
     },
     {
@@ -926,8 +954,10 @@
             "valor": "12px",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>\n                <p>Este parágrafo contém</p> texto <strong>em</strong> negrito</strong>, texto <em></em>em itálico</em> e um trecho de código: <code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>.</p>\n                <p></p>Confira também a <a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>.</p>\n                <blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>\n            </section>"
     },
     {
@@ -956,8 +986,10 @@
             "valor": "#1d4ed8",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Texto e formatação</h2>"
     },
     {
@@ -973,8 +1005,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p>Este parágrafo contém</p>"
     },
     {
@@ -990,8 +1024,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<strong>em</strong>"
     },
     {
@@ -1007,8 +1043,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<em></em>"
     },
     {
@@ -1042,8 +1080,10 @@
             "valor": "4px",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<code style=\"padding: 2px 6px; background: #e2e8f0; border-radius: 4px;\">console.log(\"Olá!\")</code>"
     },
     {
@@ -1059,8 +1099,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p></p>"
     },
     {
@@ -1085,8 +1127,10 @@
             "valor": "#1d4ed8",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<a href=\"https://developer.mozilla.org/pt-BR/docs/Web/HTML\" style=\"color: #1d4ed8;\">documentação de HTML na MDN</a>"
     },
     {
@@ -1125,8 +1169,10 @@
             "valor": "#eff6ff",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<blockquote style=\"margin: 16px 0; padding: 12px 16px; border-left: 4px solid #3b82f6; background: #eff6ff;\">\n                    HTML organiza o conteúdo; CSS cuida da apresentação; JavaScript adiciona comportamento.\n                </blockquote>"
     },
     {
@@ -1170,8 +1216,10 @@
             "valor": "12px",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>\n                <h3>Uma</h3> lista não ordenada</h3>\n                <ul>\n</ul>                    <li></li>Primeiro item</li>\n                    <li></li>Segundo item</li>\n                    <li>Ter</li>ceiro item</li>\n                </ul>\n                <h3></h3>Uma lista ordenada</h3>\n                <ol></ol>\n                    <li>Ler o arquivo HTML</li>\n                    <li></li>Transformar o conteúdo</li>\n                    <li></li>Salvar como Markdown</li>\n                </ol>\n            </section>"
     },
     {
@@ -1200,8 +1248,10 @@
             "valor": "#1d4ed8",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Listas</h2>"
     },
     {
@@ -1217,8 +1267,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h3>Uma</h3>"
     },
     {
@@ -1234,8 +1286,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<ul>\n</ul>"
     },
     {
@@ -1251,8 +1305,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<li></li>"
     },
     {
@@ -1268,8 +1324,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<li></li>"
     },
     {
@@ -1285,8 +1343,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<li>Ter</li>"
     },
     {
@@ -1302,8 +1362,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h3></h3>"
     },
     {
@@ -1319,8 +1381,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<ol></ol>"
     },
     {
@@ -1336,8 +1400,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<li>Ler o arquivo HTML</li>"
     },
     {
@@ -1353,8 +1419,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<li></li>"
     },
     {
@@ -1370,8 +1438,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<li></li>"
     },
     {
@@ -1415,8 +1485,10 @@
             "valor": "12px",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>\n                <table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>\n            </section>"
     },
     {
@@ -1445,8 +1517,10 @@
             "valor": "#1d4ed8",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">Tabela</h2>"
     },
     {
@@ -1480,8 +1554,10 @@
             "valor": "left",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<table style=\"width: 100%; border-collapse: collapse; text-align: left;\">\n                    <thead></thead>\n                        <tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>\n                    </thead>\n                    <tbody></tbody>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>\n                        </tr>\n                        <tr></tr>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>\n                            <td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>\n                        </tr>\n                    </tbody>\n                </table>"
     },
     {
@@ -1497,8 +1573,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<thead></thead>"
     },
     {
@@ -1522,8 +1600,10 @@
             "valor": "#e2e8f0",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<tr style=\"background: #e2e8f0;\">\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>\n                            <th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>\n                        </tr>"
     },
     {
@@ -1552,8 +1632,10 @@
             "valor": "1px solid #cbd5e1",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Tecnologia</th>"
     },
     {
@@ -1582,8 +1664,10 @@
             "valor": "1px solid #cbd5e1",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<th style=\"padding: 10px; border: 1px solid #cbd5e1;\">Função</th>"
     },
     {
@@ -1599,8 +1683,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<tbody></tbody>"
     },
     {
@@ -1616,8 +1702,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<tr></tr>"
     },
     {
@@ -1646,8 +1734,10 @@
             "valor": "1px solid #cbd5e1",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">HTML</td>"
     },
     {
@@ -1676,8 +1766,10 @@
             "valor": "1px solid #cbd5e1",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Estrutura</td>"
     },
     {
@@ -1693,8 +1785,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<tr></tr>"
     },
     {
@@ -1723,8 +1817,10 @@
             "valor": "1px solid #cbd5e1",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">JavaScript</td>"
     },
     {
@@ -1753,8 +1849,10 @@
             "valor": "1px solid #cbd5e1",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<td style=\"padding: 10px; border: 1px solid #cbd5e1;\">Comportamento</td>"
     },
     {
@@ -1798,8 +1896,10 @@
             "valor": "12px",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<section style=\"margin-bottom: 20px; padding: 24px; background: white; border: 1px solid #cbd5e1; border-radius: 12px;\">\n                <h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>\n                <p>Clique no botão para atualizar o contador:</p>\n                <button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>\n                <p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>\n                <details>\n                    <</details>summary style=\"cursor: pointer; color: #1d4ed8;\">O que este exemplo demonstra?</summary>\n                    <p></p>O script inline encontra o botão na página e atualiza este texto a cada clique.</p>\n                </details>\n            </section>"
     },
     {
@@ -1828,8 +1928,10 @@
             "valor": "#1d4ed8",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<h2 style=\"margin-top: 0; color: #1d4ed8;\">JavaScript inline</h2>"
     },
     {
@@ -1845,8 +1947,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p>Clique no botão para atualizar o contador:</p>"
     },
     {
@@ -1913,8 +2017,10 @@
             "valor": "pointer",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<button id=\"botao-contador\" type=\"button\" style=\"padding: 10px 16px; border: 0; border-radius: 8px; background: #1d4ed8; color: white; cursor: pointer;\">Clique aqui</button>"
     },
     {
@@ -1933,8 +2039,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p id=\"resultado\" aria-live=\"polite\">Cliques: 0</p>"
     },
     {
@@ -1950,8 +2058,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<details>\n                    <</details>"
     },
     {
@@ -1967,8 +2077,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<p></p>"
     },
     {
@@ -2012,8 +2124,10 @@
             "valor": "center",
             "importante": false
           }
-        ]
+        ],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<footer style=\"max-width: 800px; margin: 0 auto; padding: 16px; color: #64748b; text-align: center;\">\n            <small></small>Arquivo de exemplo para testes de leitura e conversão.</small>\n        </footer>"
     },
     {
@@ -2029,8 +2143,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<small></small>"
     },
     {
@@ -2046,8 +2162,10 @@
       "eventos": [],
       "css": {
         "regras": [],
-        "inline": []
+        "inline": [],
+        "avisos": []
       },
+      "avisoScripts": [],
       "texto": "<script>\n            const botao = document.querySelector(\"#botao-contador\");\n            const resultado = document.querySelector(\"#resultado\");\n            let cliques = 0;\n\n            botao.addEventListener(\"click\", () => {\n                cliques += 1;\n                resultado.textContent = `Cliques: ${cliques}`;\n            });\n        </script>"
     }
   ]

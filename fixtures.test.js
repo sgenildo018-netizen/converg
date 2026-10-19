@@ -461,3 +461,100 @@ test("F-34 foco: CSS e interativos sem evento contados só dentro do bloco", asy
   // O <a> do header é interativo e não tem evento
   assert.deepEqual(foco.interativosSemEventos.map((el) => el.nome), ["a"]);
 });
+
+// --- arquivos-externos.html (CSS e JS ligados por <link>, @import e <script src>)
+
+test("F-35 externos: lê <link rel=stylesheet>, @import e <script src> com linha e lugar", async () => {
+  const { html, externos } = await carregar("arquivos-externos.html");
+
+  assert.deepEqual(
+    externos.estilos.map((e) => [e.href, e.tipo, e.origem, e.local, e.linha]),
+    [
+      ["css/estilo.css", "estilo", "link", "head", linhaDe(html, 'href="css/estilo.css"')],
+      ["https://fonts.googleapis.com/css2?family=Inter&display=swap", "fonte", "link", "head", linhaDe(html, "family=Inter")],
+      ["https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined", "icones", "link", "head", linhaDe(html, "family=Material")],
+      ["css/tema.css", "estilo", "@import", "style", linhaDe(html, "@import")],
+    ],
+  );
+  // rel=icon e rel=preload não aplicam CSS
+  assert.equal(externos.estilos.some((e) => /favicon|pesado/.test(e.href)), false);
+  assert.equal(externos.estilos[0].remoto, false);
+  assert.equal(externos.estilos[1].remoto, true);
+
+  assert.deepEqual(
+    externos.scripts.map((s) => [s.src, s.local, s.remoto, s.linha]),
+    [
+      ["js/app.js", "head", false, linhaDe(html, 'src="js/app.js"')],
+      ["https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js", "head", true, linhaDe(html, "alpinejs")],
+      ["js/rodape.js", "body", false, linhaDe(html, 'src="js/rodape.js"')],
+    ],
+  );
+});
+
+test("F-36 externos: classe sem CSS no arquivo aponta os arquivos de estilo candidatos", async () => {
+  const { elementos } = await carregar("arquivos-externos.html");
+  const avisos = (el) => el.css.avisos.map((a) => [a.classe, a.arquivos.map((x) => x.href)]);
+  const candidatos = ["css/estilo.css", "css/tema.css"];
+
+  assert.deepEqual(avisos(buscarTodosPorNome(elementos, "div")[0]), [["container", candidatos]]);
+  // .destaque tem regra no <style>: não gera aviso
+  assert.deepEqual(avisos(buscarTodosPorNome(elementos, "h1")[0]), [["titulo", candidatos]]);
+  assert.deepEqual(avisos(buscarPorId(elementos, "enviar")), [["btn", candidatos]]);
+  assert.deepEqual(avisos(buscarTodosPorNome(elementos, "a")[0]), []);
+  assert.deepEqual(avisos(buscarTodosPorNome(elementos, "p")[0]), []);
+});
+
+test("F-37 externos: classe de ícones do Google Fonts aponta o <link> que a define", async () => {
+  const { html, elementos } = await carregar("arquivos-externos.html");
+  const [aviso] = buscarTodosPorNome(elementos, "span")[0].css.avisos;
+  assert.equal(aviso.classe, "material-symbols-outlined");
+  assert.deepEqual(aviso.arquivos.map((x) => x.linha), [linhaDe(html, "family=Material")]);
+  assert.equal(aviso.motivo, "icones");
+});
+
+test("F-38 externos: interativo sem evento aponta os scripts locais; com evento, não", async () => {
+  const { elementos, relatorio } = await carregar("arquivos-externos.html");
+  assert.deepEqual(buscarPorId(elementos, "enviar").avisoScripts.map((s) => s.src), ["js/app.js", "js/rodape.js"]);
+  assert.deepEqual(buscarTodosPorNome(elementos, "a")[0].avisoScripts.map((s) => s.src), ["js/app.js", "js/rodape.js"]);
+  assert.deepEqual(buscarPorId(elementos, "com-evento").avisoScripts, []);
+  assert.deepEqual(
+    relatorio.interativosSemEventos.map((el) => [el.tag, el.scriptsExternos.length]),
+    [["button", 2], ["a", 2]],
+  );
+});
+
+test("F-39 externos: sem arquivos externos não há aviso; Tailwind CDN não conta como script de eventos", async () => {
+  const puro = await carregar("css-puro.html");
+  assert.deepEqual(puro.externos, { estilos: [], scripts: [] });
+  assert.ok(puro.elementos.every((el) => el.css.avisos.length === 0 && el.avisoScripts.length === 0));
+
+  const tw = await carregar("tailwind-puro.html");
+  assert.equal(tw.externos.scripts[0].tipo, "tailwind-cdn");
+  assert.ok(tw.elementos.every((el) => el.avisoScripts.length === 0));
+});
+
+test("F-40 externos: a saída do console mostra os avisos no formato [LER ...] [FONTE ...]", async () => {
+  const { mapearTags } = require("./script.js");
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await mapearTags(path.join(PASTA, "arquivos-externos.html"));
+  } finally {
+    console.log = originalLog;
+  }
+  const saida = fs.readFileSync(path.join(__dirname, "output", "arquivos-externos.txt"), "utf8");
+  const html = fs.readFileSync(path.join(PASTA, "arquivos-externos.html"), "utf8");
+  const l = (t) => linhaDe(html, t);
+
+  assert.match(saida, /^Arquivos externos \(não lidos pelo script\): 4 de estilo, 3 scripts$/m);
+  assert.ok(
+    saida.includes(
+      `  - classe container (<div> L${l('class="container"')}) [LER ARQUIVO DE ESTILO css/estilo.css, css/tema.css] [FONTE: <link> no <head> L${l("css/estilo.css")}; @import no <style> L${l("@import")}]`,
+    ),
+  );
+  assert.ok(
+    saida.includes(
+      `Interativos sem evento no arquivo: 2 [LER SCRIPT EXTERNO js/app.js, js/rodape.js] [FONTE: <script src> no <head> L${l("js/app.js")}; <script src> no <body> L${l("js/rodape.js")}]`,
+    ),
+  );
+});

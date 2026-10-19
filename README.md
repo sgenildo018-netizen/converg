@@ -63,6 +63,20 @@ A amostra do `<header>` é só um recorte para conferir que o texto sai idêntic
 
 Para analisar **só um bloco**, use `--foco <seletor>`. A saída começa com `=== Foco: <header> ... ===` e a linha `Escopo: só <header> e descendentes (L506-L572): 22 de 513 elementos`. Tags, validação, eventos, CSS e a lista de **interativos sem evento** passam a contar só dentro do bloco. Os `<script>` e `<style>` continuam sendo lidos do arquivo inteiro, então um handler escrito fora do bloco ainda aparece com a linha certa.
 
+**CSS e JS em arquivos externos.** Páginas como as do Claude Design ligam o CSS e o JS pelo `<head>` (`<link rel="stylesheet">`, `@import`, `<script src>`). O script não lê esses arquivos, mas lista cada um com a linha e avisa onde procurar:
+
+```
+Arquivos externos (não lidos pelo script): 4 de estilo, 3 scripts
+  - estilo css/estilo.css (<link> no <head> L6)
+  - estilo css/tema.css (@import no <style> L12)
+  - script js/app.js (<script src> no <head> L15)
+Classes com CSS em arquivo externo: 4
+  - classe container (<div> L19) [LER ARQUIVO DE ESTILO css/estilo.css, css/tema.css] [FONTE: <link> no <head> L6; @import no <style> L12]
+Interativos sem evento no arquivo: 2 [LER SCRIPT EXTERNO js/app.js, js/rodape.js] [FONTE: <script src> no <head> L15; <script src> no <body> L27]
+```
+
+Uma classe só recebe o aviso quando não tem CSS no próprio arquivo (nem token do `tailwind.config`, nem regra de `<style>`). Links do Google Fonts são tratados à parte: os de fonte não definem classes, e os de ícones (`Material Symbols`, `Material Icons`) apontam a classe que definem, como `material-symbols-outlined` em `code.html`. Scripts remotos e o Tailwind CDN não são apontados como fonte de eventos.
+
 Cada linha de evento mostra: elemento → linha do elemento → evento → **linha do handler** → como foi registrado → tipo do handler → início do código. Embaixo vem o CSS do elemento: cada classe com as declarações que gera e a **linha do token** no `tailwind.config`, as regras de `<style>` que casam e o style inline.
 
 ## Como rodar
@@ -71,7 +85,7 @@ Cada linha de evento mostra: elemento → linha do elemento → evento → **lin
 node script.js                         # analisa code.html inteiro (e index.html)
 node script.js --foco header           # analisa só o primeiro <header> e seus descendentes
 node script.js code.html --foco "#copy-link-btn"   # qualquer seletor: tag, #id, .classe, "main .card"
-node --test            # 59 testes (52 passam, 7 todo de limitações conhecidas)
+node --test            # 65 testes (58 passam, 7 todo de limitações conhecidas)
 ```
 
 Saídas na pasta `output/`:
@@ -98,7 +112,7 @@ Saídas na pasta `output/`:
 
 - **CSS do Tailwind só vem do `tailwind.config`.** Classes com token do config (`bg-surface-container-lowest` → `background-color: #0a0e14`) e valores arbitrários (`w-[42%]`) são resolvidas com a linha do token. Classes da escala padrão do Tailwind (`flex`, `p-4`, `font-semibold`) aparecem como "sem token no config": o experimento não reproduz o Tailwind inteiro.
 - **O `tailwind.config` é avaliado com `node:vm`** num contexto vazio. Não é um sandbox de segurança; use só com arquivos confiáveis.
-- **Regras de `<style>`:** combinadores (` `, `>`, `+`, `~`), atributos e pseudo-classes estruturais (`:first-child`, `:nth-child`, `:not`, `:is`) são avaliados. Estados dinâmicos (`:hover`, `:focus`) casam e ficam anotados como estado. CSS de `<link rel="stylesheet">` externo não é lido.
+- **Regras de `<style>`:** combinadores (` `, `>`, `+`, `~`), atributos e pseudo-classes estruturais (`:first-child`, `:nth-child`, `:not`, `:is`) são avaliados. Estados dinâmicos (`:hover`, `:focus`) casam e ficam anotados como estado. CSS de `<link rel="stylesheet">` e `@import` não é lido: o script só avisa em qual arquivo procurar.
 - **Seletores simples apenas.** `#id`, `.classe` e `tag` são resolvidos. Seletores compostos e IDs montados em runtime (`"btn-" + id`) não.
 - **Casos de HTML que o tokenizer ainda erra** (cada um tem um teste `todo` em [TESTES.md](TESTES.md), F-23 a F-29): aspas soltas em valor sem aspas (`title=it's`), `<textarea>`/`<title>` com tags dentro, tags de fechamento opcionais (`<li>`, `<p>`) acusadas como erro, listeners dentro de comentários JS contados como ativos.
 - **Código de handler:** `elemento.onclick = function () {…}` com várias linhas é cortado na primeira, e entidades em `onclick` (`&quot;`) não são decodificadas.

@@ -1,5 +1,8 @@
 === Experimento 3: postcss + css-select x extrairRegrasCss/casarSeletor do script.js ===
 
+--- fixtures\arquivos-externos.html
+  regras: script.js 1 | postcss 1 | mesmo seletor e linha 1
+  casamento seletor -> elementos: igual em 1 de 1 regras
 --- fixtures\css-puro.html
   regras: script.js 9 | postcss 9 | mesmo seletor e linha 9
   casamento seletor -> elementos: igual em 9 de 9 regras
@@ -26,4 +29,4 @@
 
 --- Tempo no <style> de code.html (média de 5)
   script.js extrairRegrasCss: 0.05 ms
-  postcss:                    0.17 ms
+  postcss:                    0.12 ms

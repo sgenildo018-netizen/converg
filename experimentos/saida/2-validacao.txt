@@ -1,5 +1,9 @@
 === Experimento 2: html-validate x validarEstrutura do script.js ===
 
+--- fixtures\arquivos-externos.html
+  script.js:     válido (0 erros, 0 avisos)
+  html-validate: válido (0 erros, 0 avisos) com regras estruturais
+  html-validate recommended: 9 mensagens: void-style 6, no-implicit-button-type 2, no-inline-style 1
 --- fixtures\com-scripts.html
   script.js:     válido (0 erros, 0 avisos)
   html-validate: válido (0 erros, 0 avisos) com regras estruturais
@@ -110,5 +114,5 @@
   limitacoes.html válido (li/p sem fechamento são permitidos): sim
 
 --- Tempo em code.html (média de 5)
-  script.js validarEstrutura: 69.7 ms (inclui localizarTags)
-  html-validate estrutural:   15.2 ms
+  script.js validarEstrutura: 63.6 ms (inclui localizarTags)
+  html-validate estrutural:   13.4 ms

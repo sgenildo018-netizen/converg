@@ -1,5 +1,9 @@
 === Experimento 1: parser HTML (parse5, htmlparser2) x tokenizer do script.js ===
 
+--- fixtures\arquivos-externos.html (1287 chars, L1-L30)
+  script.js:   21 elementos
+  parse5:      21 elementos | mesmo início 21 | mesmo recorte 21 | só no parse5 0 | erros de parse 0
+  htmlparser2: 21 elementos | mesmo início 21 | mesmo recorte 21 | só no htmlparser2 0
 --- fixtures\com-scripts.html (1558 chars, L1-L46)
   script.js:   13 elementos
   parse5:      13 elementos | mesmo início 13 | mesmo recorte 13 | só no parse5 0 | erros de parse 0
@@ -79,6 +83,6 @@
   F-29 title=it's vale "it's": parse5 sim | htmlparser2 sim
 
 --- Tempo em code.html (média de 5)
-  script.js localizarTags+mapearElementos: 72.7 ms
-  parse5:      4.8 ms
-  htmlparser2: 1.9 ms
+  script.js localizarTags+mapearElementos: 64.3 ms
+  parse5:      4.2 ms
+  htmlparser2: 1.4 ms

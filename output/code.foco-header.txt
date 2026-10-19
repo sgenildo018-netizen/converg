@@ -78,6 +78,13 @@ tailwind.config: L43 | colors 47 · borderRadius 4 · spacing 9 · fontFamily 10
 Regras de <style> que atingem o foco: 1
   - ::-webkit-scrollbar (L37) -> todos os elementos do foco: display: none
 Classes distintas no foco: 69 | do tailwind.config: 26 | arbitrárias: 3 | sem token no config: 40
+Arquivos externos (não lidos pelo script): 3 de estilo, 1 script
+  - ícones https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200 (<link> no <head> L8): define material-symbols-outlined
+  - ícones https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap (<link> no <head> L12): define material-symbols-outlined
+  - fonte https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap (<link> no <head> L16): só fontes
+  - Tailwind CDN https://cdn.tailwindcss.com (<script src> no <head> L41): gera as classes do Tailwind
+Classes com CSS em arquivo externo do foco: 1
+  - classe material-symbols-outlined (<span> L515, <span> L533, <span> L542 +3) [LER ARQUIVO DE ESTILO fonts.googleapis.com (Material Symbols Outlined)] [FONTE: <link> no <head> L8; <link> no <head> L12]
 Elementos com eventos no foco: 0
 Elementos interativos sem evento no foco: 5
   - <button> (L510)
