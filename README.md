@@ -22,6 +22,12 @@ As três saídas óbvias não resolvem:
 
 O `converg` faz o caminho inverso: lê o arquivo como texto, localiza cada tag por offset e recorta com `html.slice()`. O trecho extraído é **idêntico ao original**, com espaços, quebras de linha e indentação. Em cima disso, cruza os `<script>` para ligar cada `addEventListener`, `on...` e `onclick=""` ao elemento certo.
 
+### Por que ler como texto, e não com um parser de HTML
+
+Foi uma escolha de partida, não uma limitação. Dissecar o HTML como árvore é mais complexo do que trabalhar com um texto: no texto dá para usar todos os métodos de string do JS (`indexOf`, `slice`, regex) e o arquivo nunca é reescrito, então o que sai é sempre o original. A inspiração é o processo do Astro, que pega um Markdown como texto e o transforma em HTML.
+
+Usar libs externas **não é regra do projeto**. Em [experimentos/LIBS.md](experimentos/LIBS.md) há uma comparação com libs prontas (parse5, acorn e outras) para ver o que elas resolvem; o caminho principal continua sendo o texto puro, sem dependências.
+
 Na prática, o que mais ajuda é a **saída do console**, que resume em poucas linhas o que levaria minutos para achar no arquivo.
 
 ## Exemplo de saída

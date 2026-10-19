@@ -4,6 +4,8 @@ O `script.js` faz tudo à mão (tokenizer, validador, leitura de CSS, regex sobr
 
 O `script.js` **continua sem dependências**. As libs ficam só nesta pasta, com `package.json` próprio.
 
+> Isto é uma comparação, não um plano de migração. O converg lê o HTML como texto por escolha (ver "Por que ler como texto" no README), e usar libs não é regra do projeto. O que vale levar daqui são as **ideias**: o que cada lib acerta e o script erra pode ser reproduzido com métodos de string.
+
 ## Como rodar
 
 ```bash
@@ -25,7 +27,7 @@ As saídas completas estão em [`saida/`](saida/).
 
 ## Resultado em uma tabela
 
-| Lib | Veredito | Por quê |
+| Lib | Se fosse usar | Por quê |
 |---|---|---|
 | **parse5** | adotar | Mesmos 513 elementos de `code.html`, com o mesmo início e o mesmo recorte exato. Resolve F-24, F-25 e F-29. 15× mais rápido. |
 | **acorn** | adotar | Resolve F-26, F-27 e F-28, acha a linha onde o handler foi **escrito** e lista os elementos que o handler usa. |
@@ -125,6 +127,6 @@ Tamanho da pasta de cada lib em `node_modules`, sem as dependências dela (o `no
 
 parse5 + acorn + css-select somam cerca de 1,5 MB e resolvem quase tudo; o grosso do peso está no html-validate e no jsdom.
 
-## Próximo passo possível
+## Se um dia fosse usar
 
 Trocar no `script.js` o tokenizer por **parse5** e as regex de script por **acorn** (com **css-select** para os seletores), mantendo o recorte pelo texto cru. Isso tira os `todo` F-24 a F-29, mas o projeto deixa de ser "sem dependências". Pela regra do projeto, antes viria a bateria: testes novos para a linha do handler escrita fora da chamada, as dependências do handler e o `querySelector` que liga só ao primeiro, além de ajustar F-15 e F-32.
