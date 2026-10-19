@@ -1,0 +1,130 @@
+=== Foco: <header> de code.html (L506-L572, offsets 27332-31324), seletor "header" ===
+<header
+                class="fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 z-40 px-space-md flex items-center justify-between gap-space-md"
+            >
+                <div class="flex items-center gap-space-sm flex-1 max-w-xl">
+                    <button
+                        class="w-full flex items-center justify-between px-space-sm py-1.5 bg-surface-container-low hover:bg-surface-container rounded-lg border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all"
+                        type="button"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="material-symbols-outlined text-[16px] text-outline"
+                                >search</span
+                            ><span class="font-body-sm text-body-sm"
+                                >Buscar notas, tags ou snippets...</span
+                            >
+                        </div>
+                        <kbd
+                            class="px-1.5 py-0.5 text-label-kbd font-label-kbd bg-surface-container-high border border-outline-variant/40 rounded text-outline shadow-sm"
+                            >⌘K</kbd
+                        >
+                    </button>
+                </div>
+                <div class="flex items-center gap-space-sm">
+                    <button
+                        class="flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >download</span
+                        ><span class="hidden xl:inline"
+                            >Exportar Markdown</span
+                        ></button
+                    ><button
+                        class="flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >center_focus_strong</span
+                        ><span class="hidden xl:inline">Modo Foco</span></button
+                    ><button
+                        class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors relative"
+                        title="Notificações"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[18px]"
+                            >notifications</span
+                        ><span
+                            class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-primary"
+                        ></span></button
+                    ><button
+                        class="flex items-center gap-1.5 bg-primary-container text-on-primary-container px-space-sm py-1 rounded-lg font-medium text-body-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-95 transition-all"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >add</span
+                        ><span>Novo Artigo</span>
+                    </button>
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
+                    >
+                        <span
+                            class="material-symbols-outlined text-on-primary text-[18px]"
+                            >person</span
+                        >
+                    </div>
+                </div>
+            </header>
+=== Fim do foco <header> ===
+
+--- Análise do foco <header> ---
+Escopo: só <header> e descendentes (L506-L572): 22 de 513 elementos
+Seletor "header" casa com 2 elementos; o foco é o 1º.
+Os <script> e <style> do arquivo inteiro foram lidos para achar handlers e regras que atingem o bloco.
+Tags: 44 | Elementos: 22
+Estrutura do bloco válida: Sim (0 erros)
+tailwind.config: L43 | colors 47 · borderRadius 4 · spacing 9 · fontFamily 10 · fontSize 10
+Regras de <style> que atingem o foco: 1
+  - ::-webkit-scrollbar (L37) -> todos os elementos do foco: display: none
+Classes distintas no foco: 69 | do tailwind.config: 26 | arbitrárias: 3 | sem token no config: 40
+Elementos com eventos no foco: 0
+Elementos interativos sem evento no foco: 5
+  - <button> (L510)
+      CSS: 14 classes (7 do tailwind.config, 0 arbitrárias, 7 sem token no config)
+        px-space-sm -> padding-left: 0.5rem; padding-right: 0.5rem (spacing "space-sm", L104)
+        bg-surface-container-low -> background-color: #181c22 (colors "surface-container-low", L71)
+        hover:bg-surface-container -> background-color: #1c2026 [hover] (colors "surface-container", L65)
+        rounded-lg -> border-radius: 0.25rem (borderRadius "lg", L98)
+        border-outline-variant/30 -> border-color: rgba(66, 71, 84, 0.3) (colors "outline-variant", L85)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        sem token no config: w-full flex items-center justify-between py-1.5 border transition-all
+  - <button> (L529)
+      CSS: 12 classes (7 do tailwind.config, 0 arbitrárias, 5 sem token no config)
+        px-space-xs -> padding-left: 0.25rem; padding-right: 0.25rem (spacing "space-xs", L105)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        text-body-sm -> font-size: 12px; line-height: 18px; letter-spacing: 0em; font-weight: 400 (fontSize "body-sm", L126)
+        font-body-sm -> font-family: Geist (fontFamily "body-sm", L114)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:bg-surface-container -> background-color: #1c2026 [hover] (colors "surface-container", L65)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        sem token no config: flex items-center gap-1 py-1 transition-colors
+  - <button> (L538)
+      CSS: 12 classes (7 do tailwind.config, 0 arbitrárias, 5 sem token no config)
+        px-space-xs -> padding-left: 0.25rem; padding-right: 0.25rem (spacing "space-xs", L105)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        text-body-sm -> font-size: 12px; line-height: 18px; letter-spacing: 0em; font-weight: 400 (fontSize "body-sm", L126)
+        font-body-sm -> font-family: Geist (fontFamily "body-sm", L114)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:bg-surface-container -> background-color: #1c2026 [hover] (colors "surface-container", L65)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        sem token no config: flex items-center gap-1 py-1 transition-colors
+  - <button> (L545)
+      CSS: 7 classes (4 do tailwind.config, 0 arbitrárias, 3 sem token no config)
+        text-on-surface-variant -> color: #c2c6d6 (colors "on-surface-variant", L57)
+        hover:text-on-surface -> color: #dfe2eb [hover] (colors "on-surface", L76)
+        hover:bg-surface-container -> background-color: #1c2026 [hover] (colors "surface-container", L65)
+        rounded -> border-radius: 0.125rem (borderRadius "DEFAULT", L97)
+        sem token no config: p-1 transition-colors relative
+  - <button> (L555)
+      CSS: 13 classes (5 do tailwind.config, 1 arbitrárias, 7 sem token no config)
+        bg-primary-container -> background-color: #4d8eff (colors "primary-container", L64)
+        text-on-primary-container -> color: #00285d (colors "on-primary-container", L89)
+        px-space-sm -> padding-left: 0.5rem; padding-right: 0.5rem (spacing "space-sm", L104)
+        rounded-lg -> border-radius: 0.25rem (borderRadius "lg", L98)
+        text-body-sm -> font-size: 12px; line-height: 18px; letter-spacing: 0em; font-weight: 400 (fontSize "body-sm", L126)
+        shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] -> box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) (valor arbitrário)
+        sem token no config: flex items-center gap-1.5 py-1 font-medium hover:opacity-95 transition-all
+
+[JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json). O JSON traz o arquivo inteiro; o foco vale só para esta saída.

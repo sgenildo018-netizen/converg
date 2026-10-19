@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fixture: modo foco num elemento</title>
+        <style>
+            header button {
+                padding: 4px;
+            }
+            .card {
+                border: 1px solid #ccc;
+            }
+        </style>
+    </head>
+    <body>
+        <header id="topo">
+            <h1>Título</h1>
+            <button id="menu" class="botao">Menu</button>
+            <button onclick="alert('ajuda')">Ajuda</button>
+            <a href="#perfil">Perfil</a>
+        </header>
+        <main>
+            <div class="card">
+                <button id="comprar">Comprar</button>
+            </div>
+            <div class="card">
+                <p>Card sem botão
+            </div>
+        </main>
+        <script>
+            const menu = document.getElementById("menu");
+            menu.addEventListener("click", () => {
+                console.log("abriu o menu");
+            });
+
+            const comprar = document.getElementById("comprar");
+            comprar.addEventListener("click", () => console.log("comprou"));
+        </script>
+    </body>
+</html>

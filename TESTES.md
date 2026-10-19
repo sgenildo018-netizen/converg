@@ -22,7 +22,7 @@ node --test fixtures.test.js   # só a bateria de fixtures (F-xx)
 
 Motor: `node:test` + `node:assert/strict`, nativos do Node (sem dependências).
 
-Estado atual: **53 testes, 46 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
+Estado atual: **59 testes, 52 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
 
 Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece com ⚠ no relatório, mas não quebra a suíte. Quando a limitação for resolvida, ele passa a passar e o `todo` deve ser removido.
 
@@ -36,6 +36,7 @@ Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece c
 | `com-scripts.html` | não | uma classe | não | não | sim (todos os tipos de evento) | não |
 | `sem-scripts.html` | não | não | não | não | não | não |
 | `style-inline.html` | não | não | não | não | não | sim |
+| `foco.html` | um `<p>` sem fechamento fora do `<header>` | uma classe | não | sim | sim (handler fora do bloco) | não |
 | `limitacoes.html` | casos de limitação | não | não | não | sim | não |
 | `limitacao-aspa-solta.html` | caso de limitação | não | não | não | não | não |
 
@@ -95,6 +96,16 @@ Os testes calculam as linhas esperadas procurando o trecho no próprio arquivo (
 | F-21 | Casos difíceis do `style` | `;` dentro de `url(...)` não quebra a declaração; `COLOR` vira `color`; atributo com aspas simples |
 | F-22 | Sem declarações | `style=""` e elemento sem `style` dão lista vazia |
 
+### foco.html (modo foco num elemento)
+
+| Código | O que verifica | Esperado |
+|---|---|---|
+| F-30 | Escopo do foco por tag | só o `<header>` e descendentes entram (5 elementos); linhas de início e fim do bloco; todas as tags dentro do intervalo |
+| F-31 | Eventos no foco | o `#menu` (handler escrito no `<script>` fora do bloco, com a linha certa) e o botão inline entram; o `#comprar` do `<main>` fica de fora |
+| F-32 | Validação só do bloco | o arquivo é inválido (`<p>` sem fechamento no `<main>`), mas o foco `header` é válido e o foco `main` não |
+| F-33 | Tipos de seletor | `#topo` funciona; `main .card` casa 2, usa o 1º e informa o total; seletor sem resultado dá erro claro |
+| F-34 | CSS e interativos no foco | `header button` atinge 2 elementos do foco; `.card` não aparece; classes só do bloco; o `<a>` aparece como interativo sem evento |
+
 ### Limitações conhecidas (`todo`)
 
 | Código | Fixture | Limitação | Comportamento hoje |
@@ -135,6 +146,7 @@ Os testes calculam as linhas esperadas procurando o trecho no próprio arquivo (
 | T-22 | `mapearCss` | classes, regras de `<style>` e style inline ligados aos elementos de `code.html` e `index.html` |
 | T-23 | `extrairDeclaracoes` | `;` dentro de parênteses |
 | T-24 | `mapearTags` (saída do console / `code.txt`) | a amostra diz qual elemento foi recortado (`<header>`, linhas e offsets) e a análise diz que o escopo é o arquivo inteiro |
+| T-25 | `mapearTags` com `foco` | rótulos do bloco e do escopo, `.txt` próprio (`code.foco-header.txt`) e a saída padrão `code.txt` intacta |
 
 ## Observações da bateria
 

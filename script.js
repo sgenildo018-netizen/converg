@@ -4,6 +4,9 @@ const vm = require("node:vm");
 
 // --- Constantes
 
+/** Tags tratadas como interativas no relatório de eventos. */
+const ELEMENTOS_INTERATIVOS = ["button", "a", "input", "select", "textarea", "form"];
+
 /**
  * Conjunto de elementos HTML vazios (void elements) segundo a especificação HTML.
  * Estes elementos não possuem conteúdo interno nem tag de fechamento correspondente.
@@ -1150,9 +1153,7 @@ function gerarRelatorioInteratividade(
 
   const elementosInterativos = elementos.filter(
     (el) =>
-      ["button", "a", "input", "select", "textarea", "form"].includes(
-        el.nome,
-      ) ||
+      ELEMENTOS_INTERATIVOS.includes(el.nome) ||
       el.eventos.length > 0,
   );
 
@@ -2426,15 +2427,93 @@ async function percorrerHtml() {
   caracteres.forEach(() => {});
 }
 
+// --- Modo Foco (análise restrita a um elemento e seus descendentes)
+
 /**
- * Lê o `code.html`, mapeia tags, elementos e imprime o primeiro bloco `<header>`.
- * Executa também a validação estrutural, a correlação de eventos com mapeamento completo
- * e salva o resultado JSON na pasta `output/`.
+ * Restringe um resultado de {@link processarHtml} a um elemento e seus descendentes.
+ * Scripts e `<style>` continuam vindo do arquivo inteiro (um handler escrito fora do
+ * bloco ainda é encontrado), mas tags, validação, eventos, CSS e interativos são
+ * contados só dentro do elemento foco.
+ * @param {Object} resultado - Retorno de `processarHtml`.
+ * @param {string} seletor - Seletor CSS do foco (ex.: `header`, `#topo`, `main .card`).
+ * @returns {Object} Escopo do foco: elemento, linhas, elementos, tags, validação, eventos, CSS e interativos sem evento.
+ * @throws {Error} Se nenhum elemento casar com o seletor.
+ */
+function analisarFoco(resultado, seletor) {
+  const { html, tags, elementos, css } = resultado;
+  const arvore = construirArvore(elementos);
+  const partes = analisarSeletor(seletor);
+  const casados = elementos.filter((el) => casarSeletor(partes, el, arvore));
+
+  if (!casados.length) {
+    throw new Error(`Nenhum elemento casa com o seletor "${seletor}".`);
+  }
+
+  const elemento = casados[0];
+  const dentro = (inicio, fim) => inicio >= elemento.inicio && fim <= elemento.fim;
+  const elementosFoco = elementos.filter((el) => dentro(el.inicio, el.fim));
+  const tagsFoco = tags.filter((t) => dentro(t.posicao, t.fim));
+
+  const contagemRegras = new Map();
+  const classes = new Map();
+  for (const el of elementosFoco) {
+    for (const r of el.css.regras) {
+      contagemRegras.set(r.indiceRegra, (contagemRegras.get(r.indiceRegra) || 0) + 1);
+    }
+    for (const c of el.css.classes) {
+      if (!classes.has(c.classe)) classes.set(c.classe, c);
+    }
+  }
+
+  return {
+    seletor,
+    elemento,
+    totalCasados: casados.length,
+    linhaInicio: elemento.linha,
+    linhaFim: calcularLinhaColuna(html, elemento.fim).linha,
+    elementos: elementosFoco,
+    tags: tagsFoco,
+    validacao: validarEstrutura(tagsFoco),
+    comEventos: elementosFoco
+      .filter((el) => el.eventos.length > 0)
+      .map((el) => ({
+        tag: el.nome,
+        id: el.id,
+        classes: el.classes,
+        linha: el.linha,
+        coluna: el.coluna,
+        totalEventos: el.eventos.length,
+        eventos: el.eventos,
+        css: el.css,
+      })),
+    interativosSemEventos: elementosFoco.filter(
+      (el) => ELEMENTOS_INTERATIVOS.includes(el.nome) && el.eventos.length === 0,
+    ),
+    regrasCss: [...contagemRegras.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([indice, total]) => ({ ...css.regras[indice], totalNoFoco: total })),
+    classes: [...classes.values()],
+  };
+}
+
+/** Nome de arquivo seguro a partir de um seletor: `main .card` → `main-card`. */
+function slugSeletor(seletor) {
+  return seletor.replace(/[^\w-]+/g, "-").replace(/^-+|-+$/g, "") || "foco";
+}
+
+/**
+ * Lê o HTML, executa o pipeline completo e imprime o resumo no console,
+ * gravando a mesma saída em `output/<arquivo>.txt`.
+ *
+ * Sem `foco`, imprime uma amostra do primeiro `<header>` e analisa o arquivo inteiro.
+ * Com `foco`, imprime o bloco escolhido e restringe a análise a ele e aos seus
+ * descendentes (ver {@link analisarFoco}); a saída vai para `output/<arquivo>.foco-<seletor>.txt`.
  * @param {string} [arquivo="code.html"] - Nome do arquivo HTML a ser processado.
+ * @param {{ foco?: string }} [opcoes] - `foco`: seletor CSS do elemento a analisar.
  * @async
  * @returns {Promise<Tag[]>} A lista de tags extraídas do HTML.
  */
-async function mapearTags(arquivo = "code.html") {
+async function mapearTags(arquivo = "code.html", { foco = null } = {}) {
   const caminhoHtml = path.isAbsolute(arquivo)
     ? arquivo
     : path.join(__dirname, arquivo);
@@ -2445,35 +2524,97 @@ async function mapearTags(arquivo = "code.html") {
     linhas.push(texto);
   };
 
-  const { html, tags, elementos, validacao, css, relatorio, resultado } =
-    await processarHtml(caminhoHtml, { salvarJson: true });
+  const processado = await processarHtml(caminhoHtml, { salvarJson: true });
+  const { html, tags, elementos, validacao, css, relatorio, resultado } = processado;
 
   const nomeArquivo = path.basename(caminhoHtml);
-  const header = buscarElementoPorNome(elementos, "header");
-
-  // A amostra é só um recorte para conferência; a análise abaixo cobre o arquivo inteiro
-  if (!header) {
-    log(`Nenhum elemento <header> completo foi encontrado em ${nomeArquivo}.`);
-  } else {
-    const linhaFimHeader = calcularLinhaColuna(html, header.fim).linha;
-    log(
-      `=== Amostra: primeiro <header> de ${nomeArquivo} (L${header.linha}-L${linhaFimHeader}, offsets ${header.inicio}-${header.fim}) ===`,
-    );
-    log(header.texto);
-    log("=== Fim da amostra <header> ===");
-  }
-
   const totalLinhas = html.endsWith("\n")
     ? html.split("\n").length - 1
     : html.split("\n").length;
 
-  log("\n--- Análise e Mapeamento Completo de Eventos ---");
+  // Escopo da análise: o arquivo inteiro, ou só o elemento foco e seus descendentes
+  let escopo;
+
+  if (foco) {
+    const f = analisarFoco(processado, foco);
+    const rotulo = `<${f.elemento.nome}${f.elemento.id ? ` id="${f.elemento.id}"` : ""}>`;
+    log(
+      `=== Foco: ${rotulo} de ${nomeArquivo} (L${f.linhaInicio}-L${f.linhaFim}, offsets ${f.elemento.inicio}-${f.elemento.fim}), seletor "${foco}" ===`,
+    );
+    log(f.elemento.texto);
+    log(`=== Fim do foco ${rotulo} ===`);
+
+    log(`\n--- Análise do foco ${rotulo} ---`);
+    log(
+      `Escopo: só ${rotulo} e descendentes (L${f.linhaInicio}-L${f.linhaFim}): ${f.elementos.length} de ${elementos.length} elementos`,
+    );
+    if (f.totalCasados > 1) {
+      log(`Seletor "${foco}" casa com ${f.totalCasados} elementos; o foco é o 1º.`);
+    }
+    log("Os <script> e <style> do arquivo inteiro foram lidos para achar handlers e regras que atingem o bloco.");
+
+    const contar = (origem) => f.classes.filter((c) => c.origem === origem).length;
+    escopo = {
+      tags: f.tags,
+      elementos: f.elementos,
+      validacao: f.validacao,
+      rotuloValidacao: "Estrutura do bloco válida",
+      regras: f.regrasCss.map((r) => ({ ...r, total: r.totalNoFoco })),
+      rotuloRegras: "Regras de <style> que atingem o foco",
+      sufixoAlcance: " do foco",
+      classes: {
+        distintas: f.classes.length,
+        tailwindConfig: contar("tailwind.config"),
+        arbitrarias: contar("arbitrario"),
+        padrao: contar("padrao"),
+      },
+      rotuloClasses: "Classes distintas no foco",
+      comStyleInline: f.elementos.filter((el) => el.css.inline.length).length,
+      comEventos: f.comEventos,
+      rotuloEventos: "Elementos com eventos no foco",
+      interativosSemEventos: f.interativosSemEventos,
+    };
+  } else {
+    const header = buscarElementoPorNome(elementos, "header");
+
+    // A amostra é só um recorte para conferência; a análise abaixo cobre o arquivo inteiro
+    if (!header) {
+      log(`Nenhum elemento <header> completo foi encontrado em ${nomeArquivo}.`);
+    } else {
+      const linhaFimHeader = calcularLinhaColuna(html, header.fim).linha;
+      log(
+        `=== Amostra: primeiro <header> de ${nomeArquivo} (L${header.linha}-L${linhaFimHeader}, offsets ${header.inicio}-${header.fim}) ===`,
+      );
+      log(header.texto);
+      log("=== Fim da amostra <header> ===");
+    }
+
+    log("\n--- Análise e Mapeamento Completo de Eventos ---");
+    log(
+      `Escopo: arquivo inteiro ${nomeArquivo} (L1-L${totalLinhas})${header ? ", não só a amostra acima" : ""}`,
+    );
+
+    const regrasStyle = css.regras.filter((r) => r.tipo === "regra");
+    escopo = {
+      tags,
+      elementos,
+      validacao,
+      rotuloValidacao: "Estrutura válida",
+      regras: regrasStyle.map((r) => ({ ...r, total: r.totalElementos })),
+      rotuloRegras: `Blocos <style>: ${css.blocosStyle.length}${css.blocosStyle.length ? ` (${css.blocosStyle.map((b) => `L${b.linha}`).join(", ")})` : ""} | regras`,
+      sufixoAlcance: "",
+      classes: css.classes,
+      rotuloClasses: "Classes distintas",
+      comStyleInline: css.elementosComStyleInline,
+      comEventos: relatorio.comEventos,
+      rotuloEventos: "Elementos com eventos mapeados",
+      interativosSemEventos: null,
+    };
+  }
+
+  log(`Tags: ${escopo.tags.length} | Elementos: ${escopo.elementos.length}`);
   log(
-    `Escopo: arquivo inteiro ${nomeArquivo} (L1-L${totalLinhas})${header ? ", não só a amostra acima" : ""}`,
-  );
-  log(`Tags: ${tags.length} | Elementos: ${elementos.length}`);
-  log(
-    `Estrutura válida: ${validacao.valido ? "Sim (0 erros)" : `Não (${validacao.totalErros} erros)`}`,
+    `${escopo.rotuloValidacao}: ${escopo.validacao.valido ? "Sim (0 erros)" : `Não (${escopo.validacao.totalErros} erros)`}`,
   );
 
   const tw = css.tailwindConfig;
@@ -2487,27 +2628,24 @@ async function mapearTags(arquivo = "code.html") {
   } else {
     log("tailwind.config: não encontrado");
   }
-  const regrasStyle = css.regras.filter((r) => r.tipo === "regra");
-  log(
-    `Blocos <style>: ${css.blocosStyle.length}${css.blocosStyle.length ? ` (${css.blocosStyle.map((b) => `L${b.linha}`).join(", ")})` : ""} | regras: ${regrasStyle.length}`,
-  );
-  for (const r of regrasStyle) {
+  log(`${escopo.rotuloRegras}: ${escopo.regras.length}`);
+  for (const r of escopo.regras) {
     const ctx = r.contexto.length ? `, ${r.contexto.join(", ")}` : "";
     const alcance = r.seletores.every((sel) => ehSeletorGlobal(analisarSeletor(sel)))
-      ? "todos os elementos"
-      : `${r.totalElementos} elemento${r.totalElementos === 1 ? "" : "s"}`;
+      ? `todos os elementos${escopo.sufixoAlcance}`
+      : `${r.total} elemento${r.total === 1 ? "" : "s"}${escopo.sufixoAlcance}`;
     log(`  - ${r.seletor} (L${r.linha}${ctx}) -> ${alcance}: ${formatarDeclaracoes(r.declaracoes)}`);
   }
   log(
-    `Classes distintas: ${css.classes.distintas} | do tailwind.config: ${css.classes.tailwindConfig} | arbitrárias: ${css.classes.arbitrarias} | sem token no config: ${css.classes.padrao}`,
+    `${escopo.rotuloClasses}: ${escopo.classes.distintas} | do tailwind.config: ${escopo.classes.tailwindConfig} | arbitrárias: ${escopo.classes.arbitrarias} | sem token no config: ${escopo.classes.padrao}`,
   );
-  if (css.elementosComStyleInline) {
-    log(`Elementos com style inline: ${css.elementosComStyleInline}`);
+  if (escopo.comStyleInline) {
+    log(`Elementos com style inline: ${escopo.comStyleInline}`);
   }
 
-  log(`Elementos com eventos mapeados: ${relatorio.comEventos.length}`);
+  log(`${escopo.rotuloEventos}: ${escopo.comEventos.length}`);
 
-  for (const item of relatorio.comEventos) {
+  for (const item of escopo.comEventos) {
     for (const ev of item.eventos) {
       const codigoLimpo = ev.codigo.replace(/\s+/g, " ");
       const resumoCodigo =
@@ -2523,6 +2661,14 @@ async function mapearTags(arquivo = "code.html") {
     for (const linha of descreverCssElemento(item.css)) log(linha);
   }
 
+  if (escopo.interativosSemEventos) {
+    log(`Elementos interativos sem evento no foco: ${escopo.interativosSemEventos.length}`);
+    for (const el of escopo.interativosSemEventos) {
+      log(`  - <${el.nome}${el.id ? ` id="${el.id}"` : ""}> (L${el.linha})`);
+      for (const linha of descreverCssElemento(el.css)) log(linha);
+    }
+  }
+
   // Salva também output/resultado.json como espelho padrão
   await salvarResultadoJson("resultado.json", resultado);
 
@@ -2535,22 +2681,46 @@ async function mapearTags(arquivo = "code.html") {
   }
 
   log(
-    `\n[JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json).`,
+    `\n[JSON Exportado] Arquivos salvos com sucesso na pasta output/ (code.json, index.json, resultado.json).${foco ? " O JSON traz o arquivo inteiro; o foco vale só para esta saída." : ""}`,
   );
 
   const nomeBase = path.basename(caminhoHtml, path.extname(caminhoHtml));
-  const caminhoTxt = path.join(__dirname, "output", `${nomeBase}.txt`);
+  const sufixo = foco ? `.foco-${slugSeletor(foco)}` : "";
+  const caminhoTxt = path.join(__dirname, "output", `${nomeBase}${sufixo}.txt`);
   await writeFile(caminhoTxt, linhas.join("\n") + "\n", "utf8");
   console.log(`[TXT Exportado] ${caminhoTxt}`);
 
   return tags;
 }
 
+/**
+ * Lê os argumentos da linha de comando: `node script.js [arquivo] [--foco <seletor>]`.
+ * @param {string[]} args - `process.argv.slice(2)`.
+ * @returns {{ arquivo: string, foco: string | null }}
+ */
+function lerArgumentos(args) {
+  let arquivo = "code.html";
+  let foco = null;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--foco") {
+      foco = args[i + 1] || null;
+      i++;
+    } else if (args[i].startsWith("--foco=")) {
+      foco = args[i].slice("--foco=".length) || null;
+    } else {
+      arquivo = args[i];
+    }
+  }
+  return { arquivo, foco };
+}
+
 // --- Ponto de Entrada / Execução Principal
 
 if (require.main === module) {
-  mapearTags().catch((erro) => {
-    console.error("Não foi possível processar code.html:", erro.message);
+  const { arquivo, foco } = lerArgumentos(process.argv.slice(2));
+  mapearTags(arquivo, { foco }).catch((erro) => {
+    console.error(`Não foi possível processar ${arquivo}:`, erro.message);
+    process.exitCode = 1;
   });
 }
 
@@ -2594,4 +2764,6 @@ module.exports = {
   lerHtml,
   percorrerHtml,
   mapearTags,
+  analisarFoco,
+  lerArgumentos,
 };

@@ -485,3 +485,23 @@ test("T-24 mapearTags deve deixar claro o elemento da amostra e o escopo da aná
   assert.match(saida, /^=== Fim da amostra <header> ===$/m);
   assert.match(saida, /^Escopo: arquivo inteiro code\.html \(L1-L1804\), não só a amostra acima$/m);
 });
+
+test("T-25 mapearTags com foco deve rotular o bloco, o escopo e gravar um .txt próprio", async () => {
+  const { mapearTags } = require("./script.js");
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await mapearTags("code.html", { foco: "header" });
+  } finally {
+    console.log = originalLog;
+  }
+
+  const saida = fs.readFileSync(path.join(__dirname, "output", "code.foco-header.txt"), "utf8");
+  assert.match(saida, /^=== Foco: <header> de code\.html \(L506-L572, offsets 27332-31324\), seletor "header" ===$/m);
+  assert.match(saida, /^=== Fim do foco <header> ===$/m);
+  assert.match(saida, /^Escopo: só <header> e descendentes \(L506-L572\): \d+ de 513 elementos$/m);
+  assert.match(saida, /^Elementos com eventos no foco: 0$/m);
+  // A saída padrão (arquivo inteiro) não é sobrescrita pelo modo foco
+  const padrao = fs.readFileSync(path.join(__dirname, "output", "code.txt"), "utf8");
+  assert.match(padrao, /^Escopo: arquivo inteiro code\.html/m);
+});

@@ -194,6 +194,18 @@ Depois dos eventos, o pipeline liga a cada elemento o CSS que ele usa, vindo de 
 
 ---
 
+### 7b. Modo Foco (`analisarFoco` e `node script.js --foco <seletor>`)
+
+Restringe a análise a um elemento e seus descendentes, para quem quer extrair um bloco como componente.
+
+* O seletor é resolvido pelo mesmo casamento de CSS (`analisarSeletor` / `casarSeletor`): tag, `#id`, `.classe`, compostos como `main .card`. Se vários casarem, o foco é o 1º e o total é informado. Sem resultado, erro claro.
+* Entram no escopo os elementos e tags cujo intervalo `[inicio, fim)` está dentro do elemento foco. A validação estrutural roda só sobre essas tags.
+* Scripts e `<style>` continuam vindo do arquivo inteiro: um `addEventListener` escrito fora do bloco ainda é ligado ao elemento de dentro, com a linha do handler.
+* Regras de CSS são contadas por quantos elementos **do foco** atingem; classes distintas são só as do bloco; elementos interativos sem evento do bloco são listados com o CSS de cada um.
+* Saída em `output/<arquivo>.foco-<seletor>.txt` (o `code.txt` padrão não é tocado). O JSON continua com o arquivo inteiro.
+
+---
+
 ### 8. Exportação Estruturada em JSON (`salvarResultadoJson` e `processarHtml`)
 
 O pipeline exporta os resultados da análise diretamente em arquivos JSON formatados com indentação na pasta `output/`:
@@ -266,6 +278,7 @@ Em `elementos`, o `css` de cada um é a versão enxuta (`regras` e `inline`); as
 * `buscarPorAtributo(elementos, nomeAtributo, valorEsperado?)`: localiza elementos por chave e valor de atributo;
 * `processarHtml(caminho, opcoes)`: executa todo o pipeline e gera o JSON na pasta `output/`;
 * `salvarResultadoJson(nomeArquivo, dados, pasta)`: utilitário de persistência em disco;
+* `analisarFoco(resultado, seletor)`: escopo restrito a um elemento e descendentes (tags, validação, eventos, CSS, interativos sem evento);
 * `mapearCss(elementos, html)`: preenche `el.css` e devolve o resumo de CSS;
 * `resolverClasseTailwind(classe, config)`: resolve uma classe isolada;
 * `extrairRegrasCss(css, opcoes)`, `analisarSeletor(seletor)`, `casarSeletor(partes, el, arvore)`, `construirArvore(elementos)`: parser e casamento de CSS, reutilizáveis.
@@ -296,7 +309,7 @@ Em `elementos`, o `css` de cada um é a versão enxuta (`regras` e `inline`); as
 * **CSS**: sem Tailwind e sem `<style>`; 27 elementos com style inline.
 
 ### Fixtures (`fixtures/`)
-Oito HTMLs pequenos, cada um isolando um caso: erros estruturais, CSS puro, só Tailwind, com scripts, sem scripts, só style inline e as limitações conhecidas. O resultado esperado de cada um está em [TESTES.md](TESTES.md).
+Nove HTMLs pequenos, cada um isolando um caso: erros estruturais, CSS puro, só Tailwind, com scripts, sem scripts, só style inline, modo foco e as limitações conhecidas. O resultado esperado de cada um está em [TESTES.md](TESTES.md).
 
 ---
 
@@ -308,11 +321,18 @@ node script.js
 ```
 Imprime uma amostra do primeiro `<header>` de `code.html` (marcada com linhas e offsets, para não ser confundida com o escopo da análise), a linha de escopo (arquivo inteiro), o resumo com código de cada manipulador mapeado e gera os arquivos na pasta `output/` (`code.json`, `index.json`, `resultado.json`).
 
+### 1b. Analisar só um bloco (modo foco)
+```bash
+node script.js --foco header
+node script.js code.html --foco "#copy-link-btn"
+```
+Imprime o bloco escolhido com linhas e offsets e a análise restrita a ele; grava `output/code.foco-<seletor>.txt`.
+
 ### 2. Executar a suíte de testes automatizados
 ```bash
 node --test
 ```
-Roda os 53 testes: os unitários de `test.js` (T-01 a T-24) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-29), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
+Roda os 59 testes: os unitários de `test.js` (T-01 a T-25) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-34), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
 
 ---
 

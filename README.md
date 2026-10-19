@@ -55,13 +55,17 @@ Elementos com eventos mapeados: 5
 
 A amostra do `<header>` é só um recorte para conferir que o texto sai idêntico ao original; tudo a partir de "Análise" vale para o arquivo inteiro.
 
+Para analisar **só um bloco**, use `--foco <seletor>`. A saída começa com `=== Foco: <header> ... ===` e a linha `Escopo: só <header> e descendentes (L506-L572): 22 de 513 elementos`. Tags, validação, eventos, CSS e a lista de **interativos sem evento** passam a contar só dentro do bloco. Os `<script>` e `<style>` continuam sendo lidos do arquivo inteiro, então um handler escrito fora do bloco ainda aparece com a linha certa.
+
 Cada linha de evento mostra: elemento → linha do elemento → evento → **linha do handler** → como foi registrado → tipo do handler → início do código. Embaixo vem o CSS do elemento: cada classe com as declarações que gera e a **linha do token** no `tailwind.config`, as regras de `<style>` que casam e o style inline.
 
 ## Como rodar
 
 ```bash
-node script.js         # analisa code.html (e index.html)
-node --test            # 53 testes (46 passam, 7 todo de limitações conhecidas)
+node script.js                         # analisa code.html inteiro (e index.html)
+node script.js --foco header           # analisa só o primeiro <header> e seus descendentes
+node script.js code.html --foco "#copy-link-btn"   # qualquer seletor: tag, #id, .classe, "main .card"
+node --test            # 59 testes (52 passam, 7 todo de limitações conhecidas)
 ```
 
 Saídas na pasta `output/`:
@@ -69,14 +73,15 @@ Saídas na pasta `output/`:
 | Arquivo | Conteúdo |
 |---|---|
 | `code.txt` | cópia exata do que o console imprime (o mais útil para leitura) |
+| `code.foco-<seletor>.txt` | a mesma saída no modo foco (ex.: `code.foco-header.txt`); não sobrescreve o `code.txt` |
 | `code.json` / `index.json` | análise completa: tags, elementos, validação, eventos com código integral |
 | `resultado.json` | espelho de `code.json` |
 
 ## Arquivos
 
 - `script.js`: o mapeador (tokenizer, validação estrutural, elementos, análise de scripts, vínculo de eventos).
-- `test.js`: testes unitários com `node:test` (T-01 a T-23).
-- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-29): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, e as limitações conhecidas.
+- `test.js`: testes unitários com `node:test` (T-01 a T-25).
+- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-34): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco e as limitações conhecidas.
 - `TESTES.md`: **cada teste** descrito, com o que verifica e o esperado. Antes de implementar algo novo, a bateria de testes vem primeiro (o fluxo está lá).
 - `code.html`: página real (~112 KB, Tailwind), caso de uso principal.
 - `index.html`: página pequena com erros estruturais propositais, para testar a validação.

@@ -13,6 +13,7 @@ const {
   buscarPorId,
   buscarTodosPorNome,
   calcularLinhaColuna,
+  analisarFoco,
 } = require("./script.js");
 
 const PASTA = path.join(__dirname, "fixtures");
@@ -394,3 +395,69 @@ test(
     assert.ok(buscarPorId(elementos, "botao"));
   },
 );
+
+// --- foco.html (modo foco num elemento)
+
+test("F-30 foco: por tag, só o elemento e seus descendentes entram no escopo", async () => {
+  const resultado = await carregar("foco.html");
+  const foco = analisarFoco(resultado, "header");
+
+  assert.equal(foco.elemento.nome, "header");
+  assert.equal(foco.linhaInicio, linhaDe(resultado.html, '<header id="topo">'));
+  assert.equal(foco.linhaFim, linhaDe(resultado.html, "</header>"));
+  assert.deepEqual(
+    foco.elementos.map((el) => el.nome),
+    ["header", "h1", "button", "button", "a"],
+  );
+  assert.ok(foco.tags.every((t) => t.posicao >= foco.elemento.inicio && t.fim <= foco.elemento.fim));
+});
+
+test("F-31 foco: eventos do bloco incluem handler escrito fora dele; eventos de fora ficam de fora", async () => {
+  const resultado = await carregar("foco.html");
+  const foco = analisarFoco(resultado, "header");
+  const ids = foco.comEventos.map((el) => el.id);
+
+  assert.deepEqual(ids, ["menu", null]);
+  const [evMenu] = foco.comEventos[0].eventos;
+  // O <script> está fora do <header>, mas a linha do handler é encontrada
+  assert.equal(
+    calcularLinhaColuna(resultado.html, evMenu.posicao.scriptInicio).linha,
+    linhaDe(resultado.html, 'menu.addEventListener'),
+  );
+  assert.equal(ids.includes("comprar"), false);
+});
+
+test("F-32 foco: a validação considera só as tags do bloco", async () => {
+  const resultado = await carregar("foco.html");
+
+  // O arquivo tem um <p> sem fechamento dentro do <main>...
+  assert.equal(resultado.validacao.valido, false);
+  // ...mas o <header> está bem formado
+  assert.equal(analisarFoco(resultado, "header").validacao.valido, true);
+  assert.equal(analisarFoco(resultado, "main").validacao.valido, false);
+});
+
+test("F-33 foco: seletor por #id e composto; vários resultados usam o primeiro e informam o total", async () => {
+  const resultado = await carregar("foco.html");
+
+  assert.equal(analisarFoco(resultado, "#topo").elemento.nome, "header");
+
+  const card = analisarFoco(resultado, "main .card");
+  assert.equal(card.totalCasados, 2);
+  assert.equal(card.elemento.linha, linhaDe(resultado.html, '<div class="card">'));
+  assert.deepEqual(card.comEventos.map((el) => el.id), ["comprar"]);
+
+  assert.throws(() => analisarFoco(resultado, "footer"), /Nenhum elemento casa com o seletor "footer"/);
+});
+
+test("F-34 foco: CSS e interativos sem evento contados só dentro do bloco", async () => {
+  const resultado = await carregar("foco.html");
+  const foco = analisarFoco(resultado, "header");
+
+  const regra = foco.regrasCss.find((r) => r.seletor === "header button");
+  assert.equal(regra.totalNoFoco, 2);
+  assert.equal(foco.regrasCss.some((r) => r.seletor === ".card"), false);
+  assert.deepEqual(foco.classes.map((c) => c.classe), ["botao"]);
+  // O <a> do header é interativo e não tem evento
+  assert.deepEqual(foco.interativosSemEventos.map((el) => el.nome), ["a"]);
+});
