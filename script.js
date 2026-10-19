@@ -3103,6 +3103,145 @@ function descreverContrato(contrato, html) {
   return saida;
 }
 
+/** Conteúdo de célula de tabela Markdown: `|` escapado e sem quebra de linha. */
+function celulaMd(texto) {
+  return String(texto).replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
+}
+
+/** Texto corrido do .md: tags como `<link>` vão entre crases para não virarem HTML ao renderizar. */
+function textoMd(texto) {
+  return String(texto).replace(/<[^<>\s][^<>]*>/g, (tag) => `\`${tag}\``);
+}
+
+/** Cerca de código que não colide com crases dentro do conteúdo. */
+function cercaMd(conteudo) {
+  const maior = Math.max(2, ...[...conteudo.matchAll(/`+/g)].map((m) => m[0].length));
+  return "`".repeat(maior + 1);
+}
+
+/**
+ * O contrato em Markdown, para ler, versionar ou passar adiante (um LLM, um
+ * gerador de componente). O texto do bloco e as linhas do handler saem
+ * idênticos ao arquivo, e o `.md` usa a mesma quebra de linha do HTML.
+ * @param {Object} contrato - Retorno de {@link montarContrato}.
+ * @param {string} html - HTML completo (para as linhas originais dos handlers).
+ * @param {string} arquivo - Nome do arquivo de origem.
+ * @returns {string} O Markdown.
+ */
+function contratoParaMarkdown(contrato, html, arquivo) {
+  const eol = html.includes("\r\n") ? "\r\n" : "\n";
+  const linhasHtml = html.split("\n").map((l) => l.replace(/\r$/, ""));
+  const { alvo, usa, comportamentos, pendencias } = contrato;
+  const md = [];
+  const add = (...linhas) => md.push(...linhas);
+  const intervalo = alvo.linhaInicio === alvo.linhaFim ? `L${alvo.linhaInicio}` : `L${alvo.linhaInicio}-L${alvo.linhaFim}`;
+
+  add(`# Contrato do componente: \`${alvo.rotulo}\``, "");
+  add(`> Gerado pelo converg a partir de \`${arquivo}\`, seletor \`${alvo.seletor}\`. O texto do bloco e o código dos handlers são cópias exatas do arquivo.`, "");
+
+  add("## Alvo", "");
+  add(`- Elemento: \`${alvo.rotulo}\``);
+  add(`- Linhas: ${intervalo} (offsets ${alvo.inicio}-${alvo.fim})`);
+  add(`- Elementos no bloco: ${alvo.totalElementos}`, "");
+  const cercaHtml = cercaMd(alvo.texto);
+  add(`${cercaHtml}html`, alvo.texto, cercaHtml, "");
+
+  add("## Usa", "");
+  add("### Classes do bloco", "");
+  if (usa.classes.length) {
+    add("| Classe | CSS | Fonte |", "|---|---|---|");
+    for (const c of usa.classes) {
+      const estado = c.variantes?.length ? ` [${c.variantes.join(":")}]` : "";
+      const css = c.declaracoes.length ? `${formatarDeclaracoes(c.declaracoes)}${estado}` : "-";
+      const fonte =
+        c.origem === "tailwind.config"
+          ? `tailwind.config L${c.linhaToken}`
+          : c.origem === "arbitrario"
+            ? "valor arbitrário"
+            : "sem token no config (ver pendências ou regras de `<style>`)";
+      add(`| \`${celulaMd(c.classe)}\` | ${celulaMd(css)} | ${celulaMd(fonte)} |`);
+    }
+  } else {
+    add("Nenhuma.");
+  }
+  add("");
+
+  add("### Regras de `<style>`", "");
+  if (usa.regras.length) {
+    add("| Seletor | Linha | Declarações |", "|---|---|---|");
+    for (const r of usa.regras) {
+      const ctx = r.contexto.length ? ` (${r.contexto.join(", ")})` : "";
+      add(`| \`${celulaMd(r.seletor)}\`${celulaMd(ctx)} | L${r.linha} | ${celulaMd(formatarDeclaracoes(r.declaracoes))} |`);
+    }
+  } else {
+    add("Nenhuma.");
+  }
+  add("");
+
+  if (usa.inline.length) {
+    add("### Style inline", "");
+    for (const i of usa.inline) add(`- \`${i.elemento}\` (L${i.linha}): ${formatarDeclaracoes(i.declaracoes)}`);
+    add("");
+  }
+
+  add("### Classes aplicadas pelo JS", "");
+  if (usa.classesDoJs.length) {
+    add("| Classe | Ação | Alvo | CSS |", "|---|---|---|---|");
+    for (const c of usa.classesDoJs) {
+      const fontes = [
+        ...c.css.map((r) => `\`${r.seletor}\` (L${r.linha}): ${formatarDeclaracoes(r.declaracoes)}`),
+        ...(c.tailwind ? [`${formatarDeclaracoes(c.tailwind.declaracoes)} (tailwind.config L${c.tailwind.linhaToken})`] : []),
+      ];
+      add(`| \`${celulaMd(c.classe)}\` | ${c.acoes.join(", ")} | \`${celulaMd(c.alvo)}\` | ${celulaMd(fontes.join("; ") || "sem CSS no arquivo")} |`);
+    }
+  } else {
+    add("Nenhuma.");
+  }
+  add("");
+
+  add("### CSS herdado dos ancestrais", "");
+  if (usa.herdado.length) {
+    add("| Propriedade | Valor | De | Fonte |", "|---|---|---|---|");
+    for (const h of usa.herdado) {
+      add(`| \`${h.propriedade}\` | ${celulaMd(h.valor)} | \`<${h.de}>\` L${h.linha} | ${celulaMd(h.fonte)} |`);
+    }
+  } else {
+    add("Nenhum.");
+  }
+  add("");
+
+  const externos = [...usa.externos.estilos, ...usa.externos.scripts];
+  if (externos.length) {
+    add("### Arquivos externos", "");
+    for (const e of externos) add(`- ${e.href ?? e.src} (${textoMd(descreverFonteExterna(e))})`);
+    add("");
+  }
+
+  add("## Comportamentos", "");
+  if (!comportamentos.length) add("Nenhum evento mapeado no bloco.", "");
+  for (const c of comportamentos) {
+    const linhas = c.linhaInicio ? (c.linhaInicio === c.linhaFim ? `L${c.linhaInicio}` : `L${c.linhaInicio}-L${c.linhaFim}`) : "?";
+    add(`### \`${c.elemento}\` · ${c.evento}`, "");
+    add(`- Elemento: L${c.linhaElemento}`);
+    add(`- Handler: ${linhas} (${c.origem}, ${c.tipo})${c.linhaChamada && c.linhaChamada !== c.linhaInicio ? `, registrado na L${c.linhaChamada}` : ""}`);
+    add(`- Altera: ${c.altera.length ? c.altera.join("; ") : "nada no DOM"}`);
+    add(`- Consulta dentro do bloco: ${c.consultaDentro.length ? c.consultaDentro.map((s) => `\`${s}\``).join(", ") : "nenhum"}`);
+    add(`- Consulta fora do bloco: ${c.consultaFora.length ? c.consultaFora.map((s) => `\`${s}\``).join(", ") : "nenhum"}`);
+    if (c.consultaSemElemento.length) add(`- Consulta sem elemento no arquivo: ${c.consultaSemElemento.map((s) => `\`${s}\``).join(", ")}`);
+    add(`- APIs: ${c.apis.length ? c.apis.map((a) => `\`${a}\``).join(", ") : "nenhuma"}`, "");
+    const codigo = c.linhaInicio ? linhasHtml.slice(c.linhaInicio - 1, c.linhaFim).join(eol) : c.codigo;
+    const cerca = cercaMd(codigo);
+    add(`${cerca}js`, codigo, cerca, "");
+  }
+
+  add("## Pendências", "");
+  if (pendencias.length) for (const p of pendencias) add(`- [ ] ${textoMd(p.texto)}`);
+  else add("Nenhuma: o script resolveu tudo o que o bloco usa.");
+  add("");
+
+  return md.join(eol);
+}
+
 /**
  * Restringe um resultado de {@link processarHtml} a um elemento e seus descendentes.
  * Scripts e `<style>` continuam vindo do arquivo inteiro (um handler escrito fora do
@@ -3429,6 +3568,9 @@ async function mapearTags(arquivo = "code.html", { foco = null, pastaOutput = "o
   if (escopo.contrato) {
     const caminhoContrato = await salvarResultadoJson(`${nomeBase}${sufixo}.contrato.json`, escopo.contrato, pastaOutput);
     console.log(`[Contrato Exportado] ${caminhoContrato}`);
+    const caminhoMd = path.join(pastaTxt, `${nomeBase}${sufixo}.contrato.md`);
+    await writeFile(caminhoMd, contratoParaMarkdown(escopo.contrato, html, nomeArquivo), "utf8");
+    console.log(`[Contrato Exportado] ${caminhoMd}`);
   }
 
   return tags;
@@ -3508,6 +3650,7 @@ module.exports = {
   analisarFoco,
   montarContrato,
   descreverContrato,
+  contratoParaMarkdown,
   removerComentariosJs,
   extrairRecursosExternos,
   lerArgumentos,

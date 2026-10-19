@@ -210,7 +210,7 @@ Restringe a análise a um elemento e seus descendentes, para quem quer extrair u
 * Scripts e `<style>` continuam vindo do arquivo inteiro: um `addEventListener` escrito fora do bloco ainda é ligado ao elemento de dentro, com a linha do handler.
 * Regras de CSS são contadas por quantos elementos **do foco** atingem; classes distintas são só as do bloco; elementos interativos sem evento do bloco são listados com o CSS de cada um.
 * Saída em `output/<arquivo>.foco-<seletor>.txt` (o `code.txt` padrão não é tocado). O JSON continua com o arquivo inteiro.
-* No fim, o **contrato do componente** (abaixo), também em `output/<arquivo>.foco-<seletor>.contrato.json`.
+* No fim, o **contrato do componente** (abaixo), também em `output/<arquivo>.foco-<seletor>.contrato.json` e `.contrato.md`.
 
 ### 7c. Contrato do Componente (`montarContrato` e `descreverContrato`)
 
@@ -221,6 +221,7 @@ Responde, sem deixar decisão para quem lê adivinhar: qual bloco é o alvo, o q
 * **`comportamentos`**: um por evento de cada elemento do bloco. Linha de início e fim do handler (para handler por referência, a função onde foi escrita, com `acharFuncaoNomeada`), código inteiro, **`altera`** (`classList`, `textContent`, `innerHTML`, `value`, `className`, `style.x`, `setAttribute`...), **`consultaDentro`** / **`consultaFora`** (seletores e variáveis DOM usados no código, classificados pela posição do elemento) e **`apis`** (`navigator.*`, `window.*`, `localStorage`, `fetch`, `setTimeout`...). Comentários JS são trocados por espaços antes da leitura (`removerComentariosJs`), então código comentado não conta.
 * **`pendencias`**: `classe-sem-css` (escala padrão do Tailwind ou nenhum CSS), `classe-em-arquivo-externo`, `classe-do-js-sem-css`, `dependencia-fora-do-bloco`, `seletor-sem-elemento`, `alvo-nao-resolvido`, `handler-nao-encontrado` e `interativo-sem-evento`.
 * No console, o código de cada handler sai com as **linhas originais do arquivo, numeradas** (`L1788 | ...`), sem reformatar.
+* **`.contrato.md`** (`contratoParaMarkdown`): título com o alvo, o texto do bloco num ` ```html ` idêntico ao arquivo, tabelas de classes, regras, classes do JS e CSS herdado, um ` ```js ` por handler com as linhas originais, e as pendências como checklist `- [ ]`. O `.md` usa a mesma quebra de linha do HTML de origem; tags no texto corrido vão entre crases (`textoMd`) para não virarem HTML ao renderizar, e as cercas de código crescem se o conteúdo tiver crases (`cercaMd`).
 
 ---
 
@@ -354,7 +355,7 @@ Imprime o bloco escolhido com linhas e offsets e a análise restrita a ele; grav
 ```bash
 node --test
 ```
-Roda os 72 testes: os unitários de `test.js` (T-01 a T-26) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-46), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco, arquivos externos e o contrato do componente. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
+Roda os 73 testes: os unitários de `test.js` (T-01 a T-26) e a bateria sobre os HTMLs de `fixtures/` (F-01 a F-47), que cobre erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco, arquivos externos e o contrato do componente. Sete deles são `todo` e documentam limitações conhecidas. Cada teste está descrito em [TESTES.md](TESTES.md).
 
 ---
 

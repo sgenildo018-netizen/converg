@@ -22,7 +22,7 @@ node --test fixtures.test.js   # só a bateria de fixtures (F-xx)
 
 Motor: `node:test` + `node:assert/strict`, nativos do Node (sem dependências).
 
-Estado atual: **72 testes, 65 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
+Estado atual: **73 testes, 66 passam, 0 falham, 7 `todo`** (limitações conhecidas, ver F-23 a F-29).
 
 Um teste `todo` afirma o comportamento **correto**, roda normalmente e aparece com ⚠ no relatório, mas não quebra a suíte. Quando a limitação for resolvida, ele passa a passar e o `todo` deve ser removido.
 
@@ -134,7 +134,9 @@ Foco em `#cartao`. O contrato diz qual bloco é o alvo, o que ele usa e quais co
 | F-45 | Pendências | `p-4` (escala padrão do Tailwind), `vazio` (aplicada pelo JS e sem CSS), `#status` fora do bloco, `<a id="ajuda">` sem evento |
 | F-46 | Saída do console e JSON | `=== Contrato do componente: <section id="cartao"> ===`, `Pendências: 4`, código do handler com as linhas originais numeradas e `contrato.foco-cartao.contrato.json` |
 
-Os testes que chamam `mapearTags` (F-40 e F-46) gravam numa pasta temporária, para não sobrescrever `output/`.
+| F-47 | Contrato em `.md` | `contrato.foco-cartao.contrato.md` começa com o título do alvo; o texto do bloco sai idêntico num bloco ` ```html `; seções Alvo, Usa, Comportamentos e Pendências; tabela das classes do JS; linhas originais do handler num bloco ` ```js `; uma caixa `- [ ]` por pendência; mesma quebra de linha do HTML |
+
+Os testes que chamam `mapearTags` (F-40, F-46 e F-47) gravam numa pasta temporária, para não sobrescrever `output/`.
 
 ### Limitações conhecidas (`todo`)
 

@@ -73,7 +73,7 @@ A amostra do `<header>` é só um recorte para conferir que o texto sai idêntic
 
 Para analisar **só um bloco**, use `--foco <seletor>`. A saída começa com `=== Foco: <header> ... ===` e a linha `Escopo: só <header> e descendentes (L506-L572): 22 de 513 elementos`. Tags, validação, eventos, CSS e a lista de **interativos sem evento** passam a contar só dentro do bloco. Os `<script>` e `<style>` continuam sendo lidos do arquivo inteiro, então um handler escrito fora do bloco ainda aparece com a linha certa.
 
-No foco, a saída termina com o **contrato do componente** (também gravado em `output/<arquivo>.foco-<seletor>.contrato.json`). Exemplo de `node script.js code.html --foco "#copy-link-btn"`, resumido:
+No foco, a saída termina com o **contrato do componente** (também gravado em `output/<arquivo>.foco-<seletor>.contrato.json` e `.contrato.md`). Exemplo de `node script.js code.html --foco "#copy-link-btn"`, resumido:
 
 ```
 === Contrato do componente: <button id="copy-link-btn"> ===
@@ -123,7 +123,7 @@ Cada linha de evento mostra: elemento → linha do elemento → evento → **lin
 node script.js                         # analisa code.html inteiro (e index.html)
 node script.js --foco header           # analisa só o primeiro <header> e seus descendentes
 node script.js code.html --foco "#copy-link-btn"   # qualquer seletor: tag, #id, .classe, "main .card"
-node --test            # 72 testes (65 passam, 7 todo de limitações conhecidas)
+node --test            # 73 testes (66 passam, 7 todo de limitações conhecidas)
 ```
 
 Saídas na pasta `output/`:
@@ -133,6 +133,7 @@ Saídas na pasta `output/`:
 | `code.txt` | cópia exata do que o console imprime (o mais útil para leitura) |
 | `code.foco-<seletor>.txt` | a mesma saída no modo foco (ex.: `code.foco-header.txt`), terminando com o contrato do componente; não sobrescreve o `code.txt` |
 | `code.foco-<seletor>.contrato.json` | o contrato do componente em JSON, para outra ferramenta ou um LLM ler |
+| `code.foco-<seletor>.contrato.md` | o mesmo contrato em Markdown: o bloco num ` ```html ` exato, tabelas de CSS, cada handler num ` ```js ` com as linhas originais e as pendências como checklist `- [ ]` |
 | `code.json` / `index.json` | análise completa: tags, elementos, validação, eventos com código integral |
 | `resultado.json` | espelho de `code.json` |
 
@@ -140,7 +141,7 @@ Saídas na pasta `output/`:
 
 - `script.js`: o mapeador (tokenizer, validação estrutural, elementos, análise de scripts, vínculo de eventos).
 - `test.js`: testes unitários com `node:test` (T-01 a T-26).
-- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-46): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco, arquivos externos, contrato do componente e as limitações conhecidas.
+- `fixtures.test.js` e `fixtures/`: bateria sobre HTMLs pequenos de exemplo (F-01 a F-47): erros estruturais, CSS puro, só Tailwind, com e sem scripts, com e sem style inline, modo foco, arquivos externos, contrato do componente e as limitações conhecidas.
 - `TESTES.md`: **cada teste** descrito, com o que verifica e o esperado. Antes de implementar algo novo, a bateria de testes vem primeiro (o fluxo está lá).
 - `code.html`: página real (~112 KB, Tailwind), caso de uso principal.
 - `index.html`: página pequena com erros estruturais propositais, para testar a validação.

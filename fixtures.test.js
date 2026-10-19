@@ -660,3 +660,33 @@ test("F-46 contrato: a saída do foco termina com o contrato e o código inteiro
   assert.equal(json.pendencias.length, 4);
   assert.match(saida, /^=== Fim do contrato ===$/m);
 });
+
+test("F-47 contrato: também sai em .md, com o texto exato do bloco, tabelas, código do handler e pendências como checklist", async () => {
+  const { mapearTags } = require("./script.js");
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await mapearTags(path.join(PASTA, "contrato.html"), { foco: "#cartao", pastaOutput: SAIDA });
+  } finally {
+    console.log = originalLog;
+  }
+  const md = fs.readFileSync(path.join(SAIDA, "contrato.foco-cartao.contrato.md"), "utf8");
+  const resultado = await carregar("contrato.html");
+  const { contrato } = analisarFoco(resultado, "#cartao");
+  // O .md usa a mesma quebra de linha do HTML de origem
+  const eol = resultado.html.includes("\r\n") ? "\r\n" : "\n";
+
+  assert.ok(md.startsWith('# Contrato do componente: `<section id="cartao">`'));
+  // Texto do bloco idêntico ao original, num bloco ```html
+  assert.ok(md.includes("```html" + eol + contrato.alvo.texto + eol + "```"));
+  for (const titulo of ["## Alvo", "## Usa", "## Comportamentos", "## Pendências"]) {
+    assert.match(md, new RegExp(`^${titulo}$`, "m"));
+  }
+  assert.match(md, /^\| `ativo` \| add, remove \| `#incrementar` \| `\.ativo` \(L\d+\): color: green \|$/m);
+  // Código do handler com as linhas originais, num bloco ```js
+  const linhaJs = resultado.html.split(/\r?\n/).find((l) => l.includes("localStorage.setItem"));
+  assert.ok(md.includes(linhaJs));
+  assert.match(md, /^```js$/m);
+  assert.match(md, /^- \[ \] classe p-4: escala padrão do Tailwind/m);
+  assert.equal((md.match(/^- \[ \] /gm) || []).length, contrato.pendencias.length);
+});
