@@ -22,6 +22,16 @@ As três saídas óbvias não resolvem:
 
 O `converg` faz o caminho inverso: lê o arquivo como texto, localiza cada tag por offset e recorta com `html.slice()`. O trecho extraído é **idêntico ao original**, com espaços, quebras de linha e indentação. Em cima disso, cruza os `<script>` para ligar cada `addEventListener`, `on...` e `onclick=""` ao elemento certo.
 
+### O objetivo: um contrato do componente
+
+Extrair o HTML é só o começo. A função central do converg é produzir um **contrato claro do componente**:
+
+1. **qual bloco é o alvo**: o elemento, as linhas e o texto exato;
+2. **o que ele usa**: classes, tokens, regras de `<style>`, style inline e arquivos externos;
+3. **quais comportamentos estão ligados a ele**: eventos, handlers e a linha onde cada um foi escrito.
+
+Tudo isso vem no relatório, **sem deixar decisões importantes para o LLM ou para uma pessoa adivinhar**. O que o script não consegue determinar aparece como aviso explícito (por exemplo `[LER ARQUIVO DE ESTILO x]`), em vez de sumir em silêncio. É isso que torna o script útil e o que guia os próximos experimentos.
+
 ### Por que ler como texto, e não com um parser de HTML
 
 Foi uma escolha de partida, não uma limitação. Dissecar o HTML como árvore é mais complexo do que trabalhar com um texto: no texto dá para usar todos os métodos de string do JS (`indexOf`, `slice`, regex) e o arquivo nunca é reescrito, então o que sai é sempre o original. A inspiração é o processo do Astro, que pega um Markdown como texto e o transforma em HTML.
