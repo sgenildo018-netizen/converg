@@ -1,0 +1,176 @@
+<!doctype html>
+<html class="dark" lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sandbox — Header</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            html,
+            body {
+                margin: 0;
+                min-height: 100%;
+            }
+
+            body {
+                overscroll-behavior: none;
+            }
+
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            background: "#10141a",
+                            primary: "#adc6ff",
+                            "primary-container": "#4d8eff",
+                            "on-primary": "#002e6a",
+                            "on-primary-container": "#00285d",
+                            outline: "#8c909f",
+                            "outline-variant": "#424754",
+                            "on-surface": "#dfe2eb",
+                            "on-surface-variant": "#c2c6d6",
+                            "surface-container": "#1c2026",
+                            "surface-container-high": "#262a31",
+                            "surface-container-low": "#181c22",
+                            "surface-container-lowest": "#0a0e14",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            full: "0.75rem",
+                        },
+                        spacing: {
+                            "space-xs": "0.25rem",
+                            "space-sm": "0.5rem",
+                            "space-md": "0.75rem",
+                        },
+                        fontFamily: {
+                            "body-sm": ["Geist", "sans-serif"],
+                            "label-kbd": ["JetBrains Mono", "monospace"],
+                            "label-badge": ["JetBrains Mono", "monospace"],
+                        },
+                        fontSize: {
+                            "body-sm": [
+                                "12px",
+                                {
+                                    lineHeight: "18px",
+                                    letterSpacing: "0em",
+                                    fontWeight: "400",
+                                },
+                            ],
+                            "label-kbd": [
+                                "11px",
+                                {
+                                    lineHeight: "14px",
+                                    letterSpacing: "0.02em",
+                                    fontWeight: "500",
+                                },
+                            ],
+                            "label-badge": [
+                                "11px",
+                                {
+                                    lineHeight: "16px",
+                                    letterSpacing: "0.04em",
+                                    fontWeight: "500",
+                                },
+                            ],
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body
+        class="min-h-screen bg-background font-body-sm text-on-surface antialiased"
+    >
+        <aside
+            aria-hidden="true"
+            class="fixed left-0 top-0 h-screen w-64 border-r border-outline-variant/30 bg-surface-container-lowest"
+        ></aside>
+        <main class="pl-64">
+            <header
+                class="fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/20 z-40 px-space-md flex items-center justify-between gap-space-md"
+            >
+                <div class="flex items-center gap-space-sm flex-1 max-w-xl">
+                    <button
+                        class="w-full flex items-center justify-between px-space-sm py-1.5 bg-surface-container-low hover:bg-surface-container rounded-lg border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all"
+                        type="button"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="material-symbols-outlined text-[16px] text-outline"
+                                >search</span
+                            ><span class="font-body-sm text-body-sm"
+                                >Buscar notas, tags ou snippets...</span
+                            >
+                        </div>
+                        <kbd
+                            class="px-1.5 py-0.5 text-label-kbd font-label-kbd bg-surface-container-high border border-outline-variant/40 rounded text-outline shadow-sm"
+                            >⌘K</kbd
+                        >
+                    </button>
+                </div>
+                <div class="flex items-center gap-space-sm">
+                    <button
+                        class="flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >download</span
+                        ><span class="hidden xl:inline"
+                            >Exportar Markdown</span
+                        ></button
+                    ><button
+                        class="flex items-center gap-1 px-space-xs py-1 rounded text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >center_focus_strong</span
+                        ><span class="hidden xl:inline">Modo Foco</span></button
+                    ><button
+                        class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors relative"
+                        title="Notificações"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[18px]"
+                            >notifications</span
+                        ><span
+                            class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-primary"
+                        ></span></button
+                    ><button
+                        class="flex items-center gap-1.5 bg-primary-container text-on-primary-container px-space-sm py-1 rounded-lg font-medium text-body-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-95 transition-all"
+                        type="button"
+                    >
+                        <span class="material-symbols-outlined text-[16px]"
+                            >add</span
+                        ><span>Novo Artigo</span>
+                    </button>
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
+                    >
+                        <span
+                            class="material-symbols-outlined text-on-primary text-[18px]"
+                            >person</span
+                        >
+                    </div>
+                </div>
+            </header>
+        </main>
+    </body>
+</html>
